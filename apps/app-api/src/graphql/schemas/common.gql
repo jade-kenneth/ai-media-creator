@@ -1,0 +1,81 @@
+scalar DateTime
+scalar Cursor
+scalar ID
+
+interface Node {
+  id: ID!
+}
+
+input CursorPaginationInput {
+  first: Int = 20
+  after: Cursor
+}
+
+type Query {
+  _health: String
+}
+
+type Mutation {
+  _noop: Boolean
+}
+
+enum SortDirection {
+  ASC
+  DESC
+}
+
+interface Edge {
+  cursor: Cursor!
+  node: Node!
+}
+
+interface Connection {
+  totalCount: Int!
+  edges: [Edge!]!
+  pageInfo: CursorPageInfo!
+}
+
+type CursorPageInfo {
+  hasNextPage: Boolean!
+  endCursor: Cursor
+}
+
+input OffsetLimitPaginationInput {
+  page: Int = 1
+  limit: Int = 20
+}
+
+type OffsetLimitPageInfo {
+  page: Int!
+  limit: Int!
+  total: Int!
+  totalPages: Int!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+}
+input DateTimeFilterInput {
+  equal: DateTime
+  notEqual: DateTime
+  in: [DateTime!]
+  notIn: [DateTime!]
+  lesserThan: DateTime
+  lesserThanOrEqual: DateTime
+  greaterThan: DateTime
+  greaterThanOrEqual: DateTime
+}
+
+input IDFilterInput {
+  equal: ID
+  notEqual: ID
+  in: [ID!]
+  notIn: [ID!]
+}
+
+input StringFilterInput {
+  equal: String
+  notEqual: String
+  contains: String
+  startsWith: String
+  in: [String!]
+  notIn: [String!]
+}

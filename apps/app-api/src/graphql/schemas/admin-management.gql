@@ -1,0 +1,39 @@
+type AdminAccount implements Node {
+  id: ID!
+  email: String!
+  isActive: Boolean!
+  organizationId: ID!
+  firstName: String!
+  lastName: String!
+  position: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateAdminAccountInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  position: String!
+  organizationId: ID!
+}
+
+input UpdateAdminAccountInput {
+  firstName: String
+  lastName: String
+  position: String
+  organizationId: ID
+  password: String
+}
+
+extend type Query {
+  adminAccounts: [AdminAccount!]!
+}
+
+extend type Mutation {
+  createAdminAccount(input: CreateAdminAccountInput!): AdminAccount!
+  updateAdminAccount(id: ID!, input: UpdateAdminAccountInput!): AdminAccount!
+  deactivateAdminAccount(id: ID!): AdminAccount!
+  reactivateAdminAccount(id: ID!): AdminAccount!
+}

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1200" dy="800" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- Title -->
+    <mxCell id="title" value="Multi-Tenant Architecture — Organization System" style="text;html=1;fontSize=20;fontStyle=1;align=center;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="20" y="10" width="1060" height="40" as="geometry" />
+    </mxCell>
+
+    <!-- Pre-condition banner -->
+    <mxCell id="banner" value="&lt;i&gt;Each organization is a tenant · subdomain identifies the tenant on every request · all data scoped by organizationId&lt;/i&gt;" style="text;html=1;fontSize=11;fontStyle=2;align=center;fillColor=#fffde7;strokeColor=#f0c000;" vertex="1" parent="1">
+      <mxGeometry x="20" y="55" width="1060" height="28" as="geometry" />
+    </mxCell>
+
+    <!-- ===================== ACTOR BOXES y=96, height=66 ===================== -->
+
+    <!-- Actor 1: Admin App  center_x=185 -->
+    <mxCell id="a1" value="&lt;b&gt;Admin App&lt;/b&gt;&lt;br&gt;Next.js Panel&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;apps/org-system-admin/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="110" y="96" width="150" height="66" as="geometry" />
+    </mxCell>
+
+    <!-- Actor 2: Mobile App  center_x=355 -->
+    <mxCell id="a2" value="&lt;b&gt;Mobile App&lt;/b&gt;&lt;br&gt;Expo React Native&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;apps/org-system-mobile/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="280" y="96" width="150" height="66" as="geometry" />
+    </mxCell>
+
+    <!-- Actor 3: TenantMiddleware  center_x=540 -->
+    <mxCell id="a3" value="&lt;b&gt;TenantMiddleware&lt;/b&gt;&lt;br&gt;NestJS Middleware&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;api/src/middleware/tenant.middleware.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="450" y="96" width="180" height="66" as="geometry" />
+    </mxCell>
+
+    <!-- Actor 4: Resolvers / Services  center_x=740 -->
+    <mxCell id="a4" value="&lt;b&gt;Resolvers / Services&lt;/b&gt;&lt;br&gt;GraphQL + Business Logic&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;api/src/modules/*/resolvers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="650" y="96" width="180" height="66" as="geometry" />
+    </mxCell>
+
+    <!-- Actor 5: MongoDB Atlas  center_x=930 -->
+    <mxCell id="a5" value="&lt;b&gt;MongoDB Atlas&lt;/b&gt;&lt;br&gt;Multi-tenant DB&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;organizations + all collections&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;align=center;" vertex="1" parent="1">
+      <mxGeometry x="850" y="96" width="160" height="66" as="geometry" />
+    </mxCell>
+
+    <!-- ===================== LIFELINES (y=162 → y=740) ===================== -->
+
+    <mxCell id="l1" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="185" y="162" as="sourcePoint"/>
+        <mxPoint x="185" y="740" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="l2" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="355" y="162" as="sourcePoint"/>
+        <mxPoint x="355" y="740" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="l3" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="540" y="162" as="sourcePoint"/>
+        <mxPoint x="540" y="740" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="l4" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="740" y="162" as="sourcePoint"/>
+        <mxPoint x="740" y="740" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <mxCell id="l5" value="" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="930" y="162" as="sourcePoint"/>
+        <mxPoint x="930" y="740" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ===================== SECTION SIDEBARS ===================== -->
+
+    <!-- Phase 1: Tenant Resolution (blue) y=195–360 -->
+    <mxCell id="s1" value="Tenant Resolution" style="rounded=1;fillColor=#e8f4fd;strokeColor=#6c8ebf;fontSize=9;fontColor=#6c8ebf;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="195" width="70" height="165" as="geometry" />
+    </mxCell>
+
+    <!-- Phase 2: Request Context (orange) y=375–480 -->
+    <mxCell id="s2" value="Request Context" style="rounded=1;fillColor=#fff0e0;strokeColor=#FF6600;fontSize=9;fontColor=#FF6600;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="375" width="70" height="105" as="geometry" />
+    </mxCell>
+
+    <!-- Phase 3: Scoped DB Access (green) y=495–600 -->
+    <mxCell id="s3" value="Scoped DB Access" style="rounded=1;fillColor=#e0f0e0;strokeColor=#006600;fontSize=9;fontColor=#006600;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="495" width="70" height="105" as="geometry" />
+    </mxCell>
+
+    <!-- Phase 4: Response Delivery (blue) y=615–720 -->
+    <mxCell id="s4" value="Response Delivery" style="rounded=1;fillColor=#e8f4fd;strokeColor=#6c8ebf;fontSize=9;fontColor=#6c8ebf;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="615" width="70" height="105" as="geometry" />
+    </mxCell>
+
+    <!-- ===================== MESSAGE ARROWS ===================== -->
+
+    <!-- Phase 1: Tenant Resolution -->
+
+    <!-- ① Admin → TenantMiddleware -->
+    <mxCell id="m1" value="① HTTP request  Host: org-san-jose.yourapp.com" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="185" y="220" as="sourcePoint"/>
+        <mxPoint x="540" y="220" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ② Mobile → TenantMiddleware -->
+    <mxCell id="m2" value="② GraphQL request + tenantSlug encoded in JWT payload" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="355" y="258" as="sourcePoint"/>
+        <mxPoint x="540" y="258" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ③ TenantMiddleware → MongoDB: lookup slug -->
+    <mxCell id="m3" value="③ organizations.findOne({ slug: &quot;org-san-jose&quot; })" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="540" y="295" as="sourcePoint"/>
+        <mxPoint x="930" y="295" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ④ MongoDB → TenantMiddleware: return organizationId -->
+    <mxCell id="m4" value="④ { organizationId: &quot;abc123&quot;, isActive: true }" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="930" y="332" as="sourcePoint"/>
+        <mxPoint x="540" y="332" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 2: Request Context -->
+
+    <!-- ⑤ TenantMiddleware → Resolvers: inject context -->
+    <mxCell id="m5" value="⑤ inject req.tenantId into GraphQL execution context" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="540" y="400" as="sourcePoint"/>
+        <mxPoint x="740" y="400" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑥ Resolver → Service with organizationId -->
+    <mxCell id="m6" value="⑥ @CurrentTenant() decorator  →  service.findAll({ organizationId, ...args })" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="540" y="440" as="sourcePoint"/>
+        <mxPoint x="740" y="440" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 3: Scoped DB Access -->
+
+    <!-- ⑦ Service → MongoDB: scoped query -->
+    <mxCell id="m7" value="⑦ members.find({ organizationId: &quot;abc123&quot;, ...filters })" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="740" y="522" as="sourcePoint"/>
+        <mxPoint x="930" y="522" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑧ MongoDB → Service: filtered results -->
+    <mxCell id="m8" value="⑧ filtered results — only this organization's data" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;fontStyle=1;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="930" y="562" as="sourcePoint"/>
+        <mxPoint x="740" y="562" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 4: Response Delivery -->
+
+    <!-- ⑨ Resolvers → Admin App -->
+    <mxCell id="m9" value="⑨ GraphQL response { data: [ ...org-san-jose only ] }" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="740" y="642" as="sourcePoint"/>
+        <mxPoint x="185" y="642" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑩ Resolvers → Mobile App -->
+    <mxCell id="m10" value="⑩ GraphQL response { data: [ ...org-san-jose only ] }" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="740" y="682" as="sourcePoint"/>
+        <mxPoint x="355" y="682" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ===================== LEGEND ===================== -->
+    <mxCell id="legend" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;&#x2192; solid = request / call&lt;br&gt;- &#x2192; dashed = response / return&lt;br&gt;&lt;font color=&quot;#6c8ebf&quot;&gt;&#x25a0; blue = tenant resolution &amp; response&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#FF6600&quot;&gt;&#x25a0; orange = request context setup&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#006600&quot;&gt;&#x25a0; green = scoped DB access&lt;/font&gt;" style="rounded=1;fillColor=#ffffff;strokeColor=#cccccc;fontSize=9;align=left;verticalAlign=top;html=1;" vertex="1" parent="1">
+      <mxGeometry x="830" y="752" width="240" height="90" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

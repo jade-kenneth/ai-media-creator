@@ -1,0 +1,8 @@
+type ValidateSessionResult {
+  ok: Boolean!
+  status: Int!
+}
+
+extend type Query {
+  validateSession: ValidateSessionResult!
+}

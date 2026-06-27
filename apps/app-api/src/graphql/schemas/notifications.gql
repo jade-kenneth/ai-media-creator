@@ -1,0 +1,56 @@
+enum NotificationType {
+  ANNOUNCEMENT
+  EMERGENCY_ANNOUNCEMENT
+  REGISTRATION_APPROVED
+  REGISTRATION_REJECTED
+  SYSTEM
+}
+
+type Notification implements Node {
+  id: ID!
+  userId: ID!
+  title: String!
+  message: String!
+  type: NotificationType!
+  isRead: Boolean!
+  relatedEntityId: ID
+  createdAt: DateTime!
+}
+
+type NotificationEdge implements Edge {
+  cursor: Cursor!
+  node: Notification!
+}
+
+type NotificationConnection implements Connection {
+  totalCount: Int!
+  edges: [NotificationEdge!]!
+  pageInfo: CursorPageInfo!
+  unreadCount: Int!
+}
+
+input NotificationsFilterInput {
+  unreadOnly: Boolean
+}
+
+input NotificationSortInput {
+  createdAt: SortDirection
+}
+
+type MarkAllNotificationsAsReadResult {
+  updatedCount: Int!
+}
+
+extend type Query {
+  myNotifications(
+    filter: NotificationsFilterInput
+    sort: NotificationSortInput
+    first: Int
+    after: Cursor
+  ): NotificationConnection!
+}
+
+extend type Mutation {
+  markNotificationAsRead(id: ID!): Notification!
+  markAllNotificationsAsRead: MarkAllNotificationsAsReadResult!
+}

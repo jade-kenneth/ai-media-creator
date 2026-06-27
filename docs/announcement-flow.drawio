@@ -1,0 +1,119 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="org-announcement-flow" name="Announcement Flow">
+    <mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Title -->
+        <mxCell id="title" value="App Boilerplate — How One Announcement Travels From Admin to Member" style="text;html=1;fontSize=20;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="16" y="12" width="1450" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="banner" value="Think of it like a community bulletin board inside a building with many locked offices (tenants): an admin can only pin a notice on THEIR office's board, and only members of that office ever see it." style="text;html=1;fontSize=12;fontStyle=2;align=center;fillColor=#fff7e6;strokeColor=#FF6600;" vertex="1" parent="1">
+          <mxGeometry x="16" y="48" width="1450" height="32" as="geometry"/>
+        </mxCell>
+
+        <!-- Actor boxes -->
+        <mxCell id="a1" value="&lt;b&gt;Admin (browser)&lt;/b&gt;&lt;br&gt;fills &amp; submits the form&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;features/announcements/announcement-form-dialog.tsx&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="25" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a2" value="&lt;b&gt;React Query Hook&lt;/b&gt;&lt;br&gt;owns server-state &amp; cache&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;react-query/announcements-operations.ts&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="205" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a3" value="&lt;b&gt;GraphQL Client&lt;/b&gt;&lt;br&gt;adds token, sends request&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;react-query/graphql-client.ts&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="385" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a4" value="&lt;b&gt;Gatekeeper&lt;/b&gt;&lt;br&gt;tenant + auth + role checks&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;middleware/tenant.middleware.ts + auth guards&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="565" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a5" value="&lt;b&gt;Resolver&lt;/b&gt;&lt;br&gt;thin front desk&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/announcements/announcements.resolver.ts&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="745" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a6" value="&lt;b&gt;Service&lt;/b&gt;&lt;br&gt;the actual brain / rules&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/announcements/announcements.service.ts&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="925" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a7" value="&lt;b&gt;Mongo + Notifications&lt;/b&gt;&lt;br&gt;stores data, builds pushes&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;repositories + notifications.service.ts&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="1105" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+        <mxCell id="a8" value="&lt;b&gt;Member (phone)&lt;/b&gt;&lt;br&gt;gets push, reads feed&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;org-system-mobile (Expo app)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="1285" y="96" width="150" height="66" as="geometry"/>
+        </mxCell>
+
+        <!-- Lifelines -->
+        <mxCell id="l1" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="100" y="162" as="sourcePoint"/><mxPoint x="100" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l2" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="280" y="162" as="sourcePoint"/><mxPoint x="280" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l3" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="460" y="162" as="sourcePoint"/><mxPoint x="460" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l4" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="640" y="162" as="sourcePoint"/><mxPoint x="640" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l5" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="162" as="sourcePoint"/><mxPoint x="820" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l6" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="162" as="sourcePoint"/><mxPoint x="1000" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l7" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1180" y="162" as="sourcePoint"/><mxPoint x="1180" y="860" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="l8" style="endArrow=none;dashed=1;strokeColor=#aaaaaa;strokeWidth=1;html=1;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="1360" y="162" as="sourcePoint"/><mxPoint x="1360" y="860" as="targetPoint"/></mxGeometry></mxCell>
+
+        <!-- Section sidebars -->
+        <mxCell id="s1" value="Admin Sends" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0e0;strokeColor=#FF6600;fontColor=#FF6600;fontStyle=1;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="16" y="195" width="60" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="Server Receives &amp; Handles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f0e0;strokeColor=#006600;fontColor=#006600;fontStyle=1;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="16" y="355" width="60" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="Member Sees" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4fd;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontStyle=1;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="16" y="665" width="60" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="m1" value="① Admin clicks &quot;Publish&quot; — the form fires the create mutation&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements-operations.ts:193 — useCreateAnnouncementMutation()&lt;/font&gt;" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="100" y="210" as="sourcePoint"/><mxPoint x="280" y="210" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="② Hook calls the typed request wrapper (one function per operation)&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements-operations.ts:94 — createAnnouncementRequest()&lt;/font&gt;" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="280" y="260" as="sourcePoint"/><mxPoint x="460" y="260" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m3" value="③ authMiddleware attaches the Bearer access token, then POSTs to /graphql&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;graphql-client.ts:514 — authMiddleware&lt;/font&gt;" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="460" y="310" as="sourcePoint"/><mxPoint x="640" y="310" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="note1" value="TenantMiddleware decodes the JWT → looks up the organization → stamps req.tenantId (tenant.middleware.ts:15-35)" style="text;html=1;fontSize=9;fontColor=#d79b00;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="470" y="326" width="520" height="18" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m4" value="④ Auth + Roles guards verify the user is logged in AND is an ADMIN&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;graphql-auth.guard.ts:18 — canActivate() / resolver.ts:38 — @Roles(ADMIN)&lt;/font&gt;" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="640" y="375" as="sourcePoint"/><mxPoint x="820" y="375" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="note2" value="GraphQL context bridges the Express req into the execution context so guards/decorators work (app.module.ts:108)" style="text;html=1;fontSize=9;fontColor=#006600;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="650" y="391" width="540" height="18" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="m5" value="⑤ Thin resolver immediately delegates to the service (no business logic here)&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements.resolver.ts:37 — createAnnouncement()&lt;/font&gt;" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="820" y="430" as="sourcePoint"/><mxPoint x="1000" y="430" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m6" value="⑥ Service writes the announcement to Mongo, always scoped by tenantId&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements.service.ts:46 — createAnnouncement()&lt;/font&gt;" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="480" as="sourcePoint"/><mxPoint x="1180" y="480" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m7" value="⑦ If newly published, build notifications for members of that organization&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements.service.ts:73,289 — notifyIfNewlyPublished()&lt;/font&gt;" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="540" as="sourcePoint"/><mxPoint x="1180" y="540" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m8" value="⑧ Push notification delivered to the member's phone&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;notifications.service.ts — createAnnouncementPublishedNotifications()&lt;/font&gt;" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1180" y="600" as="sourcePoint"/><mxPoint x="1360" y="600" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m9" value="⑨ Saved announcement bubbles back; React Query updates the cache and shows a success toast&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;graphql-client.ts:110 — execute() returns {ok, data}&lt;/font&gt;" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=10;fontStyle=1;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="645" as="sourcePoint"/><mxPoint x="280" y="645" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <mxCell id="m10" value="⑩ Later, the member's app queries the public feed (token carries their tenant)&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements.resolver.ts:48 — announcements query&lt;/font&gt;" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=10;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1360" y="705" as="sourcePoint"/><mxPoint x="640" y="705" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m11" value="⑪ Returns ONLY this organization's published announcements — never another tenant's&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;announcements.service.ts — getAnnouncements(tenantId)&lt;/font&gt;" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=10;fontStyle=1;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="1000" y="755" as="sourcePoint"/><mxPoint x="1360" y="755" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend" value="Legend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;fontStyle=1;spacingLeft=6;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="100" y="790" width="430" height="92" as="geometry"/>
+        </mxCell>
+        <mxCell id="leg1" value="→ solid = a call / request (going out)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="112" y="812" width="300" height="16" as="geometry"/></mxCell>
+        <mxCell id="leg2" value="⇠ dashed = a response / return value (coming back)" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="112" y="830" width="320" height="16" as="geometry"/></mxCell>
+        <mxCell id="leg3" value="orange = client sends · green = server handles · blue = member reads" style="text;html=1;fontSize=10;align=left;" vertex="1" parent="1"><mxGeometry x="112" y="848" width="400" height="16" as="geometry"/></mxCell>
+        <mxCell id="leg4" value="grey italic under each arrow = the exact file:line that does it" style="text;html=1;fontSize=9;fontColor=#888888;fontStyle=2;align=left;" vertex="1" parent="1"><mxGeometry x="112" y="866" width="400" height="14" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

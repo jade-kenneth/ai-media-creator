@@ -1,0 +1,83 @@
+enum UserRole {
+  MEMBER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum RegistrationStatus {
+  pending_approval
+  approved
+  rejected
+}
+
+enum RegistrationRejectionReason {
+  INCOMPLETE_INFORMATION
+  INVALID_IDENTITY
+  NOT_A_MEMBER
+  DUPLICATE_ACCOUNT
+  UNDERAGE
+  INVALID_CONTACT_DETAILS
+  SUSPICIOUS_ACTIVITY
+  OTHER
+}
+
+type RegistrationReview {
+  reviewedBy: ID
+  reviewedByUser: User
+  reviewedAt: DateTime
+  rejectionReason: RegistrationRejectionReason
+  rejectionNote: String
+}
+
+type User implements Node {
+  id: ID!
+  email: String!
+  role: UserRole!
+  organizationId: String
+  isActive: Boolean!
+  registrationStatus: RegistrationStatus!
+  registrationReview: RegistrationReview
+  position: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  memberProfile: MemberProfile
+}
+
+type AuthPayload {
+  accessToken: String!
+  refreshToken: String!
+  tokenType: String!
+  expiresIn: Int!
+  user: User!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+  organizationSlug: String
+}
+
+input RegisterMemberInput {
+  organizationSlug: String!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  birthdate: DateTime
+  gender: Gender
+  email: String!
+  contactNumber: String
+  address: String
+  purok: String
+  password: String!
+  confirmPassword: String!
+}
+
+extend type Query {
+  me: User!
+}
+
+extend type Mutation {
+  registerMember(input: RegisterMemberInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  logout: Boolean!
+}

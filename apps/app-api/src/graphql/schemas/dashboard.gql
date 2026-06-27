@@ -1,0 +1,31 @@
+type KpiTrend {
+  delta: Int!
+  deltaPercent: Float!
+  direction: String!
+}
+
+type AdminDashboardSummary {
+  totalMembers: Int!
+  membersTrend: KpiTrend!
+  latestAnnouncements: [Announcement!]!
+}
+
+type SuperAdminDashboardSummary {
+  totalOrganizations: Int!
+  activeOrganizations: Int!
+  inactiveOrganizations: Int!
+  totalAdminAccounts: Int!
+  activeAdminAccounts: Int!
+  inactiveAdminAccounts: Int!
+  pendingDeletionRequests: Int!
+  waitlistTotal: Int!
+  waitlistByRole: [WaitlistRoleCount!]!
+  latestOrganizations: [Organization!]!
+  totalMembers: Int!
+  membersTrend: KpiTrend!
+}
+
+extend type Query {
+  adminDashboardSummary: AdminDashboardSummary!
+  superAdminDashboardSummary: SuperAdminDashboardSummary!
+}

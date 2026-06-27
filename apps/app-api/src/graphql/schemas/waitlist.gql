@@ -1,0 +1,81 @@
+enum WaitlistRole {
+  MEMBER
+  ORGANIZATION_OFFICIAL
+  STAFF
+  OTHER
+}
+
+input WaitlistRoleFilterInput {
+  equal: WaitlistRole
+  in: [WaitlistRole!]
+}
+
+type WaitlistEntry implements Node {
+  id: ID!
+  email: String!
+  role: WaitlistRole!
+  firstName: String
+  lastName: String
+  organizationName: String
+  city: String
+  mobile: String
+  message: String
+  createdAt: DateTime!
+}
+
+type WaitlistEntryEdge implements Edge {
+  cursor: Cursor!
+  node: WaitlistEntry!
+}
+
+type WaitlistEntryConnection implements Connection {
+  totalCount: Int!
+  edges: [WaitlistEntryEdge!]!
+  pageInfo: CursorPageInfo!
+}
+
+input WaitlistFilterInput {
+  role: WaitlistRoleFilterInput
+  createdAt: DateTimeFilterInput
+}
+
+input WaitlistEntrySortInput {
+  createdAt: SortDirection
+}
+
+input JoinWaitlistInput {
+  email: String!
+  role: WaitlistRole!
+  firstName: String
+  lastName: String
+  organizationName: String
+  city: String
+  mobile: String
+  message: String
+}
+
+type WaitlistStats {
+  total: Int!
+  byRole: [WaitlistRoleCount!]!
+}
+
+type WaitlistRoleCount {
+  role: WaitlistRole!
+  count: Int!
+}
+
+extend type Query {
+  adminWaitlistEntries(
+    filter: WaitlistFilterInput
+    sort: WaitlistEntrySortInput
+    first: Int
+    after: Cursor
+  ): WaitlistEntryConnection!
+
+  adminWaitlistStats: WaitlistStats!
+}
+
+extend type Mutation {
+  joinWaitlist(input: JoinWaitlistInput!): WaitlistEntry!
+  deleteWaitlistEntry(id: ID!): Boolean!
+}

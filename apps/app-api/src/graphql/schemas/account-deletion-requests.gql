@@ -1,0 +1,78 @@
+enum AccountDeletionRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+input AccountDeletionRequestStatusFilterInput {
+  equal: AccountDeletionRequestStatus
+  in: [AccountDeletionRequestStatus!]
+  notIn: [AccountDeletionRequestStatus!]
+  notEqual: AccountDeletionRequestStatus
+}
+
+type AccountDeletionRequest implements Node {
+  id: ID!
+  fullName: String!
+  email: String!
+  organizationId: String!
+  organizationName: String!
+  status: AccountDeletionRequestStatus!
+  reviewNote: String
+  reviewedBy: ID
+  reviewedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AccountDeletionRequestEdge implements Edge {
+  cursor: Cursor!
+  node: AccountDeletionRequest!
+}
+
+type AccountDeletionRequestConnection implements Connection {
+  totalCount: Int!
+  edges: [AccountDeletionRequestEdge!]!
+  pageInfo: CursorPageInfo!
+}
+
+input AccountDeletionRequestFilterInput {
+  status: AccountDeletionRequestStatusFilterInput
+  organizationId: IDFilterInput
+}
+
+input AccountDeletionRequestSortInput {
+  createdAt: SortDirection
+  reviewedAt: SortDirection
+}
+
+input SubmitAccountDeletionRequestInput {
+  fullName: String!
+  email: String!
+  organizationId: String!
+}
+
+input ReviewAccountDeletionRequestInput {
+  requestId: ID!
+  status: AccountDeletionRequestStatus!
+  reviewNote: String
+}
+
+extend type Query {
+  adminAccountDeletionRequests(
+    filter: AccountDeletionRequestFilterInput
+    sort: AccountDeletionRequestSortInput
+    first: Int
+    after: Cursor
+  ): AccountDeletionRequestConnection!
+  adminAccountDeletionRequest(id: ID!): AccountDeletionRequest
+}
+
+extend type Mutation {
+  submitAccountDeletionRequest(
+    input: SubmitAccountDeletionRequestInput!
+  ): AccountDeletionRequest!
+  reviewAccountDeletionRequest(
+    input: ReviewAccountDeletionRequestInput!
+  ): AccountDeletionRequest!
+}

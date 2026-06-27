@@ -1,0 +1,14 @@
+{
+  "name": "project-learning-tutor-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local OpenCode Zen proxy for the learning guide's per-topic AI tutor. Keeps the API key off the browser and adds the CORS headers Zen does not send.",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "start:inline": "node server.mjs"
+  },
+  "dependencies": {
+    "openai": "latest"
+  }
+}

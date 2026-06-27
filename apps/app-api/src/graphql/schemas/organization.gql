@@ -1,0 +1,55 @@
+type Organization implements Node {
+  id: ID!
+  name: String!
+  slug: String!
+  logoUrl: String
+  primaryColor: String
+  contactNumber: String
+  address: String
+  features: [String!]!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input OrganizationFilterInput {
+  slug: String
+  isActive: Boolean
+  name: StringFilterInput
+  contactNumber: StringFilterInput
+  address: StringFilterInput
+  createdAt: DateTimeFilterInput
+}
+
+input CreateOrganizationInput {
+  name: String!
+  slug: String!
+  logoUrl: String
+  primaryColor: String
+  contactNumber: String
+  address: String
+  adminEmail: String!
+  adminPassword: String!
+}
+
+input UpdateOrganizationInput {
+  name: String
+  logoUrl: String
+  primaryColor: String
+  contactNumber: String
+  address: String
+  features: [String!]
+  isActive: Boolean
+}
+
+extend type Query {
+  organizations(filter: OrganizationFilterInput): [Organization!]!
+  organization(id: ID!): Organization
+}
+
+extend type Mutation {
+  createOrganization(input: CreateOrganizationInput!): Organization!
+  updateOrganization(id: ID!, input: UpdateOrganizationInput!): Organization!
+  deactivateOrganization(id: ID!): Organization!
+  reactivateOrganization(id: ID!): Organization!
+}

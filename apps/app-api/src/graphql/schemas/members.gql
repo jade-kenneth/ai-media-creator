@@ -1,0 +1,115 @@
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum MemberSortField {
+  CREATED_AT
+  FIRST_NAME
+  LAST_NAME
+}
+
+input MemberSortFieldFilterInput {
+  equal: MemberSortField
+  in: [MemberSortField!]
+  notIn: [MemberSortField!]
+  notEqual: MemberSortField
+}
+
+input GenderFilterInput {
+  equal: Gender
+  in: [Gender!]
+  notIn: [Gender!]
+  notEqual: Gender
+}
+
+type MemberProfile implements Node {
+  id: ID!
+  userId: ID!
+  user: User
+  firstName: String!
+  lastName: String!
+  middleName: String
+  fullName: String!
+  birthdate: DateTime
+  gender: Gender
+  address: String
+  purok: String
+  contactNumber: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type MemberProfileEdge implements Edge {
+  cursor: Cursor!
+  node: MemberProfile!
+}
+
+type MemberProfileConnection implements Connection {
+  totalCount: Int!
+  edges: [MemberProfileEdge!]!
+  pageInfo: CursorPageInfo!
+}
+
+input AdminMembersFilterInput {
+  equal: Boolean
+  in: [Boolean!]
+  notIn: [Boolean!]
+  notEqual: Boolean
+}
+
+input RegistrationStatusFilterInput {
+  equal: RegistrationStatus
+  in: [RegistrationStatus!]
+  notIn: [RegistrationStatus!]
+  notEqual: RegistrationStatus
+}
+
+input AdminMembersActiveFilterInput {
+  id: IDFilterInput
+  isActive: AdminMembersFilterInput
+  registrationStatus: RegistrationStatusFilterInput
+  gender: GenderFilterInput
+}
+
+input AdminMembersSortInput {
+  createdAt: SortDirection
+  firstName: SortDirection
+  lastName: SortDirection
+}
+
+input UpdateMemberProfileInput {
+  firstName: String!
+  lastName: String!
+  middleName: String
+  contactNumber: String!
+  address: String!
+  purok: String
+  gender: Gender
+  birthdate: DateTime!
+}
+
+extend type Query {
+  myProfile: MemberProfile!
+  adminMembers(
+    filter: AdminMembersActiveFilterInput
+    sort: AdminMembersSortInput
+    first: Int
+    after: Cursor
+  ): MemberProfileConnection!
+  adminMember(id: ID!): MemberProfile
+  searchByMembers(search: String!, first: Int, after: Cursor): [ID!]
+}
+
+extend type Mutation {
+  updateMyProfile(input: UpdateMemberProfileInput!): MemberProfile!
+  approveMember(userId: ID!): User!
+  rejectMember(
+    userId: ID!
+    rejectionReason: RegistrationRejectionReason!
+    rejectionNote: String
+  ): User!
+  retriggerApprovalNotification(userId: ID!): Boolean!
+}

@@ -1,0 +1,13 @@
+input SendTestPushNotificationInput {
+  title: String!
+  body: String!
+  userId: ID
+}
+
+type SendTestPushNotificationResult {
+  tokenCount: Int!
+}
+
+extend type Mutation {
+  sendTestPushNotification(input: SendTestPushNotificationInput!): SendTestPushNotificationResult!
+}

@@ -1,0 +1,241 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="title" value="Push Notification Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="20" width="1160" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- Pre-condition banner -->
+    <mxCell id="precond" value="&lt;i&gt;Triggered when: announcement published / document request status changed / schedule created&lt;/i&gt;" style="text;html=1;strokeColor=#6c8ebf;fillColor=#e8f4fd;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="30" y="66" width="1160" height="24" as="geometry"/>
+    </mxCell>
+
+    <!-- Actor boxes (y=96, height=66) -->
+
+    <!-- 1. Caller -->
+    <mxCell id="a1" value="&lt;b&gt;Caller&lt;/b&gt;&lt;br&gt;e.g. AnnouncementsService&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/announcements/&lt;br&gt;announcements.service.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="30" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- 2. NotificationsService -->
+    <mxCell id="a2" value="&lt;b&gt;NotificationsService&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/notifications/&lt;br&gt;notifications.service.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="190" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- 3. UsersService -->
+    <mxCell id="a3" value="&lt;b&gt;UsersService&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/users/&lt;br&gt;users.service.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="350" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- 4. NotificationsRepository -->
+    <mxCell id="a4" value="&lt;b&gt;NotificationsRepository&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/notifications/repositories/&lt;br&gt;notifications.repository.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="510" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- 5. PushNotificationsService -->
+    <mxCell id="a5" value="&lt;b&gt;PushNotificationsService&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/push-notifications/&lt;br&gt;push-notifications.service.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="670" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- 6. PushTokensRepository -->
+    <mxCell id="a6" value="&lt;b&gt;PushTokensRepository&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;modules/push-tokens/repositories/&lt;br&gt;push-tokens.repository.ts&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="830" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- 7. Expo Push API -->
+    <mxCell id="a7" value="&lt;b&gt;Expo Push API&lt;/b&gt;&lt;br&gt;External Service&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;exp.host/--/api/v2/push/send&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="990" y="96" width="130" height="66" as="geometry"/>
+    </mxCell>
+
+    <!-- Lifelines (y=162 to y=1040) -->
+    <mxCell id="ll1" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="95" y="162" as="sourcePoint"/>
+        <mxPoint x="95" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ll2" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="255" y="162" as="sourcePoint"/>
+        <mxPoint x="255" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ll3" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="415" y="162" as="sourcePoint"/>
+        <mxPoint x="415" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ll4" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="575" y="162" as="sourcePoint"/>
+        <mxPoint x="575" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ll5" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="735" y="162" as="sourcePoint"/>
+        <mxPoint x="735" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ll6" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="895" y="162" as="sourcePoint"/>
+        <mxPoint x="895" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ll7" value="" style="dashed=1;strokeColor=#aaaaaa;strokeWidth=1;endArrow=none;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1055" y="162" as="sourcePoint"/>
+        <mxPoint x="1055" y="1040" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Section Sidebars (x=20, width=70) -->
+
+    <!-- 1. Trigger (blue): y=210-260 -->
+    <mxCell id="s1" value="Trigger" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4fd;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="210" width="70" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- 2. Resolve Recipients (blue): y=290-390 -->
+    <mxCell id="s2" value="Resolve Recipients" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f4fd;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="290" width="70" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- 3. Store Notifications (orange): y=420-510 -->
+    <mxCell id="s3" value="Store Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0e0;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="420" width="70" height="100" as="geometry"/>
+    </mxCell>
+
+    <!-- 4. Send Push (orange): y=550-830 -->
+    <mxCell id="s4" value="Send Push Notifications" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0e0;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="550" width="70" height="280" as="geometry"/>
+    </mxCell>
+
+    <!-- 5. Cleanup Tokens (green): y=860-1020 -->
+    <mxCell id="s5" value="Cleanup Tokens" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e0f0e0;strokeColor=#006600;fontColor=#006600;fontSize=9;fontStyle=1;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="20" y="860" width="70" height="160" as="geometry"/>
+    </mxCell>
+
+    <!-- ARROWS -->
+
+    <!-- ① Caller → NotificationsService -->
+    <mxCell id="m1" value="① createAnnouncementPublishedNotifications(announcement, organizationId)" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="95" y="235" as="sourcePoint"/>
+        <mxPoint x="255" y="235" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ② NotificationsService → UsersService -->
+    <mxCell id="m2" value="② findActiveMemberUserIds(organizationId)" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="255" y="310" as="sourcePoint"/>
+        <mxPoint x="415" y="310" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ③ UsersService → NotificationsService (return) -->
+    <mxCell id="m3" value="③ [userId1, userId2, ...]" style="html=1;strokeColor=#6c8ebf;fontColor=#6c8ebf;fontSize=9;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="415" y="360" as="sourcePoint"/>
+        <mxPoint x="255" y="360" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ④ NotificationsService → NotificationsRepository (parallel create) -->
+    <mxCell id="m4" value="④ create(notification) × N users [Promise.all]" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="255" y="445" as="sourcePoint"/>
+        <mxPoint x="575" y="445" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑤ NotificationsRepository → NotificationsService (return) -->
+    <mxCell id="m5" value="⑤ Notification[]" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="575" y="490" as="sourcePoint"/>
+        <mxPoint x="255" y="490" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑥ NotificationsService → PushNotificationsService -->
+    <mxCell id="m6" value="⑥ sendAnnouncementPublished({ userIds, title, body, announcementId })" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="255" y="575" as="sourcePoint"/>
+        <mxPoint x="735" y="575" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑦ PushNotificationsService → PushTokensRepository -->
+    <mxCell id="m7" value="⑦ list({ userId: { in: userIds }, platform: { in: [ANDROID, IOS] } })" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="735" y="620" as="sourcePoint"/>
+        <mxPoint x="895" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑧ PushTokensRepository → PushNotificationsService (return) -->
+    <mxCell id="m8" value="⑧ PushTokenRecord[]" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="895" y="665" as="sourcePoint"/>
+        <mxPoint x="735" y="665" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑨ PushNotificationsService internal note -->
+    <mxCell id="m9" value="⑨ dedup + filter valid ExpoPushTokens, chunk into groups of ≤100" style="text;html=1;strokeColor=none;fillColor=#fff0e0;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=9;fontColor=#FF6600;" vertex="1" parent="1">
+      <mxGeometry x="670" y="695" width="260" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- ⑩ PushNotificationsService → Expo Push API -->
+    <mxCell id="m10" value="⑩ POST /push/send [chunk of ≤100 ExpoPushMessages]" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="735" y="755" as="sourcePoint"/>
+        <mxPoint x="1055" y="755" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑪ Expo Push API → PushNotificationsService (return) -->
+    <mxCell id="m11" value="⑪ { data: ExpoPushTicket[] }" style="html=1;strokeColor=#FF6600;fontColor=#FF6600;fontSize=9;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1055" y="800" as="sourcePoint"/>
+        <mxPoint x="735" y="800" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑫ PushNotificationsService → PushTokensRepository (cleanup) -->
+    <mxCell id="m12" value="⑫ delete({ token, platform }) for DeviceNotRegistered tickets" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="735" y="900" as="sourcePoint"/>
+        <mxPoint x="895" y="900" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑬ PushNotificationsService → NotificationsService (return void) -->
+    <mxCell id="m13" value="⑬ void (push complete)" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="735" y="960" as="sourcePoint"/>
+        <mxPoint x="255" y="960" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ⑭ NotificationsService → Caller (return count) -->
+    <mxCell id="m14" value="⑭ recipientCount (number of notified members)" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;dashed=1;startArrow=none;endArrow=open;endFill=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="255" y="1010" as="sourcePoint"/>
+        <mxPoint x="95" y="1010" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Legend (bottom-right) -->
+    <mxCell id="legend" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;→ Solid = request / call&lt;br&gt;- - → Dashed = response / return&lt;br&gt;&lt;font color=&quot;#6c8ebf&quot;&gt;■ Blue = trigger / resolve recipients&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#FF6600&quot;&gt;■ Orange = store DB &amp; send push&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#006600&quot;&gt;■ Green = invalid token cleanup&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cccccc;fontSize=9;align=left;spacingLeft=8;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="870" y="930" width="290" height="110" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>

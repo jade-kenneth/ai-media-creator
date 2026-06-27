@@ -1,0 +1,86 @@
+[
+  {
+    "query": "scan this project and build me a single HTML page that teaches me how the whole thing works — architecture, frontend, backend, database, and what's risky",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm new to this codebase. Make a self-contained learning guide I can open in a browser that explains it with analogies and diagrams",
+    "should_trigger": true
+  },
+  {
+    "query": "audit this repo for learning: best practices, risky patterns, and strengths, with P1/P2/P3 cards and a comprehension quiz",
+    "should_trigger": true
+  },
+  {
+    "query": "generate a project-learning-audit guide for this monorepo",
+    "should_trigger": true
+  },
+  {
+    "query": "help me understand how the frontend connects to the backend and the database here, end to end, with animated flow diagrams",
+    "should_trigger": true
+  },
+  {
+    "query": "onboard me onto this project — mental model, tech stack, full-stack flows, and a learning path, but don't change any code",
+    "should_trigger": true
+  },
+  {
+    "query": "make an interactive study guide with reveal-answer questions for this codebase so I can quiz myself before an interview",
+    "should_trigger": true
+  },
+  {
+    "query": "explain this whole project like a beginner lesson plus a senior onboarding doc, grounded in real file paths",
+    "should_trigger": true
+  },
+  {
+    "query": "show me old-vs-modern comparisons of the patterns used in this app and where the risky implementations are",
+    "should_trigger": true
+  },
+  {
+    "query": "produce a one-file html dashboard summarizing the architecture, the patterns, and the top risks to fix first",
+    "should_trigger": true
+  },
+  {
+    "query": "deep dive on the authentication flow and append it to the learning guide",
+    "should_trigger": true
+  },
+  {
+    "query": "add a section to the guide explaining how the polls reminder scheduler works",
+    "should_trigger": true
+  },
+  {
+    "query": "append a topic deep dive about tenant scoping to the project guide html",
+    "should_trigger": true
+  },
+  {
+    "query": "there's a bug where the poll list doesn't refresh after voting — find and fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "add a new GraphQL mutation to the announcements module and wire it into the admin form",
+    "should_trigger": false
+  },
+  {
+    "query": "deploy the API to production and run the migrations",
+    "should_trigger": false
+  },
+  {
+    "query": "write and pass unit tests for the auth service",
+    "should_trigger": false
+  },
+  {
+    "query": "refactor the scheduler to use the repository pattern more cleanly",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what this single function does",
+    "should_trigger": false
+  },
+  {
+    "query": "update the env var docs in the api README",
+    "should_trigger": false
+  },
+  {
+    "query": "the android build is failing with a gradle metadata error, help me fix it",
+    "should_trigger": false
+  }
+]
