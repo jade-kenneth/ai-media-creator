@@ -93,3 +93,13 @@ Do not:
 Patterns are tools, not goals.
 
 Choose the pattern that improves clarity, preserves consistency, supports maintainability, and avoids unnecessary complexity.
+
+---
+
+## Related References
+
+- `references/state-management.md` — state boundaries and the `useState` → `useReducer` → Context → external-store decision guide
+- `references/folder-structure.md` — where each kind of code belongs and feature colocation
+- `references/performance.md` — the perceived-performance priority order referenced in step 8 above
+- `references/common-anti-patterns.md` — the same anti-patterns with the "what to do instead" for each
+- `references/react-patterns.md` — the pattern implementations (custom hook, provider, HOC, compound, headless)

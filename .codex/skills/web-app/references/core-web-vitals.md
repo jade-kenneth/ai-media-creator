@@ -464,3 +464,11 @@ The best Lighthouse improvements usually come from:
 4. **Disciplined React/Next.js architecture** — right state for the job, small client boundaries, intentional hydration
 
 **Treat Lighthouse as feedback, not the goal.** The goal is fast, stable, responsive UI for real users on real devices and real networks.
+
+---
+
+## Related References
+
+- `references/nextjs-performance-seo.md` — framework-level patterns for the same metrics
+- `references/code-splitting.md` — when splitting helps (and when it hurts) each metric
+- `references/responsive-design.md` — § Performance-Related Responsiveness; CLS-stable layouts

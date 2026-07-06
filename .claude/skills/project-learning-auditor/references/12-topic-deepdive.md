@@ -5,7 +5,8 @@ single, self-contained deep-dive section and **appends it** to the existing
 `reference/project-learning-audit/index.html` — without regenerating the whole
 guide. Examples of a topic: "the authentication flow", "the polls reminder
 scheduler", "how notifications are sent", "tenant scoping", "the registration
-approval flow", "the DataTable component".
+approval flow", "the DataTable component", "CI/CD", "migration scripts", or
+"third-party integrations".
 
 Every topic section ends with two learning aids:
 1. A **per-topic comprehension test** — graded `<details>` questions (static, works
@@ -36,6 +37,11 @@ not this mode.
    for the modules/components/flows the topic names. Collect the concrete
    `path:line` evidence. If the topic isn't present in the codebase, say
    `Not detected from current files.` and stop — never invent a topic.
+   If the topic names an engineering initiative track (`cicd`, `migration`,
+   `automation`, `ai`, or `third-party`), reuse
+   `references/19-engineering-initiatives.md` heuristics and
+   `signals.initiative_surfaces.<track>` as the evidence block before reading the
+   cited config/script/module files.
 
 4. **Build the slug.** `slug = kebab-case(topic)` (lowercase, spaces→`-`, strip
    punctuation). Section id = `topic-<slug>`. Nav label = short Title Case.
@@ -202,7 +208,7 @@ The chat box gives a **continuous, topic-scoped conversation** about each topic.
   escape `<`, `>`, `&` in code samples; never paste secret values.
 - **Idempotent.** Re-running the same topic refreshes its section in place (quiz + chat
   included); it never creates a duplicate section or duplicate nav link.
-- **Append-only to the page body.** Never touch the existing §0–§13 sections when in
+- **Append-only to the page body.** Never touch the existing §0–§15 sections when in
   topic mode — only the TOPICS and TOPIC_NAV regions and the date stamp.
 - **Animated flow is optional.** Include it only when the topic is a process worth
   visualizing; a concept topic can be cards + quiz + chat only.

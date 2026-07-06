@@ -88,7 +88,7 @@ This project uses Tailwind CSS with a mobile-first approach. Default styles targ
 | `html, body { overflow-x: hidden; }`   | Safety net — should not be needed if components are responsive |
 | `img, video, svg { max-width: 100%; }` | All media constrained by default                               |
 
-These live in `apps/brgy-system-admin/app/globals.css`. They are guards, not substitutes for component-level responsiveness.
+These live in `apps/*-admin/app/globals.css`. They are guards, not substitutes for component-level responsiveness.
 
 ---
 
@@ -545,3 +545,11 @@ Before shipping any user-facing UI change:
 | ☐ Cards shrink cleanly in grid                                 | Check text truncation and image ratio at 375px     |
 | ☐ Sticky elements don't block content                          | Scroll with sticky header — content still readable |
 | ☐ Test at 375px, 768px, 1040px, 1280px                         | All major breakpoints pass                         |
+
+---
+
+## Related References
+
+- `references/accessibility.md` — tap targets, focus, and contrast rules that pair with these standards
+- `references/browser-compatibility.md` — cross-browser layout watchouts
+- `references/core-web-vitals.md` — CLS-stable responsive layouts

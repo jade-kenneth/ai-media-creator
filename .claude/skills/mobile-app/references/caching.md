@@ -511,6 +511,33 @@ useQuery({ queryKey: ['notes'], staleTime: Infinity, ... })
 // GOOD — pair long staleTime with explicit invalidation on mutations
 ```
 
+#### ❌ Relying on `staleTime` while a global `refetchOnMount: 'always'` overrides it
+
+`refetchOnMount: 'always'` refetches on **every** mount regardless of `staleTime`. If
+that is the QueryClient default, adding a per-query `staleTime` does nothing to stop the
+cached data from flickering (background refetch → re-render) each time its screen mounts.
+
+For **stable, read-only reference data** — data the user reads but never mutates and that
+changes rarely (rosters, directories, catalogs, category/option lists) — pair a long
+`staleTime` with `refetchOnMount: true` so mounts respect `staleTime` and render the cached
+list instantly. It still refreshes on reconnect/focus once stale and on cold start, and
+there is no stale-after-mutation risk because the client never mutates it.
+
+```ts
+// BAD — inherits the global `refetchOnMount: 'always'`, so it refetches and
+// flickers on every mount even though the data almost never changes
+useReferenceListQuery();
+
+// BAD — staleTime is ignored while `refetchOnMount: 'always'` is the default
+defineQuery({ /* ... */ staleTime: ONE_HOUR });
+
+// GOOD — respect staleTime on mount so the cached list shows instantly
+defineQuery({ /* ... */ staleTime: ONE_HOUR, refetchOnMount: true });
+```
+
+Share one `staleTime` constant across reference-list queries so the freshness policy lives
+in one place instead of a magic number copied per file.
+
 #### ❌ Over-invalidating (invalidating everything on every mutation)
 
 ```ts

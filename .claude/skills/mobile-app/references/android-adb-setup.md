@@ -48,7 +48,7 @@ adb devices
 
 ## Gradle Version
 
-- **Use `8.13`** — set in `apps/brgy-system-mobile/android/gradle/wrapper/gradle-wrapper.properties`
+- **Use `8.13`** — set in `apps/*-mobile/android/gradle/wrapper/gradle-wrapper.properties`
 - **Do not upgrade to 8.14.x** — confirmed bug where `metadata.bin` files in the Kotlin DSL cache are never created, crashing both `expo run:android` and `eas build --local`
 
 ---

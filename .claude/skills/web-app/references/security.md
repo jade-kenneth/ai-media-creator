@@ -141,6 +141,7 @@ module.exports = {
 | Enforce allowed file types (allowlist MIME + extension) | 🟠 | Don't rely on extension alone — check magic bytes/MIME |
 | Enforce size limits | 🟡 | Set per-route limits (e.g., 5MB for images, 50MB for documents) |
 | Sanitize file names before storage | 🟠 | Strip path traversal (`../`), special characters, spaces |
+| Let the upload service generate storage object keys | 🟠 | Clients should send upload intent such as namespace and content type, not final shared-folder object paths |
 | Scan/isolate uploaded files | 🟡 | Store in isolated bucket, never serve from app origin |
 | Serve uploads from a separate domain/CDN | 🟡 | Prevents uploaded HTML/SVG from executing scripts on your origin |
 
@@ -385,3 +386,11 @@ Quick pass/fail verification for the most dangerous vulnerability classes:
 8. 🟠 Rate limiting enabled on authentication endpoints
 9. 🟡 Source maps not exposed in production
 10. 🟡 Error messages don't reveal implementation details
+
+---
+
+## Related References
+
+- `references/auth-patterns.md` — client-side session and guard implementation
+- `references/dependency-management.md` — dependency advisories and patching cadence
+- `references/analytics-ga4-gtm.md` — third-party scripts, consent, and privacy

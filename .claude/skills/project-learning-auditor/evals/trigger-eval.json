@@ -40,6 +40,34 @@
     "should_trigger": true
   },
   {
+    "query": "build the learning guide and include an optimization audit for bundle size, API performance, database queries, caching, and assets",
+    "should_trigger": true
+  },
+  {
+    "query": "build the learning guide with a UI/UX audit — flag where the sign-in button shows a spinner but isn't disabled so users can spam-click it, plus missing loading, error, and accessibility states",
+    "should_trigger": true
+  },
+  {
+    "query": "audit the existing features for safe improvement initiatives — non-breaking, low-complexity ways to make them more useful or more effective, and add them to the guide",
+    "should_trigger": true
+  },
+  {
+    "query": "what small, non-breaking enhancements could improve user retention here — re-engagement notifications, reminders, nudges — reusing what we already have? put it in the learning audit",
+    "should_trigger": true
+  },
+  {
+    "query": "audit this repo's CI/CD and automation gaps and suggest initiatives",
+    "should_trigger": true
+  },
+  {
+    "query": "what AI or third-party integrations could this project add — put them in the learning guide",
+    "should_trigger": true
+  },
+  {
+    "query": "propose migration-script and pipeline improvements as initiative cards",
+    "should_trigger": true
+  },
+  {
     "query": "deep dive on the authentication flow and append it to the learning guide",
     "should_trigger": true
   },
@@ -69,6 +97,10 @@
   },
   {
     "query": "refactor the scheduler to use the repository pattern more cleanly",
+    "should_trigger": false
+  },
+  {
+    "query": "set up GitHub Actions for this repo",
     "should_trigger": false
   },
   {

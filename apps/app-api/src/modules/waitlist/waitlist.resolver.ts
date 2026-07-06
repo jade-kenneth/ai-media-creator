@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   Connection,
   RepositoryFilter,
@@ -22,7 +23,7 @@ export class WaitlistResolver {
   constructor(private readonly waitlistService: WaitlistService) {}
 
   @Mutation('joinWaitlist')
-  async joinWaitlist(@Args('input') input: JoinWaitlistInput) {
+  async joinWaitlist(@ServiceValidatedArgs('input') input: JoinWaitlistInput) {
     return this.waitlistService.join(input);
   }
 

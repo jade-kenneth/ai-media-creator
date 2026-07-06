@@ -664,6 +664,33 @@ useQuery({ queryKey: ['notes'], staleTime: Infinity, ... })
 // GOOD — pair long staleTime with explicit invalidation on mutations
 ```
 
+#### ❌ Relying on `staleTime` while a global `refetchOnMount: 'always'` overrides it
+
+`refetchOnMount: 'always'` refetches on **every** mount regardless of `staleTime`. If
+that is the QueryClient default, adding a per-query `staleTime` does nothing to stop the
+cached data from flickering (background refetch → re-render) each time it mounts.
+
+For **stable, read-only reference data** — data the user reads but never mutates and that
+changes rarely (rosters, directories, catalogs, category/option lists) — pair a long
+`staleTime` with `refetchOnMount: true` so mounts respect `staleTime` and render the cached
+list instantly. It still refreshes on reconnect/focus once stale and on cold start, and
+there is no stale-after-mutation risk because the client never mutates it.
+
+```ts
+// BAD — inherits the global `refetchOnMount: 'always'`, so it refetches and
+// flickers on every mount even though the data almost never changes
+useReferenceListQuery();
+
+// BAD — staleTime is ignored while `refetchOnMount: 'always'` is the default
+defineQuery({ /* ... */ staleTime: ONE_HOUR });
+
+// GOOD — respect staleTime on mount so the cached list shows instantly
+defineQuery({ /* ... */ staleTime: ONE_HOUR, refetchOnMount: true });
+```
+
+Share one `staleTime` constant across reference-list queries so the freshness policy lives
+in one place instead of a magic number copied per file.
+
 #### ❌ Over-invalidating (invalidating everything on every mutation)
 
 ```ts
@@ -1674,14 +1701,14 @@ const [updateNote] = useMutation(UPDATE_NOTE, {
 Define all GraphQL operations as typed document exports, one file per domain:
 
 ```
-apps/brgy-system-admin/graphql/
+apps/*-admin/graphql/
   Cart.ts
   Product.ts
   Order.ts
 ```
 
 ```ts
-// apps/brgy-system-admin/graphql/Cart.ts
+// apps/*-admin/graphql/Cart.ts
 import { gql } from '@apollo/client';
 
 export const CART_QUERY = gql`
@@ -1712,3 +1739,12 @@ Before merging any GraphQL-related change:
 - UI code does not use generated React hook wrappers (`useXxxQuery` etc.).
 - Shared enums/types are imported from `~/graphql/generated`, not re-declared.
 - GraphQL codegen/typecheck passes.
+
+---
+
+## Related References
+
+- `references/graphql-patterns.md` — the defineQuery/defineMutation wrappers and query key conventions these rules apply to
+- `references/state-management.md` — deciding what is server state vs client state in the first place
+- `references/notifications-toast.md` — surfacing mutation success/error from the flows defined here
+- `references/common-anti-patterns.md` — § Query Over-Fetching for Count-Only Operations

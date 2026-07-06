@@ -152,3 +152,11 @@ function AppToaster() {
 - Do not use `toast()` without a variant for action feedback — always pick `success`, `error`, `info`, or `warning`.
 - Do not let `toast.loading()` auto-dismiss — always `toast.dismiss(id)` explicitly.
 - Do not pass raw error objects or stack traces to the toast message.
+
+---
+
+## Related References
+
+- `references/error-boundaries.md` — boundary vs toast decision for error surfacing
+- `references/caching.md` — the mutation lifecycle where success/error toasts fire
+- `references/graphql-patterns.md` — error names to map into user-facing messages

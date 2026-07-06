@@ -11,22 +11,22 @@
 
 | File                                                                           | What to change                                                                                 |
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `apps/brgy-system-mobile/app.json`                                             | `expo.name`, `expo.plugins[expo-splash-screen].image`, `expo.plugins[expo-notifications].icon` |
-| `apps/brgy-system-mobile/ios/<AppName>/Info.plist`                             | `CFBundleDisplayName`                                                                          |
-| `apps/brgy-system-mobile/features/notifications/push-notifications.ts`         | Android default channel name                                                                   |
-| `apps/brgy-system-mobile/features/notifications/local-notification-testing.ts` | Android local test channel name                                                                |
+| `apps/*-mobile/app.json`                                             | `expo.name`, `expo.plugins[expo-splash-screen].image`, `expo.plugins[expo-notifications].icon` |
+| `apps/*-mobile/ios/<AppName>/Info.plist`                             | `CFBundleDisplayName`                                                                          |
+| `apps/*-mobile/features/notifications/push-notifications.ts`         | Android default channel name                                                                   |
+| `apps/*-mobile/features/notifications/local-notification-testing.ts` | Android local test channel name                                                                |
 
 ## Steps to Change Branding
 
-1. Replace or add asset files in `apps/brgy-system-mobile/assets/`.
-2. Update `apps/brgy-system-mobile/app.json`:
+1. Replace or add asset files in `apps/*-mobile/assets/`.
+2. Update `apps/*-mobile/app.json`:
    - `expo.name` — app display name
    - `expo.plugins[expo-splash-screen].image` — path to splash image
    - `expo.plugins[expo-notifications].icon` — path to notification icon
-3. Update `CFBundleDisplayName` in `apps/brgy-system-mobile/ios/<AppName>/Info.plist`.
+3. Update `CFBundleDisplayName` in `apps/*-mobile/ios/<AppName>/Info.plist`.
 4. Update Android notification channel names in:
-   - `apps/brgy-system-mobile/features/notifications/push-notifications.ts`
-   - `apps/brgy-system-mobile/features/notifications/local-notification-testing.ts`
+   - `apps/*-mobile/features/notifications/push-notifications.ts`
+   - `apps/*-mobile/features/notifications/local-notification-testing.ts`
 5. Rebuild and reinstall the app to verify branding and notification behavior.
 
 ## Important Notes

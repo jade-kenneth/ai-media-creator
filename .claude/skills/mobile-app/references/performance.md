@@ -36,3 +36,12 @@ When making a performance-focused change, state which metric is expected to impr
 | Input latency | Time from tap/type to visual response |
 | Scroll FPS | Smoothness of list and scroll interaction |
 | Layout stability | Absence of content jumping after load |
+
+---
+
+## Related References
+
+- `references/react-hooks.md` — when `useMemo`/`useCallback` actually help (memoize only after profiling)
+- `references/ux-patterns.md` § Lists — `FlatList`/`SectionList` usage for long collections
+- `references/caching.md` — prefetching and cache strategy to cut perceived load time
+- `references/common-anti-patterns.md` — unnecessary re-renders and effect loops that regress the metrics above

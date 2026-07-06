@@ -900,6 +900,61 @@ const { data, isLoading, error } = useQuery({
 - Prefer extending that pattern rather than adding ad-hoc `useEffect` + `useState` fetch logic.
 - See `CACHING.md` for detailed caching strategies.
 
+### Mutation Safety — Disable In-Flight Actions (Prevent Double-Fire)
+
+**Any** control that triggers a mutation must be disabled while that mutation is pending — submit button, icon button, table row action, dropdown/menu item, dialog confirm, toolbar action, link styled as an action. If it stays enabled, a fast second activation fires the mutation twice: duplicate writes, duplicate toasts, and races on cache invalidation. This is not a forms-only or dropdown-only rule; it is the default for every mutation-triggering control.
+
+Apply it the same way everywhere, with two layers:
+
+1. **Disable the control** on `mutation.isPending` so it can't be re-activated.
+2. **Guard the handler** with `if (mutation.isPending) return;` for re-entry the `disabled` prop can't catch (keyboard activation, programmatic calls, or a control that re-enables itself between renders).
+
+#### ✅ The pattern (applies to every mutation control)
+
+```tsx
+const saveMutation = useSaveSomethingMutation();
+
+async function handleSave(input: SaveInput) {
+  if (saveMutation.isPending) return; // 1. re-entry guard
+
+  try {
+    await saveMutation.mutateAsync(input);
+    await queryClient.invalidateQueries({ queryKey: somethingKeys.all });
+    toast.success('Saved');
+  } catch (error) {
+    toast.error(explainGraphqlErrorMessage(/* … */));
+  }
+}
+
+// 2. disable + pending feedback
+<Button disabled={saveMutation.isPending} onClick={() => void handleSave(input)}>
+  {saveMutation.isPending ? 'Saving…' : 'Save'}
+</Button>;
+```
+
+The exact same `disabled={mutation.isPending}` + handler guard applies regardless of the control — a `DropdownMenuItem`, an `AlertDialogAction`, an icon button, or a row action:
+
+```tsx
+<DropdownMenuItem
+  disabled={rejectMutation.isPending}
+  onSelect={() => void handleReject(row)}
+>
+  Reject
+</DropdownMenuItem>;
+```
+
+> **Watch the surfaces that dismiss on activation** (dropdown/menu item, popover, dialog action). They feel one-shot because the surface closes — but reopening it while the request is in flight re-enables the control. They need the guard just as much as a persistent button.
+
+#### Rules
+
+| Rule | Why |
+| --- | --- |
+| Bind `disabled` to `mutation.isPending` on every control that calls `mutate`/`mutateAsync` | A disabled control can't be re-activated — the first line of defense |
+| Add `if (mutation.isPending) return;` at the top of the handler | Belt-and-suspenders for re-entry the `disabled` prop misses (keyboard, programmatic, surfaces that re-enable) |
+| Scope per-row state with `mutation.variables` when one hook drives many rows | `mutation.variables?.id === row.id && mutation.isPending` disables only the in-flight row, not the whole table |
+| Show pending feedback (spinner, "Saving…", `LoadingChip`) with the disabled state | A control that just goes dead reads as broken; tell the user it's working |
+| Forms: `disabled={form.formState.isSubmitting || mutation.isPending}` | Same double-submit class of bug, on forms |
+
 ---
 
 ## 12. Suspense Pattern (Concurrent React / App Router)
@@ -1091,6 +1146,7 @@ Real features often combine multiple patterns:
 | Hydration-unstable UI                           | Console errors, visual flicker, SEO issues       | Follow hydration safety rules                  |
 | `useState` for derived values                   | Creates sync bugs and extra re-renders           | Compute inline or `useMemo`                    |
 | Multiple `useState` for related state           | Impossible state combinations                    | `useReducer` with explicit states              |
+| Mutation-triggering action left enabled while pending | Double-fires the mutation (duplicate writes, races) on fast re-click or menu reopen | Disable on `mutation.isPending` **and** guard the handler with `if (mutation.isPending) return;` |
 
 ---
 
@@ -1188,3 +1244,12 @@ Use `Field` wrappers consistently across all forms. Do not use plain `<label>` d
 | Align `Field.Label htmlFor` with input `id` | Accessibility requirement |
 
 Applies to `Input`, `DebounceInput`, `Textarea`, and any other field control used in forms.
+
+---
+
+## Related References
+
+- `references/state-management.md` — decision guide for which state tool a pattern should use
+- `references/react-hooks.md` — memoization discipline inside these patterns
+- `references/reducer-context.md` — scaling the Provider pattern with reducers and split contexts
+- `references/folder-structure.md` — where pattern code lives in the feature tree

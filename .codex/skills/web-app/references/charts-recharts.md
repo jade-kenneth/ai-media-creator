@@ -180,3 +180,11 @@ if (!data.length || data.every((d) => d.value === 0)) {
 - Do not skip the empty state.
 - Do not skip `accessibilityLayer` on the root chart element.
 - Do not use pie charts for > 5 categories or for time-series data.
+
+---
+
+## Related References
+
+- `references/code-splitting.md` — charts are heavy imports; load them per the heavy-client-imports non-negotiable
+- `references/responsive-design.md` — container sizing and dense-content rules for chart layouts
+- `references/accessibility.md` — accessible labels and color-independent communication

@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Mutation, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   RegisterPushTokenInput,
   UnregisterPushTokenInput,
@@ -17,7 +18,7 @@ export class PushTokensResolver {
   @Mutation('registerPushToken')
   @UseGuards(GraphqlAuthGuard)
   registerPushToken(
-    @Args('input') input: RegisterPushTokenInput,
+    @ServiceValidatedArgs('input') input: RegisterPushTokenInput,
     @CurrentUser() user: AuthenticatedUser,
     @CurrentTenant() tenantId?: string,
   ): Promise<boolean> {
@@ -27,7 +28,7 @@ export class PushTokensResolver {
   @Mutation('unregisterPushToken')
   @UseGuards(GraphqlAuthGuard)
   unregisterPushToken(
-    @Args('input') input: UnregisterPushTokenInput,
+    @ServiceValidatedArgs('input') input: UnregisterPushTokenInput,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<boolean> {
     return this.pushTokensService.unregisterPushToken(input, user.id);

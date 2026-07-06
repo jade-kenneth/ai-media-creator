@@ -8,6 +8,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import { CurrentTenant } from 'src/common/decorators/current-tenant.decorator';
 import { LoaderFactory } from 'src/common/batch/loader-registry';
 import type {
@@ -42,7 +43,7 @@ export class AnnouncementsResolver {
   @UseGuards(GraphqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async createAnnouncement(
-    @Args('input') input: CreateAnnouncementInput,
+    @ServiceValidatedArgs('input') input: CreateAnnouncementInput,
     @CurrentUser() user: AuthenticatedUser,
     @CurrentTenant() tenantId: string,
   ): Promise<Announcement> {
@@ -116,7 +117,7 @@ export class AnnouncementsResolver {
   @Roles(UserRole.ADMIN)
   async updateAnnouncement(
     @Args('id') id: string,
-    @Args('input') input: UpdateAnnouncementInput,
+    @ServiceValidatedArgs('input') input: UpdateAnnouncementInput,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<Announcement> {
     return this.announcementsService.updateAnnouncement(id, input, user.id);

@@ -799,3 +799,11 @@ For a clean and maintainable TypeScript codebase, adopt these as defaults:
 | **Payload validation** | Apply exact object checks where field shape matters |
 | **Assertions** | Use `asserts` functions for required nullable fields (GraphQL, API) |
 | **Casting (`as`)** | Only at validated boundaries, branding, or proven invariants — never to silence errors |
+
+---
+
+## Related References
+
+- `references/eslint-prettier.md` — lint rules that enforce these standards mechanically
+- `references/graphql-patterns.md` — typed operations and result contracts these utilities support
+- `references/reducer.md` — typed action/state modeling applied in practice

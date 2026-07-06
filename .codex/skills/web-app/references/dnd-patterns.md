@@ -184,3 +184,10 @@ Roll back to the previous items state in the mutation `onError` callback.
 - Do not omit `KeyboardSensor` — keyboard reordering is required for accessibility.
 - Do not use `CSS.Transform.toString` in `className` — apply it via `style.transform` only.
 - Do not call `setItems` and `mutate` separately (race condition) — compute the new array once, use it for both.
+
+---
+
+## Related References
+
+- `references/caching.md` — § Optimistic UI Rules for persisting reorder to the server with rollback
+- `references/accessibility.md` — keyboard operability for sortable interactions

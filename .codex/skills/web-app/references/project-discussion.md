@@ -15,11 +15,28 @@ Keep answers grounded in the actual stack and reference the correct reference do
 | Data fetching / GraphQL | `references/graphql-patterns.md` |
 | Toast / notifications | `references/notifications-toast.md` |
 | Date formatting | `references/date-handling.md` |
+| Forms / validation / react-hook-form | `references/forms.md` |
+| File or image upload fields / presigned URLs | `references/upload-fields.md` |
 | Rich text / Tiptap | `references/tiptap-richtext.md` |
 | Drag and drop | `references/dnd-patterns.md` |
 | Charts | `references/charts-recharts.md` |
 | Error handling | `references/error-boundaries.md` |
 | Zustand store | `references/zustand-patterns.md` |
+| TypeScript typing question | `references/typescript-patterns.md` |
+| Pure TypeScript unit tests / Node test runner | `references/testing.md` |
+| React component architecture | `references/react-patterns.md` |
+| Memoization (`useCallback` / `useMemo`) | `references/react-hooks.md` |
+| SSR / hydration / rendering strategy | `references/nextjs-performance-seo.md` |
+| SEO, metadata, sitemap, social previews | `references/nextjs-performance-seo.md` |
+| Responsive layout / theming / styling | `references/responsive-design.md` |
+| Accessibility | `references/accessibility.md` |
+| Security concern | `references/security.md` |
+| Analytics / tracking | `references/analytics-ga4-gtm.md` |
+| Browser support / cross-browser bug | `references/browser-compatibility.md` |
+| Lint / formatting | `references/eslint-prettier.md` |
+| Dependency / upgrade question | `references/dependency-management.md` |
+
+For anything not listed here, use the grouped quick reference map in `SKILL.md` — it covers every reference doc.
 
 ## Response Format
 

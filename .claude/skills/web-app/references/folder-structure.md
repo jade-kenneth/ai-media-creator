@@ -387,3 +387,11 @@ This version favors:
 - centralized shared hooks, types, and utilities
 
 It is generic enough for similar admin or dashboard applications while still matching the structure patterns already present in the current codebase.
+
+---
+
+## Related References
+
+- `references/react-patterns.md` — § Colocation Pattern (feature-first organization)
+- `references/graphql-patterns.md` — § File Structure for the data-fetching layer
+- `references/core-principles.md` — instruction priority and the pattern-consistency rule

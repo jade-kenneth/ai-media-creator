@@ -725,3 +725,11 @@ useEffect(() => {
 - Every delayed `URL.revokeObjectURL` has an unmount fallback.
 - Every `addEventListener` is removed or uses an aborted `AbortSignal`.
 - Every observer/subscription has `disconnect`, `unsubscribe`, or equivalent cleanup.
+
+---
+
+## Related References
+
+- `references/state-management.md` — choose the right state tool before optimizing it
+- `references/reducer.md` — when scattered `useState` + memoization pressure means you need a reducer
+- `references/react-patterns.md` — the component patterns these hook rules serve

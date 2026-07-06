@@ -569,3 +569,11 @@ Code splitting is about:
 3. **Component-level splitting** — charts, editors, maps below the fold
 4. **User-triggered splitting** — modals, drawers, export tools
 5. **Measure before and after** — always verify the split helped
+
+---
+
+## Related References
+
+- `references/core-web-vitals.md` — the metrics (LCP, TBT) splitting decisions must improve, not just move
+- `references/nextjs-performance-seo.md` — Next.js `next/dynamic` usage and rendering strategy context
+- `references/tiptap-richtext.md`, `references/charts-recharts.md` — the canonical heavy-import consumers in this app

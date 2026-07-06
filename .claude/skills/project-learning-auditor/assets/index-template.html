@@ -251,6 +251,52 @@
         background: var(--green-soft);
         color: var(--green);
       }
+      /* Initiative cards (§14/§15): forward-looking safe wins, not a
+         severity. Blue reads as "opportunity/idea", distinct from red/amber/green
+         risk + strength badges. .badge-meta carries track/goal/effort/value/
+         non-breaking chips. */
+      .badge-initiative {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+      .badge-meta {
+        background: var(--grey-soft);
+        color: var(--muted);
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 600;
+      }
+      .badge-fixed {
+        background: var(--green-soft);
+        color: var(--green);
+        border: 1px solid var(--green);
+      }
+      /* A fixed finding stays visible (never hidden/summarized) but is visually
+         resolved: its original priority badge is struck through and the card is
+         de-emphasised so open findings still draw the eye first. */
+      .badge-was {
+        text-decoration: line-through;
+        opacity: 0.65;
+      }
+      .card.audit.fixed {
+        opacity: 0.82;
+        border-left: 4px solid var(--green);
+      }
+      .card.audit.fixed .head h3 {
+        text-decoration: line-through;
+        text-decoration-color: var(--green);
+        text-decoration-thickness: 1px;
+      }
+      .fix-note {
+        background: var(--green-soft);
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin: 8px 0 0;
+        font-size: 13px;
+      }
+      .fix-note strong {
+        color: var(--green);
+      }
       .file-ref {
         font-family: var(--mono);
         font-size: 12px;
@@ -888,13 +934,18 @@
         <a href="#mental-model">Mental model</a>
         <a href="#architecture">Architecture</a>
         <a href="#tech-stack">Tech stack</a>
+        <a href="#js-fundamentals">JS fundamentals</a>
         <a href="#frontend">Frontend</a>
         <a href="#backend">Backend</a>
         <a href="#database">Database</a>
         <a href="#flows">Flows</a>
         <a href="#old-vs-new">Old vs modern</a>
+        <a href="#optimization">Optimization</a>
+        <a href="#uiux">UI/UX</a>
         <a href="#audit">Audit</a>
         <a href="#strengths">Strengths</a>
+        <a href="#initiatives">Initiatives</a>
+        <a href="#eng-initiatives">Eng initiatives</a>
         <a href="#test">Test yourself</a>
         <a href="#path">Learning path</a>
         <!-- PLA:TOPIC_NAV:start -->
@@ -910,9 +961,12 @@
         <!-- PLA:SUMMARY
       Replace with stat cards (.grid.cols-4 > .stat) for: files scanned, apps
       detected, architecture, tech stack, frontend/backend/database pattern
-      counts, and a count row of badges for P1/P2/P3/STRENGTH. Then two cards:
-      "Top 5 concepts to learn" and "Top 5 risks to fix first". Numbers from
-      data/audit-findings.json.summary. -->
+      counts, and a count row of badges for P1/P2/P3/STRENGTH plus a
+      "💡 N initiatives" tally (summary.counts.initiative), a
+      "🚀 N engineering initiatives" tally
+      (summary.counts.engineering_initiative), and the "✅ N fixed" tally. Then
+      two cards: "Top 5 concepts to learn" and "Top 5 risks to fix first".
+      Numbers from data/audit-findings.json.summary. -->
       </section>
 
       <section id="mental-model">
@@ -927,38 +981,76 @@
 
       <section id="tech-stack">
         <h2><span class="num">§3</span> Tech stack</h2>
-        <!-- PLA:TECH_STACK — table: technology · where · what it does · why · analogy · related files. -->
+        <!-- PLA:TECH_STACK — overview table (technology · layer · where configured ·
+             what it does · why · analogy · related files), THEN one per-technology
+             deep-dive .card per CORE tech (each ENDING with a per-card AI tutor box
+             scoped to that tech), THEN a "how the stack connects" .flow strip.
+             See references/13-tech-stack.md. -->
+      </section>
+
+      <section id="js-fundamentals">
+        <h2><span class="num">§4</span> JavaScript fundamentals</h2>
+        <!-- PLA:JS_FUNDAMENTALS — core-topics table (variables, objects, arrays,
+             functions, async, etc.) grounded in real path:line, THEN a few grouped
+             explainer .cards, THEN ONE section-level AI tutor box (.topic-chat, NOT
+             inside a .card). Core topics only. See references/14-js-fundamentals.md. -->
       </section>
 
       <section id="frontend">
-        <h2><span class="num">§4</span> Frontend deep dive</h2>
+        <h2><span class="num">§5</span> Frontend deep dive</h2>
         <!-- PLA:FRONTEND — pattern cards (.card), each ENDING with a per-card AI tutor
              box (.topic-chat scoped to that card). See references/03-frontend.md. -->
       </section>
 
       <section id="backend">
-        <h2><span class="num">§5</span> Backend deep dive</h2>
+        <h2><span class="num">§6</span> Backend deep dive</h2>
         <!-- PLA:BACKEND — pattern cards, each ENDING with a per-card AI tutor box
              (.topic-chat scoped to that card). See references/04-backend.md. -->
       </section>
 
       <section id="database">
-        <h2><span class="num">§6</span> Database</h2>
+        <h2><span class="num">§7</span> Database</h2>
         <!-- PLA:DATABASE — filing-cabinet analogy, entity list, relationship map. -->
       </section>
 
       <section id="flows">
-        <h2><span class="num">§7</span> Full-stack flows</h2>
+        <h2><span class="num">§8</span> Full-stack flows</h2>
         <!-- PLA:FLOWS — numbered traces + embedded .flow animated diagrams. -->
       </section>
 
       <section id="old-vs-new">
-        <h2><span class="num">§8</span> Old vs modern</h2>
+        <h2><span class="num">§9</span> Old vs modern</h2>
         <!-- PLA:OLD_VS_NEW — .compare blocks (.code-old / .code-new). -->
       </section>
 
+      <section id="optimization">
+        <h2><span class="num">§10</span> Optimization audit</h2>
+        <p class="lede">
+          Static performance signals for bundle size, mobile startup, API/database
+          cost, caching, assets, and build speed. These are evidence-based leads,
+          not runtime measurements.
+        </p>
+        <!-- PLA:OPTIMIZATION — scorecard/table + optimization cards for web bundle,
+             mobile startup, API/GraphQL, database, cache/network, assets, and build/CI.
+             Each card ends with a per-card AI tutor box. See references/15-optimization-audit.md. -->
+      </section>
+
+      <section id="uiux">
+        <h2><span class="num">§11</span> UI/UX audit</h2>
+        <p class="lede">
+          How the interface behaves while the user waits, fails, taps twice, or
+          navigates — loading and disabled states, error and empty states, feedback,
+          accessibility, and forms. Evidence-based leads, not usability testing.
+        </p>
+        <!-- PLA:UIUX — scorecard/table + UI/UX cards for interaction safety
+             (double-submit / spam clicks), loading & pending states, error & empty
+             states, feedback & confirmation, accessibility, forms & validation, and
+             responsiveness. Lead with any double-submit finding. Each card ends with a
+             per-card AI tutor box. See references/16-uiux-audit.md. -->
+      </section>
+
       <section id="audit">
-        <h2><span class="num">§9</span> Best-practices audit</h2>
+        <h2><span class="num">§12</span> Best-practices audit</h2>
         <p class="lede">
           Findings are grounded in real files. Heuristic findings are marked
           low/medium confidence — confirm before acting.
@@ -976,21 +1068,65 @@
           <button class="chip" data-filter="p3" aria-pressed="false">
             P3 Low
           </button>
+          <button class="chip" data-filter="fixed" aria-pressed="false">
+            ✅ Fixed
+          </button>
         </div>
         <div id="audit-list">
           <!-- PLA:AUDIT — one .card.audit.<p1|p2|p3> per finding from audit-findings.json,
                each ENDING with a per-finding AI tutor box (.topic-chat scoped to that
-               finding). See references/08-audit-and-strengths.md. -->
+               finding). A FIXED finding is NOT removed or collapsed into a summary —
+               keep its card with class .card.audit.<p1|p2|p3>.fixed, a green FIXED badge
+               beside its struck-through original priority badge, and a .fix-note saying
+               what changed + where (path:line) and any resulting STRENGTH.
+               See references/08-audit-and-strengths.md. -->
         </div>
       </section>
 
       <section id="strengths">
-        <h2><span class="num">§10</span> Strengths to copy</h2>
+        <h2><span class="num">§13</span> Strengths to copy</h2>
         <!-- PLA:STRENGTHS — one .card.audit.strength per STRENGTH finding. -->
       </section>
 
+      <section id="initiatives">
+        <h2><span class="num">§14</span> Feature enhancement initiatives</h2>
+        <p class="lede">
+          Safe wins for features that already work: small, non-breaking,
+          low-complexity ways to make them more useful, more effective, or better at
+          retaining users. Ranked by value vs effort — quick wins first. Each builds
+          on an existing implementation; nothing here changes a contract or needs a
+          migration.
+        </p>
+        <!-- PLA:INITIATIVES — one .card per initiative (badge-initiative + badge-meta
+             chips for goal/effort/value/non-breaking). Use a .code-old "Current" panel
+             beside a .code-new "Enhanced" (additive) panel when a sketch helps. Rank by
+             value vs effort, quick wins first; surface any retention initiative
+             prominently. Each card ends with a per-card AI tutor box. Folded into
+             audit-findings.json as priority "INITIATIVE", category "feature",
+             breaking:false. See references/17-feature-initiatives.md. -->
+      </section>
+
+      <section id="eng-initiatives">
+        <h2><span class="num">§15</span> Engineering & platform initiatives</h2>
+        <p class="lede">
+          Safe platform wins derived from the project's objective and what already
+          exists: CI/CD, migrations, automation, AI, and third-party integrations.
+          Quick wins first.
+        </p>
+        <!-- PLA:ENG_INITIATIVES — one .card per engineering initiative
+             (badge-initiative + badge-meta chips for track/goal/effort/value/
+             non-breaking). Use optional .code-old "Current" and .code-new
+             "Proposed" panels when a config/script sketch helps, with Proposed
+             visibly additive. Group by track, lead each track with its quick win,
+             park L/breaking work under bigger bets, and end each card with a
+             per-card AI tutor box. Folded into audit-findings.json as priority
+             "INITIATIVE", category "engineering", track, goal, breaking:false,
+             and counted at summary.counts.engineering_initiative. See
+             references/19-engineering-initiatives.md. -->
+      </section>
+
       <section id="test">
-        <h2><span class="num">§11</span> Test yourself</h2>
+        <h2><span class="num">§16</span> Test yourself</h2>
         <p class="lede">Answers are hidden — try first, then reveal.</p>
         <!-- PLA:TEST — questions, each with <details><summary>Show answer</summary>…</details>. -->
         <div class="test-gen">
@@ -1008,12 +1144,12 @@
       </section>
 
       <section id="path">
-        <h2><span class="num">§12</span> Learning path</h2>
+        <h2><span class="num">§17</span> Learning path</h2>
         <!-- PLA:LEARNING_PATH — <ol class="path"> of concrete, file-referencing steps. -->
       </section>
 
       <section id="topics">
-        <h2><span class="num">§13</span> Topic deep dives</h2>
+        <h2><span class="num">§18</span> Topic deep dives</h2>
         <p class="lede">
           Focused, on-demand explanations of specific topics — added with
           <code>project-learning-auditor &lt;topic&gt;</code>. Each is grounded in
@@ -1168,7 +1304,7 @@
 
         // ---- Test yourself: generate fresh questions grounded in THIS repo ----
         function genGrounding() {
-          var ids = ['summary', 'architecture', 'frontend', 'backend', 'database', 'old-vs-new', 'audit'];
+          var ids = ['summary', 'architecture', 'tech-stack', 'js-fundamentals', 'frontend', 'backend', 'database', 'old-vs-new', 'optimization', 'uiux', 'audit'];
           var out = '';
           ids.forEach(function (id) {
             var el = document.getElementById(id);

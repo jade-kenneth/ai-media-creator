@@ -1,5 +1,7 @@
 # API Standards
 
+There is currently no dedicated `api-app` skill. Until one exists, this file and `apps/app-api/CLAUDE.md` are the API implementation standard and the place to capture reusable API/NestJS/GraphQL lessons.
+
 ## Pattern Consistency
 
 - Follow the existing codebase structure, naming, data-flow, and module/resolver/service/repository patterns.
@@ -114,6 +116,13 @@ input XSortInput {
 }
 ```
 
+## Pagination Rules
+
+- Root GraphQL `Query` fields that can grow with tenant or user data must return a concrete `XConnection!`, not an unbounded `[X!]!`.
+- Every cursor or offset paginated repository read must use the shared page-size policy from `src/libs/repository.ts` (`DEFAULT_PAGE_SIZE`, `MAX_PAGE_SIZE`, `clampPageSize`). Do not hand-roll local max/min page-size logic.
+- Dedicated `searchByX` queries may keep their flat list shape, but their `first` argument must be clamped with `clampPageSize(first, DEFAULT_SEARCH_LIMIT)` before reaching repository search.
+- Flat `[X!]!` root lists are allowed only when they are domain-bounded by a small enum/config set or are intentionally capped in the service. Add a short code comment explaining the bound.
+
 ## Search Rules
 
 No generic `search` field inside filter inputs. Implement search via the repository `search(...)` method and expose it as a dedicated query:
@@ -206,7 +215,17 @@ export class DomainService {
 ## Service Implementation
 
 - Inline small validation and normalization logic; do not create tiny helpers like `normalizeRequiredString`.
+- When multiple entry points share request/body or write-model rules, centralize those rules in a feature validation module or common pipe and pass the parsed result into persistence. Do not leave unused validation helpers beside write paths, and do not rely on ad-hoc controller defaults for required body fields.
+- GraphQL resolver `input` arguments must use the service-validated args decorator when SDL handles shape/nullability and the service owns business-rule validation. This keeps resolvers thin while making validation ownership visible to readers and static audits.
+- For presigned upload or file-ingest endpoints, validate more than presence: require an allowed storage namespace, reject traversal or absolute keys, and enforce a MIME/type allowlist before signing any write. Do not accept caller-supplied final object keys for shared folders; clients may provide upload intent such as namespace and content type, but the service must generate the final unique storage key and extension.
+- REST endpoints that perform side effects must declare authentication intent at the method boundary. For admin-only writes, pair `JwtAuthGuard` with `RolesGuard` and `@Roles(UserRole.ADMIN)`; do not rely on request-body validation as an authorization control.
 - In multi-step workflows with side effects, perform the side effect first and only persist terminal state after it succeeds. Handle rollback or transactional boundaries explicitly when ordering cannot change.
+
+## Scheduled Work
+
+- Recurring jobs must use the shared scheduler lock service and honor the runtime scheduler-enabled flag before doing work.
+- Once-only reminders or sweeps must persist a dedicated timestamp field so retries and multiple replicas do not re-send the same side effect indefinitely.
+- Stamp reminder timestamps only after the notification or side-effect path has been attempted successfully enough for the user-visible record to exist; log per-record failures and continue the sweep.
 
 ## Authentication
 
@@ -230,3 +249,17 @@ Rules:
 
 - Expose `GET /health` (REST) and `_health` query (GraphQL) backed by real runtime state.
 - Reflect MongoDB connection readiness: `ok` when connected, `degraded` otherwise.
+
+---
+
+## Fix & Enhancement Workflow Standard
+
+When the user invokes a **fix or an enhancement** (any "fix", "fix this", "enhance", "improve", "add", feature-request, or similar change request), follow this three-step loop every time:
+
+1. **Pull from Notion first.** Before touching code, use the **Notion MCP** to find the matching item in the project's task/bug tracker (the project's tracker database in Notion). Read its **Description**, **Root cause**, and **Fix** notes and treat them as the source of truth for scope. If the user names a symptom rather than a task, search the tracker to locate the item. **If no matching item exists, create one first** — a new task with the fitting `Task type` (🐞 Bug / 💬 Feature request / 💅 Polish), a clear **Task name**, a **Description** of the problem, an **Expected output / behavior** section that states what should be true after the bug or enhancement is done, and **Status** `In progress` — so every fix is tracked before any code changes.
+2. **Apply the fix** in the owning app only, following that app's established patterns. When it lands, update the Notion item's **Status** to `Done` (and add a short root-cause + fix note in the page body if one isn't there).
+3. **Enhance the relevant standard source.** After the fix is applied, capture the reusable lesson in the matching in-repo standard — `web-app` for admin/Next.js fixes, `mobile-app` for Expo/React Native fixes, and this file plus `apps/app-api/CLAUDE.md` for API/NestJS/GraphQL fixes until an API skill exists. **Then sync any cross-surface lesson to the matching standard.** `web-app` and `mobile-app` carry parallel reference files (e.g. `references/caching.md`, `graphql-patterns.md`, `react-patterns.md`, `typescript-patterns.md`). If the lesson is client-agnostic — it holds for both admin and mobile — add it to the matching reference in **both** skills, placing it in the equivalent section of each. If the lesson affects the GraphQL/API contract, validation, pagination, resolver/service/repository flow, generated types, or client operations, update the API docs and any affected client GraphQL/cache reference. The standard copies have diverged over time, so insert the guidance to match each file's structure rather than copy-pasting one over the other. Skip a sibling/surface only when the lesson is genuinely platform-bound (Expo/native-only, Next.js/SSR-only, or API-only), or when that surface has no parallel location.
+
+**Why:** The tracker already holds the diagnosed root cause and intended fix, so starting there avoids re-investigating and keeps scope tight. Feeding each fix back into the relevant standard turns one-off fixes into durable guidance — but only when written generically; otherwise the standard fills up with project trivia instead of transferable rules. Most caching, data-fetching, React, and TypeScript lessons apply to both clients, while API contract and validation lessons belong in the API docs until a dedicated API skill exists.
+
+**How to apply:** Notion → code → standard update, in that order, for every fix or enhancement. Write guidance **generically** — the rule or pattern itself, never this fix's domain, routes, filenames, or project labels — so it applies to *all* future cases, not just the one just fixed. Concrete/project-specific values stay in app source. Keep edits minimal and in the right place (`SKILL.md` non-negotiables + `references/*.md` for client skills; this file and `CLAUDE.md` for API standards). Before finishing, check whether another surface has a matching reference and mirror any cross-surface lesson there too.

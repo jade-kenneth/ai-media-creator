@@ -22,13 +22,14 @@ Do not:
 - Create effect loops by reading and writing the same state in one effect
 - Use arbitrary utility values or ad hoc inline styles when canonical classes or tokens exist
 - Build custom components before checking project registries and MCP
+- Re-implement a shared field/upload component's picker, preview, validation, or upload flow inline in a new form
 - Leave page titles, sitemap, robots, or structured data inconsistent with the actual site structure
 - Use CSR alone for SEO-critical pages when SSG, ISR, or SSR is the better fit
 - Use SSR for content that is fully static and better served with SSG or ISR
 
 ---
 
-Patterns to avoid across `apps/brgy-system-admin`. Each entry names the anti-pattern, explains the harm, and points to the correct alternative.
+Patterns to avoid across `apps/*-admin`. Each entry names the anti-pattern, explains the harm, and points to the correct alternative.
 
 ---
 
@@ -109,6 +110,39 @@ Do not pile multiple status treatments onto the same element when they all commu
 
 ---
 
+## Re-Implementing a Shared Field Component Inline
+
+When a shared field wrapper already exists for an input type (file/image upload, rich text, date picker, tag input, etc.), consume it through a form `Controller` instead of hand-rolling its picker, preview, validation, and side effects again inside the new form.
+
+```tsx
+// ❌ dialog re-implements the whole file-upload flow inline
+const [file, setFile] = useState<File | null>(null);
+const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+async function uploadToStorage(f: File) { /* signed URL + PUT, duplicated */ }
+<input type="file" ref={inputRef} hidden onChange={/* size/type checks */} />
+// ...bespoke preview + remove button + on-submit upload
+
+// ✅ reuse the shared field; hold its output value in the form
+<Controller
+  control={form.control}
+  name="imageUrl"
+  render={({ field }) => (
+    <SharedUploadField
+      value={field.value ?? ''}
+      onChange={field.onChange}
+      errorMessage={form.formState.errors.imageUrl?.message}
+      disabled={isBusy}
+    />
+  )}
+/>
+```
+
+**Why:** The bespoke copy drifts from the shared component — it misses later fixes (auth handling, path/prefix sanitization, size/type limits, accessible states) and re-introduces bugs the shared one already solved. It also duplicates the upload/side-effect logic the wrapper owns.
+
+**How to apply:** Store the field's resolved output (e.g. the uploaded URL) in the form via `Controller`, validate that value in the zod schema, and gate submit on it with `useWatch({ control, name })` (never `form.watch`, which bails out React Compiler memoization). Only build a new inline implementation when no shared wrapper covers the input type. See `references/upload-fields.md` for the full presigned-URL upload field recipe.
+
+---
+
 ## Anti-Pattern Reference
 
 | Anti-Pattern                                       | Why It's Harmful                                            | What to Do Instead                                           |
@@ -132,3 +166,14 @@ Do not pile multiple status treatments onto the same element when they all commu
 | Icon + badge + helper copy all repeat one state    | Visual noise, weaker hierarchy, harder scanning             | Keep one primary indicator; add others only for new meaning  |
 | Prop drilling through 3+ intermediate components   | Tight coupling, refactor-resistant                          | Context, composition, or co-location                         |
 | `useXxxQuery({ first: 1 })` to read `totalCount`  | Server resolves full entity fragment for 1 node; wasted I/O | Create a dedicated count-only query with no `edges` selector |
+| Re-implementing a shared field/upload flow inline  | Drifts from the shared component; misses its fixes, dupes logic | Reuse the shared field via `Controller`; store its output value |
+
+---
+
+## Related References
+
+- `references/caching.md` — correct invalidation and server-state patterns behind the fetch/reload entries
+- `references/upload-fields.md` — shared presigned-URL upload field recipe for the upload anti-pattern
+- `references/react-hooks.md` — effect-loop prevention details
+- `references/typescript-patterns.md` — fixing types properly instead of `as` / `!`
+- `references/folder-structure.md` — where feature logic belongs instead of global utilities

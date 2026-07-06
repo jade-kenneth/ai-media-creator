@@ -53,4 +53,6 @@ Do not create effect-driven render loops:
 
 - `references/reducer.md` — `useReducer` patterns for complex local state
 - `references/reducer-context.md` — `useReducer` + Context, split context, scaling patterns
+- `references/zustand-patterns.md` — external store for high-frequency shared global state
+- `references/caching.md` — server state belongs in query caches, never mirrored into client state
 - `references/react-patterns.md` — Provider pattern, HOC, custom hooks

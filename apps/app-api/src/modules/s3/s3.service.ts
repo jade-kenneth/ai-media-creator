@@ -2,6 +2,11 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'node:crypto';
+import {
+  getUploadExtensionForContentType,
+  validateCreatePresignedUploadUrlBody,
+} from './s3.validation';
 
 export interface S3ConfigSummary {
   bucket: string;
@@ -55,20 +60,14 @@ export class S3Service {
   }
 
   async createPresignedUploadUrl(
-    key: string,
+    uploadPathPrefix: string,
     contentType: string,
     expiresInSeconds: number,
   ): Promise<PresignedUploadUrlResponse> {
-    const normalizedKey = key.trim();
-    const normalizedContentType = contentType.trim();
-
-    if (!normalizedKey) {
-      throw new BadRequestException('key is required.');
-    }
-
-    if (!normalizedContentType) {
-      throw new BadRequestException('contentType is required.');
-    }
+    const validatedInput = validateCreatePresignedUploadUrlBody({
+      uploadPathPrefix,
+      contentType,
+    });
 
     if (
       !Number.isInteger(expiresInSeconds) ||
@@ -80,21 +79,33 @@ export class S3Service {
       );
     }
 
+    const extension = getUploadExtensionForContentType(
+      validatedInput.contentType,
+    );
+
+    if (!extension) {
+      throw new BadRequestException(
+        'contentType must be a supported image MIME type.',
+      );
+    }
+
+    const key = `${validatedInput.uploadPathPrefix}/${randomUUID()}.${extension}`;
+
     const command = new PutObjectCommand({
       Bucket: this.bucket,
-      Key: normalizedKey,
-      ContentType: normalizedContentType,
+      Key: key,
+      ContentType: validatedInput.contentType,
     });
     const uploadUrl = await getSignedUrl(this.client, command, {
       expiresIn: expiresInSeconds,
     });
 
     return {
-      key: normalizedKey,
+      key,
       expiresInSeconds,
       uploadUrl,
       publicUrl: this.publicBaseUrl
-        ? `${this.publicBaseUrl.replace(/\/+$/, '')}/${normalizedKey}`
+        ? `${this.publicBaseUrl.replace(/\/+$/, '')}/${key}`
         : null,
     };
   }

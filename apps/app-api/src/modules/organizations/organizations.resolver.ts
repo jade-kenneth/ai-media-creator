@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type { RepositoryFilter } from 'src/libs/repository';
 import type {
   Organization,
@@ -33,7 +34,7 @@ export class OrganizationsResolver {
   @UseGuards(GraphqlAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   async createOrganization(
-    @Args('input') input: CreateOrganizationInput,
+    @ServiceValidatedArgs('input') input: CreateOrganizationInput,
   ): Promise<Organization> {
     return this.organizationsService.create(input);
   }
@@ -43,7 +44,7 @@ export class OrganizationsResolver {
   @Roles(UserRole.SUPER_ADMIN)
   async updateOrganization(
     @Args('id') id: string,
-    @Args('input') input: UpdateOrganizationInput,
+    @ServiceValidatedArgs('input') input: UpdateOrganizationInput,
   ): Promise<Organization> {
     return this.organizationsService.update(id, input);
   }

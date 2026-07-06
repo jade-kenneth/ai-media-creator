@@ -96,6 +96,7 @@ A practical checklist for reviewing application security before release. Each se
 | Enforce allowed file types (allowlist MIME + extension) | 🟠 | Don't rely on extension alone — check magic bytes/MIME |
 | Enforce size limits | 🟡 | Set per-route limits (e.g., 5MB for images, 50MB for documents) |
 | Sanitize file names before storage | 🟠 | Strip path traversal (`../`), special characters, spaces |
+| Let the upload service generate storage object keys | 🟠 | Clients should send upload intent such as namespace and content type, not final shared-folder object paths |
 | Scan/isolate uploaded files | 🟡 | Store in isolated bucket, never serve from app origin |
 | Serve uploads from a separate domain/CDN | 🟡 | Prevents uploaded HTML/SVG from executing scripts on your origin |
 

@@ -92,7 +92,7 @@ async function uploadEditorImage(
     process.env.NEXT_PUBLIC_GRAPHQL_URL ?? 'http://localhost:3001/graphql';
   const apiBaseUrl = graphqlUrl.replace(/\/graphql\/?$/, '');
   const auth = await store.get('accessToken');
-  const key = `${uploadPathPrefix.replace(/^\/+|\/+$/g, '')}/${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+  const sanitizedUploadPathPrefix = uploadPathPrefix.replace(/^\/+|\/+$/g, '');
 
   const presignedResponse = await fetch(
     `${apiBaseUrl}/files/presigned-upload-url?expiresInSeconds=900`,
@@ -103,7 +103,7 @@ async function uploadEditorImage(
         ...(auth ? { Authorization: `Bearer ${auth}` } : {}),
       },
       body: JSON.stringify({
-        key,
+        uploadPathPrefix: sanitizedUploadPathPrefix,
         contentType: file.type,
       }),
     },

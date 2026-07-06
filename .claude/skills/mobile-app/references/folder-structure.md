@@ -45,3 +45,11 @@ Organize code by feature or domain.
 - Keep screen entry files focused on composition, guards, and layout.
 - Keep feature-specific GraphQL, query, and data usage close to the feature unless the app already centralizes that concern in a dedicated data layer.
 - Prefer `index.ts` only at folder boundaries with a clear public surface.
+
+---
+
+## Related References
+
+- `references/react-patterns.md` § Colocation Pattern — feature-first vs type-based organization with examples
+- `references/core-principles.md` — the pattern-consistency and simplicity rules that drive placement decisions
+- `references/graphql-patterns.md` — where GraphQL operations and typed hooks live per feature

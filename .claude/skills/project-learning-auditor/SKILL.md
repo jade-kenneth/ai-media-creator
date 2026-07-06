@@ -1,23 +1,23 @@
 ---
 name: project-learning-auditor
 description: >-
-  Scan the current project (read-only) and generate a self-contained HTML
-  learning guide at `reference/project-learning-audit/index.html` that explains
-  the project from beginner to full-stack level: mental-model analogy, full
-  architecture map, frontend patterns, backend patterns, database structure,
-  end-to-end flows, tech stack, old-vs-modern comparisons, a best-practices and
-  risk audit with P1/P2/P3/STRENGTH cards, strengths, HTML/CSS-only animated
-  flow diagrams, a comprehension test, and a project-specific learning path. Can
-  also run in topic mode: given one named topic, generate a focused deep-dive
-  section and append it to the existing guide without regenerating the whole page —
-  each topic gets its own per-topic comprehension test plus an opt-in AI tutor chat
-  for continuous, topic-scoped Q&A, powered by the user's OpenCode Zen key through a
-  local proxy (the key lives only in a git-ignored .env the user creates; never in
-  the HTML). Use whenever the user wants to learn, understand, audit for learning,
-  study, onboard onto, get an interactive guide for this codebase, or add/append a
-  deep-dive section about a specific topic to that guide — even if they
-  never say "auditor". Docs-only output under `reference/project-learning-audit/`:
-  it never edits app source, runs builds/tests, deploys, or commits.
+  Scan the current project read-only and generate a self-contained HTML learning
+  guide at `reference/project-learning-audit/index.html`: mental model,
+  architecture, tech stack, JavaScript fundamentals, frontend/backend/database
+  patterns, full-stack flows, old-vs-modern comparisons, optimization audit
+  (bundle size, mobile startup, API/GraphQL/database performance, caching, assets,
+  build/CI), UI/UX audit (in-flight action safety / double-submit, loading and
+  disabled states, error and empty states, accessibility, forms), feature
+  enhancement initiatives (non-breaking, low-complexity wins that make existing
+  features more useful, more effective, or better at retaining users),
+  engineering initiatives (CI/CD, migrations, automation, AI & third-party
+  integrations),
+  P1/P2/P3/STRENGTH audit cards, diagrams, comprehension tests, and a
+  learning path. Also supports topic deep-dive append mode with per-topic tests and
+  an opt-in local AI tutor. Use when the user wants to learn, onboard, understand,
+  audit for learning/risks/optimization, generate an interactive guide, or append a
+  specific topic section. Docs-only output under `reference/project-learning-audit/`;
+  never edits app source, runs builds/tests, deploys, or commits.
 ---
 
 # Project Learning Auditor
@@ -90,8 +90,10 @@ you did not do and why.
    If Python is unavailable, fall back to a manual scan following the rules in
    `references/00-scanning.md`. Read the resulting `manifest.json` — it lists
    every readable file (`class`, `ext`, `size`), the detected
-   `signals.markers`/`signals.dependencies`, the `skipped` list, and the
-   heuristic `audit_signals` (each `kind` + `path` + `line` + `note`).
+   `signals.markers`/`signals.dependencies`, `signals.initiative_surfaces`, the
+   `skipped` list, and the heuristic `audit_signals` (each `kind` + `path` +
+   `line` + `note`). The scanner also writes `manifest-summary.json` beside the
+   manifest; it includes `signals.initiative_surfaces` for cheap later reads.
    **Ground every later claim in this manifest.**
 
 2. **Bootstrap output.** Create the `reference/project-learning-audit/` tree (§3).
@@ -147,7 +149,7 @@ you did not do and why.
   `<!-- PLA:TOPICS:end -->` and a nav link before `<!-- PLA:TOPIC_NAV:end -->`.
   If the same `topic-<slug>` already exists, **replace it in place** (no
   duplicates). Remove the `.topics-empty` placeholder on the first topic. Re-stamp
-  the date. Touch nothing else in §0–§13.
+  the date. Touch nothing else in §0–§15.
 - Stay self-contained: reuse the page's existing CSS classes; add no new `<style>`
   or `<script>` or external assets. The only network use is the opt-in AI tutor
   calling the **local** proxy.
@@ -162,6 +164,10 @@ reference/project-learning-audit/
 ├── audit-report.md             [P-audit]    → references/08-audit-and-strengths.md
 ├── best-practices.md           [P-audit]
 ├── risky-patterns.md           [P-audit]
+├── optimization-report.md       [P-optimization] → references/15-optimization-audit.md
+├── uiux-report.md              [P-uiux]      → references/16-uiux-audit.md
+├── feature-initiatives.md      [P-initiatives] → references/17-feature-initiatives.md
+├── engineering-initiatives.md  [P-eng-initiatives] → references/19-engineering-initiatives.md
 ├── learning-guide.md           [P-flows/path]
 ├── concept-map.md              [P-architecture]
 ├── data/
@@ -186,9 +192,11 @@ and every Best-practices-audit finding card ships its own per-card AI tutor box)
 also in topic deep-dive mode (each topic gets its own tutor box). It is created once
 and never overwritten; the user supplies the key in a git-ignored `.env`.
 
-Phase order: **scan → mental model → architecture → frontend → backend →
-database → full-stack flows → old-vs-modern → audit & strengths → diagrams →
-comprehension & learning path → assemble index.html.**
+Phase order: **scan → mental model → architecture → tech stack → JavaScript
+fundamentals → frontend → backend → database → full-stack flows → old-vs-modern →
+optimization audit → UI/UX audit → audit & strengths → feature initiatives →
+engineering initiatives → diagrams → comprehension & learning path → assemble
+index.html.**
 
 `index.html` is required on every normal run. Do not skip it unless the user
 explicitly asks for a limited phase run (e.g. "just the audit findings").
@@ -227,9 +235,34 @@ Tag every audit card with one of:
 | `P2 MEDIUM` | Can cause maintainability, performance, UX, reliability, or scaling issues. |
 | `P3 LOW` | Small cleanup, consistency, readability, or learning improvement. |
 | `STRENGTH` | Good implementation worth copying elsewhere in the project. |
+| `INITIATIVE` | A safe, **non-breaking, low-complexity** opportunity. It has two flavors sharing one label: **feature initiatives** (§17: goal = `effectiveness`/`usefulness`/`retention`/`adoption`, category `feature`, IDs `INI-###`) and **engineering initiatives** (§19: `track` = `cicd`/`migration`/`automation`/`ai`/`third-party`, goal = `velocity`/`reliability`/`safety`/`reach`, category `engineering`, IDs `ENG-###`). Not a defect — an opportunity. Ranked by value-vs-effort, never by severity, and rendered in dedicated initiative sections, never in `#audit`. |
 
 Every card carries a `confidence` of `high` · `medium` · `low`, and a real
 `path:line`. Heuristic-only findings are `low` or `medium`.
+
+`INITIATIVE` findings always carry an `effort` (`S`/`M` only — never `L`), a
+`value` (`high`/`medium`/`low`), and `breaking: false`. An `L` idea is parked under
+"Out of scope (bigger bets)". Feature initiatives additionally carry a `goal`
+(`effectiveness` · `usefulness` · `retention` · `adoption`) and render in
+`#initiatives`; see `references/17-feature-initiatives.md`. Engineering initiatives
+add `category: "engineering"`, a `track`
+(`cicd` · `migration` · `automation` · `ai` · `third-party`), and a `goal`
+(`velocity` · `reliability` · `safety` · `reach`), and render in
+`#eng-initiatives`; see `references/19-engineering-initiatives.md`.
+
+**Proposal-grounding rule:** an engineering initiative proposes something that may
+not exist yet, but its *motivation* must cite real evidence — the `path:line` of the
+config/script/module it builds on or replaces, or the objective statement in the
+repo's own docs (README/requirements). Current-state claims still obey "No
+invention": what exists is cited; what doesn't gets `Not detected from current
+files.`
+
+**Fixed findings stay visible.** When a finding has been resolved in the code, never
+delete it or collapse it into a "Resolved" summary. Keep its card and mark it
+**FIXED** — a green FIXED badge beside its struck-through original priority badge,
+plus a `.fix-note` saying what changed and the `path:line` that proves it. Priority is
+the unchanging severity; `open`/`fixed` is a separate status. See
+`references/08-audit-and-strengths.md`.
 
 ---
 
@@ -251,6 +284,31 @@ Every card carries a `confidence` of `high` · `medium` · `low`, and a real
   proxy reads the user's OpenCode Zen key from a git-ignored `.env`. This is the
   page's *only* permitted network call, it is opt-in, and the page (and every
   comprehension test) stays fully usable when JS is off or the proxy is down.
+- **Voice output default.** If the generated guide includes any repo-wide
+  voice-output assistant (for example J.A.R.V.I.S. using the browser Web Speech
+  API), its voice picker must default to a UK English male voice when the browser
+  exposes one. Detect both `en-GB` language tags and UK/British voice names, prefer
+  likely male names such as Daniel, Arthur, George, Ryan, Oliver, Jamie, Thomas,
+  Guy, or "male", and keep high-quality neural/natural English voices as fallback.
+  Preserve the user's manual voice selection after they choose a different voice.
+- **Voice input UI stability.** If the generated guide includes browser speech
+  recognition, the microphone button's active state must follow the user's
+  listening session (`wantListening` / explicit start-stop intent), not raw
+  `SpeechRecognition.onstart` / `onend` events. Do not auto-reopen
+  `SpeechRecognition` after `onend`; that can make the laptop mic/privacy
+  indicator switch on and off nonstop. Prefer one continuous browser recognition
+  session per click (`continuous = true`) so a short pause does not end the user's
+  turn. If the session ends with text, wait about 3 seconds before submitting so
+  the assistant does not interrupt while the user is still forming the next phrase.
+  If the user taps the mic again during that grace period, cancel the pending answer
+  and preserve the transcript so they can continue. Browser `onend` and silence
+  timeout paths both use the 3-second grace delay; only an explicit second mic click
+  may submit immediately. Stop clicks should clear the active UI immediately.
+- **Interview feedback visuals.** If the generated guide includes a repo-wide
+  technical interview mode, each post-answer feedback card should show a concise
+  visual map of the model answer: a 3-7 line ASCII flow, layer map, or responsibility
+  map grounded in real repo files/patterns. Keep the visual on-screen only; spoken
+  replies should stay natural and should not read raw diagrams aloud.
 
 ---
 
@@ -261,12 +319,18 @@ Every card carries a `confidence` of `high` · `medium` · `low`, and a real
 | Scanning / fallback rules | `references/00-scanning.md` | `data/manifest.json` + evidence |
 | Mental model | `references/01-mental-model.md` | whole-project analogy section |
 | Architecture | `references/02-architecture.md` | architecture section + `concept-map.md` |
+| Tech stack (extensive) | `references/13-tech-stack.md` | tech-stack table + per-tech deep-dive cards + connect-the-stack flow |
+| JavaScript fundamentals | `references/14-js-fundamentals.md` | core JS-topics table + grouped explainer cards |
 | Frontend deep dive | `references/03-frontend.md` | frontend pattern cards |
 | Backend deep dive | `references/04-backend.md` | backend pattern cards |
 | Database | `references/05-database.md` | data-model section |
 | Full-stack flows | `references/06-fullstack-flows.md` | flow traces + `learning-guide.md` |
 | Old vs modern | `references/07-old-vs-modern.md` | comparison blocks |
+| Optimization audit | `references/15-optimization-audit.md` | bundle/API/database/caching/assets optimization section + `optimization-report.md` |
+| UI/UX audit | `references/16-uiux-audit.md` | interaction-safety/loading/error/accessibility/forms UI-UX section + `uiux-report.md` |
 | Audit & strengths | `references/08-audit-and-strengths.md` | `audit-findings.json` + `*.md` |
+| Feature initiatives | `references/17-feature-initiatives.md` | non-breaking, low-complexity enhancement section (effectiveness/usefulness/retention/adoption) + `feature-initiatives.md` |
+| Engineering initiatives | `references/19-engineering-initiatives.md` | CI/CD · migrations · automation · AI · third-party initiative section + `engineering-initiatives.md` |
 | Diagrams | `references/09-diagrams.md` | `diagrams/*.html` |
 | Comprehension & path | `references/10-comprehension-and-path.md` | test + learning path |
 | Assemble HTML | `references/11-html-assembly.md` | `index.html` |

@@ -14,6 +14,9 @@ import {
 
 import { SortDirection } from 'src/graphql/generated/graphql';
 import {
+  clampPageSize,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
   RepositoryFilter,
   type CursorPaginationInput,
   type FilterCondition,
@@ -89,7 +92,7 @@ class MongooseRepositoryList<
   async connection(
     pagination: CursorPaginationInput = {},
   ): Promise<RepositoryConnection<TSchema>> {
-    const first = normalizePositiveValue(pagination.first, 20);
+    const first = clampPageSize(pagination.first);
     const sort = normalizeSort(this.options.sort);
     const baseFilter = serializeRepositoryFilter(this.filter);
 
@@ -133,7 +136,7 @@ class MongooseRepositoryList<
     pagination: OffsetLimitPaginationInput = {},
   ): Promise<OffsetResult<TSchema>> {
     const page = normalizePositiveValue(pagination.page, 1);
-    const limit = normalizePositiveValue(pagination.limit, 20);
+    const limit = clampPageSize(pagination.limit);
     const offset = (page - 1) * limit;
     const query = serializeRepositoryFilter(this.filter);
     const sort = normalizeSort(this.options.sort);
@@ -472,14 +475,14 @@ export class MongooseRepository<TSchema extends object> implements Repository<
       },
       { $match: filter ? serializeRepositoryFilter(filter) : {} },
       {
-        $limit: 50,
+        $limit: MAX_PAGE_SIZE,
       },
       {
         $sort: {
           [sortPath]: 1,
         },
       },
-      { $limit: opts.limit ?? 10 },
+      { $limit: clampPageSize(opts.limit, DEFAULT_PAGE_SIZE) },
     ]);
 
     return documents;

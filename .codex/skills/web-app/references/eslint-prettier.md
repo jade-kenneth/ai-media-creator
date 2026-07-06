@@ -497,3 +497,10 @@ The goal is not to create a painful developer experience. The best lint config i
 | **Style**     | Keep minimal — Prettier handles formatting                                                                         |
 | **Severity**  | `error` for bugs, `warn` for judgment-based rules, never `error` for style preferences                             |
 | **Conflicts** | Always add `eslint-config-prettier` last to prevent formatting conflicts                                           |
+
+---
+
+## Related References
+
+- `references/typescript-patterns.md` — the type-level standards these lint rules enforce
+- `references/dependency-management.md` — upgrade workflow when bumping tooling versions

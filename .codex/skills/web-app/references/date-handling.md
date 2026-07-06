@@ -126,3 +126,10 @@ When a relative time display causes a hydration warning, move the component to `
 - Do not use `.toLocaleDateString()` / `.toLocaleTimeString()` in components — locale inconsistency causes hydration mismatches.
 - Do not import `moment` or `dayjs` — use `date-fns`.
 - Do not assume the API date string is always valid — always validate before formatting.
+
+---
+
+## Related References
+
+- `references/nextjs-performance-seo.md` — hydration-stable rendering; why locale/timezone formatting defers to the client
+- `references/browser-compatibility.md` — § 3 JavaScript and browser API watchouts (date parsing differences)

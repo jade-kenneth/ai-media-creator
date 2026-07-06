@@ -151,3 +151,11 @@ useEffect(() => {
 - Do not use `error.tsx` for expected empty states — those are `EmptyState` territory.
 - Do not omit `'use client'` from `error.tsx` — it is always required.
 - Do not add a nested `error.tsx` for every route segment — one root fallback is usually enough.
+
+---
+
+## Related References
+
+- `references/notifications-toast.md` — toast vs boundary: transient action errors vs render failures
+- `references/caching.md` — query error states that should render inline instead of throwing
+- `references/graphql-patterns.md` — the error names the client returns and boundaries may need to interpret

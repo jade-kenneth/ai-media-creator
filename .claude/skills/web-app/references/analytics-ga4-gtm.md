@@ -154,6 +154,42 @@ gtag('config', '${GA_MEASUREMENT_ID}');`}
 
 **What this does**: Loads the gtag.js library, defines the global `gtag()` function that pushes events to `dataLayer`, sets the initialization timestamp, and configures the GA4 property with the measurement ID.
 
+### Encapsulate the tag in one component (GA4-only apps)
+
+When GA4 gtag.js is the only tag (no GTM), do **not** inline the `<Script>` blocks in the root layout. Wrap them in a single dedicated component and render it once from the layout, so the layout stays thin and every guard lives in one place. The component owns three rules:
+
+- Read the measurement ID from an env var — never hardcode or scatter the raw ID.
+- Return `null` unless `NODE_ENV === 'production'` **and** the ID is set, so local dev and unconfigured environments load nothing.
+- Load both the `gtag.js` `<Script src>` and the `gtag('config', …)` init `<Script>` with `strategy="afterInteractive"`.
+
+```tsx
+// components/analytics/google-analytics.tsx
+import Script from 'next/script';
+
+const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+export function GoogleAnalytics() {
+  if (process.env.NODE_ENV !== 'production' || !measurementId) return null;
+
+  return (
+    <>
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+        strategy="afterInteractive"
+      />
+      <Script id="gtag-init" strategy="afterInteractive">
+        {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${measurementId}');`}
+      </Script>
+    </>
+  );
+}
+```
+
+Render it once in the root layout — `<GoogleAnalytics />` just before `</body>`. Because the component self-gates, the layout needs no conditional wrapper of its own.
+
 ---
 
 ## GTM Utility Module
@@ -448,6 +484,41 @@ gtag('consent', 'update', {
 
 GTM can also be configured to respect consent signals via its built-in consent mode.
 
+### Third-Party CMP Auto-Blocking
+
+An alternative to wiring consent signals by hand is a Consent Management Platform (CMP) that ships an **auto-blocking** script (e.g. consentmanager.net's `data-cmp-ab="1"` variant). It renders the banner and automatically blocks known tracking scripts until the visitor consents — no per-tag `gtag('consent', …)` calls needed.
+
+For it to block anything, it must **run before every tracking script**:
+
+- Load it with `next/script` `strategy="beforeInteractive"` — Next.js documents cookie-consent managers as the canonical `beforeInteractive` use case. This guarantees it initializes before an `afterInteractive` analytics tag regardless of DOM order, so DOM position between the two doesn't matter (though rendering the CMP first in the layout keeps intent obvious).
+- Wrap it in a dedicated component (mirrors the analytics component), and pass the vendor's `data-*` attributes straight through as props on `<Script>`.
+- Gate it with the same production guard as analytics, so no banner/blocking runs in local dev.
+
+```tsx
+// components/analytics/consent-manager.tsx
+import Script from 'next/script';
+
+export function ConsentManager() {
+  if (process.env.NODE_ENV !== 'production') return null;
+
+  return (
+    // App Router supports `beforeInteractive` from the root layout, and a CMP
+    // auto-blocker must run before any tracking script — this legacy
+    // pages-router lint rule is a false positive here.
+    // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
+    <Script
+      id="cmp-autoblocking"
+      strategy="beforeInteractive"
+      src="https://cdn.<vendor>/autoblocking/<config-id>.js"
+      data-cmp-ab="1"
+      /* …remaining vendor data-* attributes… */
+    />
+  );
+}
+```
+
+**Expect the lint warning**: `@next/next/no-before-interactive-script-outside-document` fires because the rule predates the App Router (it only whitelists `pages/_document.js`). `beforeInteractive` in the root layout is valid in the App Router — suppress the rule with an explanatory comment rather than downgrading to `afterInteractive`, which would let tracking scripts slip past the blocker.
+
 ---
 
 ## Common Pitfalls
@@ -477,3 +548,11 @@ GTM can also be configured to respect consent signals via its built-in consent m
 - `libs/ui/components/Cards.tsx` — Event tracking integration in product cards
 - `libs/utils/gtm.ts` — Centralized GTM/GA4 utility module
 - `libs/utils/index.ts` — Barrel export update
+
+---
+
+## Related References
+
+- `references/core-web-vitals.md` — third-party script cost; keep analytics off the critical rendering path
+- `references/nextjs-performance-seo.md` — Next.js script loading strategy
+- `references/security.md` — § 10 third-party services; consent and data handling

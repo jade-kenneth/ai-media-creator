@@ -30,44 +30,11 @@ Do not introduce a new implementation pattern when an established pattern alread
 
 ---
 
-## Implementation Workflow
+## Implementation Workflow and Pattern Selection
 
-When generating or modifying code:
+The canonical **Implementation workflow** and **Pattern selection guide** live in `SKILL.md`. This doc holds the principles behind them; do not maintain a second copy here — earlier duplicates drifted (e.g. an outdated rule that routed auth/layout gates to HOCs instead of client wrappers with `children`).
 
-1. Match existing project patterns first.
-2. Choose the simplest implementation that fits.
-3. Follow `references/folder-structure.md` when deciding where new code belongs.
-4. Keep code colocated by feature unless it is clearly shared.
-5. Keep route entry files thin and move domain logic into features.
-6. Use hooks, providers, and server-state tools consistently.
-7. Prefer registry components first, then MCP-discovered components, then custom implementations.
-8. Add loading, empty, and error states for async flows.
-9. Avoid hydration-unstable rendering.
-10. Prefer choices that protect Core Web Vitals.
-11. Use inline modals or drawers for create and edit flows unless a dedicated page is clearly justified.
-12. For performance changes, document the target metric and the reason.
-13. For security-sensitive work, verify against the project security guidance.
-14. For user-facing UI, verify responsiveness and accessibility.
-15. For server mutations, prefer targeted cache updates or invalidation over reload-based solutions.
-
----
-
-## Quick Pattern Selection Guide
-
-| Situation | Pattern |
-| --- | --- |
-| Reusable component logic | custom hook |
-| App-wide dependency or service | provider |
-| Page wrapper or auth/layout concern | HOC |
-| Flexible shared UI API | compound component |
-| Complex local state transitions | `useReducer` |
-| Shared structured state | `useReducer` + Context |
-| High-frequency shared global state | Zustand or another external store |
-| Server state fetching and mutations | TanStack Query, SWR, or Apollo Client |
-| Simple create/edit UX in an existing workflow | modal, drawer, or inline editor |
-| SEO-critical page with static content | SSG |
-| SEO-critical page with periodic refresh needs | ISR |
-| SEO-critical page with per-request data | SSR |
+When applying the workflow, the priorities in this doc decide conflicts: existing conventions beat safety-neutral preferences, and safety/correctness beats simplicity, performance, and reuse.
 
 ---
 
@@ -76,3 +43,12 @@ When generating or modifying code:
 Patterns are tools, not goals.
 
 Choose the pattern that improves clarity, preserves consistency, supports maintainability, and avoids unnecessary complexity.
+
+---
+
+## Related References
+
+- `SKILL.md` — canonical non-negotiables, pattern selection guide, and implementation workflow
+- `references/folder-structure.md` — where new code belongs
+- `references/state-management.md` — decision entry point for state tooling
+- `references/common-anti-patterns.md` — what violating these principles looks like in practice

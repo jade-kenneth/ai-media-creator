@@ -12,6 +12,7 @@
 8. [Common Mistakes and Anti-Patterns](#common-mistakes-and-anti-patterns)
 9. [Best Practice Guidelines](#best-practice-guidelines)
 10. [Quick Reference Table](#quick-reference-table)
+11. [Effect Cleanup for Browser Resources](#effect-cleanup-for-browser-resources)
 
 ---
 
@@ -125,7 +126,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   // Without useCallback, every consumer of AuthContext re-renders on every AuthProvider render
-  return <AuthContext.Provider value={{ logout }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ logout }}>{children}</AuthContext.Provider>
+  );
 }
 ```
 
@@ -255,7 +258,9 @@ return <MemoizedChart config={chartConfig} />;
 
 ```tsx
 // ❌ BAD — new object every render, React.memo cannot help
-return <MemoizedChart config={{ theme: 'dark', layout: 'grid', showLabels: true }} />;
+return (
+  <MemoizedChart config={{ theme: 'dark', layout: 'grid', showLabels: true }} />
+);
 ```
 
 #### 3. Derived State from Server Data
@@ -295,7 +300,9 @@ function CartProvider({ children }: { children: React.ReactNode }) {
     [items],
   );
 
-  return <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>
+  );
 }
 ```
 
@@ -520,7 +527,10 @@ const filtered = useMemo(
 );
 
 // ✅ CORRECT
-const filtered = useMemo(() => items.filter((i) => i.name.includes(query)), [items, query]);
+const filtered = useMemo(
+  () => items.filter((i) => i.name.includes(query)),
+  [items, query],
+);
 ```
 
 ---
@@ -606,11 +616,120 @@ useEffect(() => {
 
 ### Common Causes
 
-| Cause | Why It Loops | Fix |
-| --- | --- | --- |
-| `setState(value)` in effect that depends on `value` | Circular: read → write → re-render → read → write | Use functional updater, remove state from deps |
-| No dependency array | Effect runs every render, each `setState` triggers another | Add a dependency array |
-| Object/array in dependency array | New reference every render → effect always sees a "change" | `useMemo`, `useRef`, or use primitive deps |
-| Async fetch + `setState` without cleanup | Race conditions cause repeated updates | Use abort controller or an ignore flag |
+| Cause                                               | Why It Loops                                               | Fix                                            |
+| --------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------- |
+| `setState(value)` in effect that depends on `value` | Circular: read → write → re-render → read → write          | Use functional updater, remove state from deps |
+| No dependency array                                 | Effect runs every render, each `setState` triggers another | Add a dependency array                         |
+| Object/array in dependency array                    | New reference every render → effect always sees a "change" | `useMemo`, `useRef`, or use primitive deps     |
+| Async fetch + `setState` without cleanup            | Race conditions cause repeated updates                     | Use abort controller or an ignore flag         |
 
 **Rule of thumb:** If `useEffect` both reads and writes the same state variable, it will loop. Use the functional updater (`setState(prev => ...)`) to break the circular dependency.
+
+---
+
+## Effect Cleanup for Browser Resources
+
+Any hook or component that allocates browser resources must own their cleanup. This includes `setTimeout`, `setInterval`, `requestAnimationFrame`, `URL.createObjectURL`, observers, subscriptions, event listeners, and abortable async work.
+
+### Timers
+
+```tsx
+// ❌ leaks after unmount if the timeout has not fired
+useEffect(() => {
+  window.setTimeout(() => {
+    setOpen(false);
+  }, 1000);
+}, []);
+
+// ✅ cleanup cancels the pending timeout
+useEffect(() => {
+  const timeoutId = window.setTimeout(() => {
+    setOpen(false);
+  }, 1000);
+
+  return () => window.clearTimeout(timeoutId);
+}, []);
+```
+
+For callbacks outside `useEffect`, track timer handles in a ref and clear them from an unmount cleanup.
+
+```tsx
+const pendingTimersRef = useRef(new Set<number>());
+
+useEffect(() => {
+  const pendingTimers = pendingTimersRef.current;
+
+  return () => {
+    pendingTimers.forEach((timerId) => window.clearTimeout(timerId));
+    pendingTimers.clear();
+  };
+}, []);
+
+const runLater = useCallback(() => {
+  const timerId = window.setTimeout(() => {
+    pendingTimersRef.current.delete(timerId);
+    doWork();
+  }, 1000);
+
+  pendingTimersRef.current.add(timerId);
+}, []);
+```
+
+### Object URLs
+
+```tsx
+// ✅ revoke object URLs after use and on unmount if revocation is delayed
+const revokeTimersRef = useRef(new Map<number, string>());
+
+useEffect(() => {
+  const revokeTimers = revokeTimersRef.current;
+
+  return () => {
+    revokeTimers.forEach((objectUrl, timerId) => {
+      window.clearTimeout(timerId);
+      URL.revokeObjectURL(objectUrl);
+    });
+    revokeTimers.clear();
+  };
+}, []);
+```
+
+### Listeners and Observers
+
+```tsx
+useEffect(() => {
+  const controller = new AbortController();
+
+  window.addEventListener('resize', onResize, {
+    signal: controller.signal,
+  });
+
+  return () => controller.abort();
+}, [onResize]);
+```
+
+```tsx
+useEffect(() => {
+  const observer = new IntersectionObserver(handleEntries);
+  observer.observe(node);
+
+  return () => observer.disconnect();
+}, [handleEntries, node]);
+```
+
+### Review Checklist
+
+- Every `setTimeout` has `clearTimeout`.
+- Every `setInterval` has `clearInterval`.
+- Every `requestAnimationFrame` has `cancelAnimationFrame`.
+- Every delayed `URL.revokeObjectURL` has an unmount fallback.
+- Every `addEventListener` is removed or uses an aborted `AbortSignal`.
+- Every observer/subscription has `disconnect`, `unsubscribe`, or equivalent cleanup.
+
+---
+
+## Related References
+
+- `references/state-management.md` — choose the right state tool before optimizing it
+- `references/reducer.md` — when scattered `useState` + memoization pressure means you need a reducer
+- `references/react-patterns.md` — the component patterns these hook rules serve

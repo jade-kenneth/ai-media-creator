@@ -28,3 +28,11 @@ Always consider accessibility for every user-facing component and screen.
 | `accessibilityRole` set on interactive elements | `button`, `link`, `header`, `image`, etc. |
 | VoiceOver / TalkBack reading order is logical | Focus order matches visual order |
 | No color-only communication | Do not use color as the only indicator of state |
+
+---
+
+## Related References
+
+- `mobile-native-ui-design` › `references/icons.md` — dark-mode color tokens; hardcoded icon colors are a blocker
+- `references/responsive-and-theming.md` — light/dark contrast and theming that affects AA compliance
+- `references/layout-and-safe-areas.md` — safe-area handling so controls stay reachable and unobscured

@@ -8,6 +8,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import { LoaderFactory } from 'src/common/batch/loader-registry';
 import { CurrentTenant } from 'src/common/decorators/current-tenant.decorator';
 import type {
@@ -98,7 +99,7 @@ export class MembersResolver {
   @UseGuards(GraphqlAuthGuard, RolesGuard)
   @Roles(UserRole.MEMBER)
   async updateMyProfile(
-    @Args('input') input: UpdateMemberProfileInput,
+    @ServiceValidatedArgs('input') input: UpdateMemberProfileInput,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<MemberProfile> {
     return this.membersService.updateMyProfile(user.id, input);

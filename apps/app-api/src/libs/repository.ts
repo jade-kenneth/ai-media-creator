@@ -1,5 +1,19 @@
 import { Types } from 'mongoose';
 
+export const DEFAULT_PAGE_SIZE = 20;
+export const MAX_PAGE_SIZE = 100;
+
+export function clampPageSize(
+  value: number | undefined,
+  fallback = DEFAULT_PAGE_SIZE,
+): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return fallback;
+  }
+
+  return Math.min(MAX_PAGE_SIZE, Math.max(1, Math.trunc(value)));
+}
+
 export type FilterCondition<TEntity> = {
   equal?: TEntity;
   notEqual?: TEntity;

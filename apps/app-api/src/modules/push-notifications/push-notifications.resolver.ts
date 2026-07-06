@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Mutation, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import {
   UserRole,
   type SendTestPushNotificationInput,
@@ -20,7 +21,7 @@ export class PushNotificationsResolver {
   @UseGuards(GraphqlAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async sendTestPushNotification(
-    @Args('input') input: SendTestPushNotificationInput,
+    @ServiceValidatedArgs('input') input: SendTestPushNotificationInput,
   ): Promise<SendTestPushNotificationResult> {
     return this.pushNotificationsService.sendTestPush({
       title: input.title,

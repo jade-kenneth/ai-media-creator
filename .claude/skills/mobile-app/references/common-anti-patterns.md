@@ -1,6 +1,6 @@
 # Common Anti-Patterns
 
-Patterns to avoid across `apps/brgy-system-mobile`. Each entry names the anti-pattern, explains the harm, and points to the correct alternative.
+Patterns to avoid across `apps/*-mobile`. Each entry names the anti-pattern, explains the harm, and points to the correct alternative.
 
 ---
 
@@ -75,6 +75,37 @@ Do not stack multiple UI treatments that all communicate the same state unless e
 
 ---
 
+## Re-Implementing a Shared Field Component Inline
+
+When a shared field wrapper already exists for an input type (image/file picker, rich text, date picker, etc.), consume it through a form `Controller` instead of re-implementing its picker, preview, validation, and upload side effects again inside the new form/screen.
+
+```tsx
+// ❌ screen re-implements the whole image-pick + upload flow inline
+const [asset, setAsset] = useState<ImagePickerAsset | null>(null);
+async function uploadToStorage(a: ImagePickerAsset) { /* signed URL + PUT, duplicated */ }
+// ...bespoke launchImageLibraryAsync + size/type checks + preview + remove
+
+// ✅ reuse the shared field; hold its output value in the form
+<Controller
+  control={form.control}
+  name="imageUrl"
+  render={({ field }) => (
+    <SharedUploadField
+      value={field.value ?? ''}
+      onChange={field.onChange}
+      errorMessage={form.formState.errors.imageUrl?.message}
+      disabled={isBusy}
+    />
+  )}
+/>
+```
+
+**Why:** The bespoke copy drifts from the shared component — it misses later fixes (auth handling, path/prefix sanitization, size/type limits, permission and accessibility states) and re-introduces bugs the shared one already solved, while duplicating the upload logic the wrapper owns.
+
+**How to apply:** Store the field's resolved output (e.g. the uploaded URL) in the form via `Controller`, validate that value in the zod schema, and gate submit on it. Only build a new inline implementation when no shared wrapper covers the input type.
+
+---
+
 ## Anti-Pattern Reference
 
 | Anti-Pattern                                      | Why It's Harmful                                            | What to Do Instead                                           |
@@ -86,3 +117,4 @@ Do not stack multiple UI treatments that all communicate the same state unless e
 | Multiple `useState` for related values            | Impossible state combinations, inconsistent updates         | `useReducer` with typed actions                              |
 | `setState` inside `useEffect` on the same value   | Infinite re-render loop                                     | Use functional updater; see `react-hooks.md`                 |
 | `as` casts or `!` assertions to silence TypeScript| Masks real type errors, hides bugs                          | Fix the type; narrow properly                                |
+| Re-implementing a shared field/upload flow inline | Drifts from the shared component; misses its fixes, dupes logic | Reuse the shared field via `Controller`; store its output value |

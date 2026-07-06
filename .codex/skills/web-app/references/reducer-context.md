@@ -333,3 +333,11 @@ Too simple ←——————————————————→ Too comp
   useState    useReducer    useReducer     Zustand/Redux
   (local)     (local)       + Context      (global store)
                             ← HERE →
+
+---
+
+## Related References
+
+- `references/reducer.md` — reducer fundamentals this pattern builds on
+- `references/zustand-patterns.md` — where to go when the scaling limits here are hit
+- `references/react-patterns.md` — § Provider Pattern

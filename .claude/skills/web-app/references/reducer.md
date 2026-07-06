@@ -466,3 +466,11 @@ type FormState =
 If the hard part is understanding **how** state changes across many user actions → `useReducer`.
 
 If the hard part is just **storing** a few values → `useState`.
+
+---
+
+## Related References
+
+- `references/state-management.md` — when to reach for `useReducer` at all
+- `references/reducer-context.md` — sharing reducer state across a component subtree
+- `references/typescript-patterns.md` — § 4 discriminated unions for typed actions and state

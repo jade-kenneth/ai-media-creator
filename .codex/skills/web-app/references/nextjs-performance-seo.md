@@ -29,7 +29,10 @@ For user-facing pages:
 - Keep `sitemap.xml` and `robots.txt` aligned with the real route structure — generate from the actual site structure whenever possible.
 - Keep sitemap entries current and include useful metadata such as last modified dates when available.
 - Make sure `robots.txt` allows public content and blocks sensitive or non-SEO routes.
-- Open Graph, Twitter metadata, breadcrumbs, and JSON-LD should be added when they materially improve discoverability or sharing.
+- Set `metadataBase` once in the root layout — without it, every `openGraph`/`twitter` image and canonical URL resolves to `http://localhost:3000` and breaks in production.
+- **When a page is publicly shareable or indexable** (landing, marketing, legal, public content), it must declare `openGraph` + `twitter` with a 1200×630 image, and its `description` must match that page's audience. Internal/authenticated tools (admin, account pages) don't need social metadata. See § 2a. Social Sharing (Open Graph / Twitter).
+- Scope `robots: noindex` to the private **segment** layouts; never place it on the root layout (it silently de-indexes public pages and can suppress link previews).
+- Breadcrumbs and JSON-LD: add when they materially improve discoverability.
 
 ---
 
@@ -499,6 +502,56 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 - Include the page title and branding in the image
 - Test with: Facebook Sharing Debugger, Twitter Card Validator, LinkedIn Post Inspector
 
+### 2a. Social Sharing (Open Graph / Twitter) — required when a page is publicly shareable
+
+Any page that can be **shared on social media or indexed by search** (landing, marketing, legal, public content) must produce a complete preview card. Internal/authenticated tools (admin dashboards, account/settings pages) do not need this.
+
+**Three coupled requirements — they only work together:**
+
+1. **`metadataBase` (root layout, once).** Without it, relative `openGraph`/`twitter` image paths resolve to `http://localhost:3000` and break for every external crawler in production. Drive it from env with a production fallback:
+
+   ```tsx
+   // app/layout.tsx
+   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://example.com'),
+   ```
+
+2. **`openGraph` + `twitter` blocks.** Put the canonical site defaults in the root layout so public pages inherit them; override per page where the copy differs. Always include a 1200×630 image.
+
+   ```tsx
+   openGraph: {
+     type: 'website',
+     siteName: 'MyApp',
+     url: siteUrl,
+     title: 'MyApp',
+     description: siteDescription,
+     images: [{ url: '/images/og-image.png', width: 1200, height: 630, alt: 'MyApp' }],
+   },
+   twitter: {
+     card: 'summary_large_image',
+     title: 'MyApp',
+     description: siteDescription,
+     images: ['/images/og-image.png'],
+   },
+   ```
+
+3. **A real 1200×630 image.** Either a static `public/images/og-image.png`, or generate it in code with `app/opengraph-image.tsx` using `next/og` `ImageResponse` (no design tool needed). PNG or JPG, never WebP — some platforms can't read it.
+
+**Description must match the page's audience.** Don't let an admin/control-panel `description` leak onto a public share through inheritance — set product-facing copy on the public route (or on the root layout if the public site is the canonical surface).
+
+**Favicon / icon hygiene.** Never wire a multi-MB logo as the favicon or OG image. Use small file-based `app/icon.png` (~256px) and `app/apple-icon.png` (180px); Next.js emits the `<link>` tags automatically — no manual `icons` block pointing at a heavy asset.
+
+**Common failure modes (all silent — nothing errors):**
+
+| Symptom                                       | Cause                                                                          |
+| --------------------------------------------- | ------------------------------------------------------------------------------ |
+| No image/description in any share             | No `openGraph`/`twitter` declared at all                                        |
+| Image works locally, breaks in production     | `metadataBase` unset → `localhost` image URL                                    |
+| Public page not indexed / preview suppressed  | `robots: noindex` placed on the **root** layout instead of private segments    |
+| Cramped or cropped thumbnail                  | Square logo reused instead of a purpose-built 1200×630 card                     |
+| Wrong / admin-flavored description on a share  | Inherited a private `description`; not overridden on the public route          |
+
+**Verify after deploy.** Social platforms cache scrapes, so old/empty results persist until re-scraped. Confirm with the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/), [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/), and [X Card Validator](https://cards-dev.twitter.com/validator) — use "Scrape Again" to bust the cache.
+
 ### 3. Canonical URLs + `noindex` Rules
 
 ```tsx
@@ -528,6 +581,8 @@ export const metadata: Metadata = {
 | Account/settings pages         | Private user content                         |
 | Preview/draft pages            | Incomplete content                           |
 | Paginated list pages (page 2+) | Optional — use `canonical` to page 1 instead |
+
+**Scope `noindex` to the segment that owns the private area — never the root `app/layout.tsx`.** A root-level `noindex` blankets every public page (landing, legal) too, silently de-indexing them and risking suppressed link previews. Put `robots: { index: false, follow: false, nocache: true }` on the private **segment** layouts (e.g. `app/admin/layout.tsx`, `app/login/layout.tsx`, the super-admin layout) and leave public/marketing/legal routes indexable by default.
 
 ### 4. Structured Data (JSON-LD)
 
@@ -616,6 +671,50 @@ export default function robots(): MetadataRoute.Robots {
 }
 ```
 
+### 5b. Sitemap & Robots
+
+Ship `app/sitemap.ts` and `app/robots.ts` as the **single source of truth** for crawlability. Keep them aligned with the real route structure — when a public page is added or removed, update `sitemap.ts` in the same change.
+
+**Base URL.** Derive the origin from the same env value used for `metadataBase`; don't hardcode the domain in more than one place:
+
+```ts
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '<production-origin>';
+```
+
+It resolves correctly in production only if the env var is set in the deploy environment; otherwise it falls back to the literal default.
+
+**`sitemap.ts` lists only public, indexable routes.** Exclude:
+
+- Private/authenticated areas — they are `noindex` and disallowed.
+- Thin utility pages that must stay reachable but aren't worth indexing (e.g. an account-deletion form required by app-store policy).
+- Routes pulled from the public surface.
+- Empty route dirs with no `page.tsx`.
+
+Set a sensible `priority` and `changeFrequency` per entry (higher priority for the landing page, lower/yearly for rarely-changing legal pages).
+
+**`robots.ts`** allows `/`, disallows the private/authenticated segments, and references the sitemap:
+
+```ts
+import type { MetadataRoute } from 'next';
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '<production-origin>';
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      // authenticated/private segments
+      disallow: ['/admin/', '/login'],
+    },
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
+  };
+}
+```
+
+**`robots.txt` disallow ≠ de-indexing.** A disallowed URL can still be indexed if linked elsewhere. The real protection is `robots: { index: false, follow: false, nocache: true }` on the **private segment layouts** — treat `robots.txt` as crawl-budget hygiene layered on top of that, and keep both.
+
 ### 6. Semantic HTML + Heading Structure
 
 | Rule                       | Implementation                                                                                                                                                                                               |
@@ -692,3 +791,12 @@ Does the page need SEO indexing?
 | **ISR** | Product pages, content updated hourly/daily | `generateStaticParams` + `revalidate: N` |
 | **SSR** | Dashboards, user profiles, search results — fresh per request | `export const dynamic = 'force-dynamic'` |
 | **CSR** | Admin panels, authenticated dashboards, live editors — no SEO | `'use client'` + `next/dynamic({ ssr: false })` |
+
+---
+
+## Related References
+
+- `references/core-web-vitals.md` — metric-by-metric patterns behind these rules
+- `references/code-splitting.md` — implementation detail for deferring heavy client code
+- `references/date-handling.md` — hydration-safe date rendering
+- `references/error-boundaries.md` — route-level `error.tsx` / `global-error.tsx`

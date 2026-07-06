@@ -2,7 +2,7 @@
 
 ## Overview
 
-Client-side auth: tokens in localStorage with expiry envelopes, session loaded on mount, route protection via HOC. No Next.js `middleware.ts` involved.
+Client-side auth: tokens in localStorage with expiry envelopes, session loaded on mount, route protection via child client wrappers in route layouts. No Next.js `middleware.ts` involved.
 
 ---
 
@@ -175,7 +175,7 @@ The optional `onAuthenticated` callback fires once the session resolves to authe
 
 ## resolveGuardState — Pure Function
 
-Map the session discriminated union to the guard's three states. Keep this as a pure, testable function separate from the HOC.
+Map the session discriminated union to the guard's three states. Keep this as a pure, testable function separate from the wrapper component.
 
 ```ts
 type GuardState = 'loading' | 'unauthenticated' | 'authenticated';
@@ -191,7 +191,7 @@ export function resolveGuardState(session: Session): GuardState {
 
 ## RouteGuard Component — Loading + Redirect UI
 
-A single component handles both the loading spinner and the redirecting state. It renders while `withAuthGuard` is still checking or redirecting — prevents a flash of blank content.
+A single component handles both the loading spinner and the redirecting state. It renders while `AuthGuard` is still checking or redirecting — prevents a flash of blank content.
 
 ```tsx
 type RouteGuardState = 'loading' | 'unauthenticated';
@@ -211,54 +211,62 @@ export function RouteGuard({ state }: { state: RouteGuardState }) {
 
 ---
 
-## withAuthGuard HOC — Layout-Level Route Protection
+## AuthGuard Wrapper — Layout-Level Route Protection
 
-Apply at the **layout level**, not inside individual page components.
+Apply as a **child client wrapper inside the route layout**, not as an HOC around the layout export. This keeps `app/**/layout.tsx` as a Server Component while the auth logic remains in a `'use client'` file.
 
 ```tsx
-// features/auth/with-auth-guard.tsx
+// features/auth/auth-guard.tsx
 'use client';
 
-export function withAuthGuard<P extends object>(Component: ComponentType<P>) {
-  function GuardedComponent(props: P) {
-    const session = useSession();
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+import type { ReactNode } from 'react';
 
-    const guardState = resolveGuardState(session);
+export function AuthGuard({ children }: { children: ReactNode }) {
+  const session = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-    const callback = encodeURIComponent(`${pathname}?${searchParams}`);
-    const redirectTarget = `/login?callback=${callback}`;
+  const guardState = resolveGuardState(session);
 
-    useEffect(() => {
-      if (guardState !== 'unauthenticated') return;
-      router.replace(redirectTarget);
-    }, [guardState, redirectTarget, router]);
+  const callback = encodeURIComponent(`${pathname}?${searchParams}`);
+  const redirectTarget = `/login?callback=${callback}`;
 
-    // Render RouteGuard for both 'loading' and 'unauthenticated' states
-    if (guardState !== 'authenticated') {
-      return <RouteGuard state={guardState} />;
-    }
+  useEffect(() => {
+    if (guardState !== 'unauthenticated') return;
+    router.replace(redirectTarget);
+  }, [guardState, redirectTarget, router]);
 
-    return <Component {...props} />;
+  // Render RouteGuard for both 'loading' and 'unauthenticated' states
+  if (guardState !== 'authenticated') {
+    return <RouteGuard state={guardState} />;
   }
 
-  GuardedComponent.displayName = `withAuthGuard(${Component.displayName ?? Component.name ?? 'Component'})`;
-  return GuardedComponent;
+  return children;
 }
 ```
 
 ```tsx
 // app/admin/layout.tsx
-export default withAuthGuard(AdminLayout);
+import { AuthGuard } from '@/features/auth';
+import { AdminShell } from '@/features/admin-shell';
+
+export default function AdminLayout({ children }: { children: ReactNode }) {
+  return (
+    <AuthGuard>
+      <AdminShell>{children}</AdminShell>
+    </AuthGuard>
+  );
+}
 ```
+
+Do not put `'use client'` in `app/admin/layout.tsx` just to use the guard. The layout imports the client wrapper and passes React children through it, which is the supported App Router boundary pattern.
 
 ---
 
 ## Role-Based Guard
 
-Same HOC pattern, extends `resolveGuardState` with a role check:
+Use the same children-wrapper pattern and extend `resolveGuardState` with a role check:
 
 ```ts
 type RoleGuardState = GuardState | 'forbidden';
@@ -296,8 +304,18 @@ async function logout(router: AppRouterInstance) {
 - Do not put session fetching logic inside `AuthProvider` — it belongs in `useAuth`.
 - Do not check `user !== null` — check `session.status === 'authenticated'`.
 - Do not read localStorage directly outside the store module.
-- Do not guard individual page components — guard at the layout level with `withAuthGuard`.
+- Do not guard individual page components — guard at the layout level with `AuthGuard` / `SuperAdminGuard` child wrappers.
+- Do not wrap a route layout export with a client HOC. It forces the layout file into the client graph.
+- Do not mark App Router route layouts with `'use client'` unless the layout file itself contains browser hooks or event handlers.
 - Do not store tokens without expiry — stale tokens persist indefinitely otherwise.
 - Do not implement token refresh in individual query hooks — centralize in the HTTP client.
 - Do not call `store.clearSession()` without redirecting afterward.
-- Do not return `null` while redirecting in `withAuthGuard` — render `<RouteGuard>` to prevent a blank flash.
+- Do not return `null` while redirecting in auth guards — render `<RouteGuard>` to prevent a blank flash.
+
+---
+
+## Related References
+
+- `references/graphql-patterns.md` — auth middleware that injects session tokens into the GraphQL client
+- `references/zustand-patterns.md` — store patterns behind the token store interface
+- `references/security.md` — § 02 authentication, access, and API rules these patterns must satisfy

@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   AdminAccount,
   CreateAdminAccountInput,
@@ -30,7 +31,7 @@ export class AdminManagementResolver {
   @UseGuards(GraphqlAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   async createAdminAccount(
-    @Args('input') input: CreateAdminAccountInput,
+    @ServiceValidatedArgs('input') input: CreateAdminAccountInput,
     @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<AdminAccount> {
     return this.adminManagementService.createAdminAccount(
@@ -44,7 +45,7 @@ export class AdminManagementResolver {
   @Roles(UserRole.SUPER_ADMIN)
   async updateAdminAccount(
     @Args('id') id: string,
-    @Args('input') input: UpdateAdminAccountInput,
+    @ServiceValidatedArgs('input') input: UpdateAdminAccountInput,
   ): Promise<AdminAccount> {
     return this.adminManagementService.updateAdminAccount(id, input);
   }

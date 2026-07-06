@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   AuthPayload,
   LoginInput,
@@ -19,14 +20,14 @@ export class AuthResolver {
   @Mutation('registerMember')
   @Public()
   async registerMember(
-    @Args('input') input: RegisterMemberInput,
+    @ServiceValidatedArgs('input') input: RegisterMemberInput,
   ): Promise<AuthPayload> {
     return this.authService.registerMember(input);
   }
 
   @Mutation('login')
   @Public()
-  async login(@Args('input') input: LoginInput): Promise<AuthPayload> {
+  async login(@ServiceValidatedArgs('input') input: LoginInput): Promise<AuthPayload> {
     return this.authService.login(input);
   }
 

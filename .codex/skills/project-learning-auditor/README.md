@@ -16,15 +16,29 @@ reference/project-learning-audit/
 └── *.md                 ← supporting companions (audit, best-practices, etc.)
 ```
 
-The guide covers: mental-model analogy · full architecture map · tech stack ·
-frontend patterns · backend patterns · database structure · end-to-end flows ·
-old-vs-modern comparisons · a P1/P2/P3/STRENGTH best-practices audit · strengths ·
-a comprehension test · and a project-specific learning path. Every claim is
-grounded in a real `path:line` or marked `Not detected from current files.`
+The guide covers: mental-model analogy · full architecture map · an **extensive
+core tech-stack deep dive** (each technology tied to the repo's own
+config/settings + structure) · a **core JavaScript-fundamentals primer** (arrays,
+objects, functions, async, etc.) grounded in real repo usage · frontend patterns ·
+backend patterns · database structure · end-to-end flows · old-vs-modern
+comparisons · a dedicated **optimization audit** for bundle size, mobile startup,
+API/GraphQL/database cost, caching, assets, and build/CI signals · a dedicated
+**UI/UX audit** for in-flight action safety (double-submit / spam clicks), loading
+and disabled states, error and empty states, accessibility, and forms · a
+P1/P2/P3/STRENGTH best-practices audit · strengths · a dedicated **feature
+enhancement initiatives** backlog (non-breaking, low-complexity wins that make
+existing features more useful, more effective, or better at retaining users —
+ranked by value vs effort) · a comprehension test · and a project-specific learning
+path. Every claim is grounded in a real `path:line` or marked
+`Not detected from current files.`
 
 In **topic deep-dive mode**, each appended topic also gets its own comprehension
 test and an opt-in **AI tutor chat** (continuous, topic-scoped Q&A via OpenCode Zen,
 through a local proxy — your key never touches the HTML). See below.
+
+When the generated guide includes browser text-to-speech for a repo-wide assistant,
+the assistant defaults to a UK English male voice when the browser exposes one, with
+natural/neural English voices as fallback and manual voice choices preserved.
 
 ## How to invoke
 
@@ -32,6 +46,16 @@ Ask in plain language, e.g.:
 
 > "Scan this project and build me a learning guide HTML page that explains how it
 > works and audits it for risks."
+
+> "Audit this repo for optimization too — bundle size, API performance, database
+> queries, caching, and assets."
+
+> "Audit the UI/UX — check that buttons get disabled while a request is in flight so
+> users can't spam-click Sign in, plus loading, error, empty, and accessibility states."
+
+> "Audit the features for safe improvement initiatives — non-breaking, low-complexity
+> ways to make existing features more useful, more effective, or better at retaining
+> users (e.g. reuse the push/email modules for re-engagement)."
 
 Or run the skill directly. Either way it follows `SKILL.md`.
 
@@ -89,8 +113,14 @@ your hand-written notes (outside the `<!-- pla:auto:* -->` markers).
 ## Files
 
 - `SKILL.md` — the orchestrator (start here).
-- `references/00..12-*.md` — per-phase content specs, read on demand
-  (`12-topic-deepdive.md` covers the comprehension test + AI tutor).
+- `references/00..17-*.md` — per-phase content specs, read on demand
+  (`12-topic-deepdive.md` covers the comprehension test + AI tutor;
+  `13-tech-stack.md` the extensive tech-stack deep dive;
+  `14-js-fundamentals.md` the core JavaScript-fundamentals primer;
+  `15-optimization-audit.md` the bundle/API/database/caching optimization audit;
+  `16-uiux-audit.md` the interaction-safety/loading/error/accessibility UI/UX audit;
+  `17-feature-initiatives.md` the non-breaking, low-complexity feature-enhancement
+  initiatives — effectiveness / usefulness / retention / adoption).
 - `scripts/safe_scan.py` — the read-only scanner.
 - `assets/index-template.html` — the self-contained HTML skeleton + CSS + the
   audit-filter and AI-tutor scripts.

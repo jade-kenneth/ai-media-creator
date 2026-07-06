@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   Connection,
   RepositoryFilter,
@@ -27,7 +28,7 @@ export class AccountDeletionRequestsResolver {
 
   @Mutation('submitAccountDeletionRequest')
   async submitAccountDeletionRequest(
-    @Args('input') input: SubmitAccountDeletionRequestInput,
+    @ServiceValidatedArgs('input') input: SubmitAccountDeletionRequestInput,
   ): Promise<AccountDeletionRequest> {
     return this.accountDeletionRequestsService.submit(input);
   }
@@ -57,7 +58,7 @@ export class AccountDeletionRequestsResolver {
   @UseGuards(GraphqlAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
   async reviewAccountDeletionRequest(
-    @Args('input') input: ReviewAccountDeletionRequestInput,
+    @ServiceValidatedArgs('input') input: ReviewAccountDeletionRequestInput,
     @CurrentUser() user?: AuthenticatedUser,
   ): Promise<AccountDeletionRequest> {
     return this.accountDeletionRequestsService.review(input, user!.id);

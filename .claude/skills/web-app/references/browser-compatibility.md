@@ -334,3 +334,11 @@ Before approving frontend work, agent should confirm:
 - [ ] Animations respect `prefers-reduced-motion`
 - [ ] All interactive elements reachable via keyboard
 - [ ] Contrast ratios meet WCAG AA minimums
+
+---
+
+## Related References
+
+- `references/responsive-design.md` — the breakpoint and mobile layout rules these watchouts protect
+- `references/accessibility.md` — keyboard and focus rules that overlap § 7
+- `references/core-web-vitals.md` — performance and stability overlap with § 8

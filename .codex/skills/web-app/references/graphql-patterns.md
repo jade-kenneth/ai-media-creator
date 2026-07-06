@@ -259,3 +259,12 @@ react-query/
 - Do not throw raw strings — always throw `Error` objects with `.name` set to the `GraphqlRequestErrorName`.
 - Do not create a new client instance in a hook or component — use the exported singleton.
 - Do not inline query keys as strings — use the domain's `queryKeys` object.
+
+---
+
+## Related References
+
+- `references/caching.md` — invalidation, optimistic UI, and pagination rules for the hooks defined here
+- `references/auth-patterns.md` — the session/token source consumed by the auth middleware
+- `references/error-boundaries.md` — where returned errors surface in the UI
+- `references/typescript-patterns.md` — § 12 utilities for nullable API/GraphQL fields

@@ -246,3 +246,12 @@ const plainBody = getPlainTextFromRichTextHtml(htmlContent);
 - Do not render HTML from the editor with `dangerouslySetInnerHTML` without sanitizing.
 - Do not add extensions in multiple places — centralize the extension list.
 - Do not use `editor.getHTML()` in a `useEffect` dependency array — it returns a new string on every render.
+
+---
+
+## Related References
+
+- `references/code-splitting.md` — editors are heavy imports; keep them in lazy-loaded feature children
+- `references/forms.md` — `Controller` integration, validation, and submit gating for editor fields
+- `references/upload-fields.md` — shared presigned-URL upload flow for images/files inserted through editors
+- `references/common-anti-patterns.md` — § Re-Implementing a Shared Field Component Inline

@@ -149,3 +149,11 @@ Do not persist auth tokens or sensitive data in Zustand — use a dedicated, exp
 - Do not create multiple Zustand stores unless they are genuinely independent subsystems.
 - Do not omit `devtools` or `subscribeWithSelector`.
 - Do not mutate state directly — always use `set()`.
+
+---
+
+## Related References
+
+- `references/state-management.md` — confirm an external store is the right layer before adding a slice
+- `references/reducer-context.md` — the lighter alternative for subtree-scoped shared state
+- `references/auth-patterns.md` — the token store consumed through an interface

@@ -857,6 +857,66 @@ const { data, isLoading, error } = useQuery({
 - Prefer extending that pattern rather than adding ad-hoc `useEffect` + `useState` fetch logic.
 - See `CACHING.md` for detailed caching strategies.
 
+### Mutation Safety — Disable In-Flight Actions (Prevent Double-Fire)
+
+**Any** control that triggers a mutation must be disabled while that mutation is pending — a `Button`, a `Pressable`/`TouchableOpacity`, a list row action, a swipe action, a FAB, an action-sheet or bottom-sheet item. If it stays enabled, a fast double-tap fires the mutation twice: duplicate writes, duplicate toasts, and races on cache invalidation. This is not a forms-only rule; it is the default for every mutation-triggering control.
+
+On native this matters **more** than on web: rapid taps register before React re-renders the control into its disabled state, so the `disabled` prop alone is not enough — always pair it with a handler guard.
+
+1. **Disable the control** on `mutation.isPending` (`<Button loading>` already renders disabled; a bare `Pressable` needs an explicit `disabled`).
+2. **Guard the handler** with `if (mutation.isPending) return;` to absorb the taps that land before the re-render.
+
+#### ✅ The pattern (applies to every mutation control)
+
+```tsx
+import { showToast } from '@/components/ui/toast';
+import { Button } from '@/components/ui/button';
+
+const saveMutation = useSaveSomethingMutation();
+
+async function handleSave(input: SaveInput) {
+  if (saveMutation.isPending) return; // 1. re-entry guard — absorbs fast double-taps
+
+  try {
+    await saveMutation.mutateAsync(input);
+    await queryClient.invalidateQueries({ queryKey: somethingKeys.all });
+    showToast({ message: 'Saved', type: 'success' });
+  } catch (error) {
+    showToast({ message: 'Could not save right now.', type: 'error' });
+  }
+}
+
+// 2. loading -> disabled + spinner via the shared Button
+<Button loading={saveMutation.isPending} onPress={() => void handleSave(input)}>
+  Save
+</Button>;
+```
+
+A bare `Pressable`/`TouchableOpacity` (row action, swipe action, custom control) does **not** block taps on its own — pass `disabled` and keep the guard:
+
+```tsx
+<Pressable
+  disabled={rejectMutation.isPending}
+  onPress={() => void handleReject(row)}
+  style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+>
+  <Text>Reject</Text>
+</Pressable>;
+```
+
+> **Watch surfaces that dismiss on activation** (action sheet, bottom sheet, swipe row). They feel one-shot because the surface closes — but it can reopen while the request is in flight. They need the guard just as much as a persistent button.
+
+#### Rules
+
+| Rule | Why |
+| --- | --- |
+| Use `<Button loading={mutation.isPending}>` for the shared button | `loading` renders the button disabled with a spinner — disabled state + feedback in one prop |
+| Pass `disabled={mutation.isPending}` on bare `Pressable`/`TouchableOpacity` actions | Unlike `<Button>`, these don't block `onPress` on their own |
+| **Always** add `if (mutation.isPending) return;` at the top of the handler | On native, taps land before the re-render disables the control — the guard is the real defense |
+| Scope per-row state with `mutation.variables` when one hook drives a `FlatList` of rows | `mutation.variables?.id === row.id && mutation.isPending` disables only the in-flight row |
+| Show pending feedback (`loading`, `ActivityIndicator`, dimmed style) with the disabled state | A control that just goes dead reads as broken; tell the user it's working |
+| Forms: gate submit on `form.formState.isSubmitting || mutation.isPending` | Same double-submit class of bug, on forms |
+
 ---
 
 ## 12. Suspense Pattern (Concurrent React)
@@ -994,6 +1054,7 @@ Real features often combine multiple patterns:
 | Hydration-unstable UI                           | Console errors, visual flicker, SEO issues       | Follow hydration safety rules                  |
 | `useState` for derived values                   | Creates sync bugs and extra re-renders           | Compute inline or `useMemo`                    |
 | Multiple `useState` for related state           | Impossible state combinations                    | `useReducer` with explicit states              |
+| Mutation-triggering control left enabled while pending | Double-fires the mutation (duplicate writes, races) on fast double-tap | `<Button loading={mutation.isPending}>` / `disabled` on `Pressable`, **and** guard the handler with `if (mutation.isPending) return;` |
 
 ---
 
