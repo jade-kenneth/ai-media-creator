@@ -2,6 +2,7 @@ import { addDays, addMinutes, isAfter } from 'date-fns';
 import { isBoolean, isNull, isPlainObject, isUndefined } from 'es-toolkit';
 import { isNil } from 'es-toolkit/compat';
 import * as SecureStore from 'expo-secure-store';
+import { DeviceEventEmitter } from 'react-native';
 import z from 'zod';
 
 import { UserRole } from '@/react-query/generated__types';
@@ -9,6 +10,7 @@ import {
   AUTH_ACCESS_TOKEN_STORAGE_KEY,
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_ROLE,
+  AUTH_STATE_CHANGE_EVENT,
 } from '@/utils/constants';
 
 import { Session__Authenticated } from './type';
@@ -196,3 +198,7 @@ const createStore = (): Store => {
 };
 
 export const store = createStore();
+
+export function notifyAuthChange() {
+  DeviceEventEmitter.emit(AUTH_STATE_CHANGE_EVENT);
+}

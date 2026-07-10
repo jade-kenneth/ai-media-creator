@@ -1,5 +1,5 @@
-import { GuidedOnboardingScreen } from '@/features/auth/guided-onboarding-screen';
+import { RegisterScreen } from '@/features/auth/register-screen';
 
 export default function RegisterRoute() {
-  return <GuidedOnboardingScreen initialStep="register-name" />;
+  return <RegisterScreen />;
 }

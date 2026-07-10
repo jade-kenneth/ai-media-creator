@@ -33,13 +33,13 @@ describe('S3Service', () => {
     const service = new S3Service(configService);
 
     const response = await service.createPresignedUploadUrl(
-      'gallery',
+      'avatars',
       'image/png',
       900,
     );
 
     expect(response.key).toMatch(
-      /^gallery\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/,
+      /^avatars\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.png$/,
     );
     expect(response.publicUrl).toBe(
       `https://cdn.example.com/uploads/${response.key}`,

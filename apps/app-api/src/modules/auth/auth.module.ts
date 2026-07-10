@@ -4,7 +4,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { OrganizationsModule } from '../organizations/organizations.module';
-import { MembersModule } from '../members/members.module';
 import { SessionController } from '../sessions/session.controller';
 import { SessionsModule } from '../sessions/sessions.module';
 import { UsersModule } from '../users/users.module';
@@ -46,7 +45,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
     OrganizationsModule,
     UsersModule,
-    MembersModule,
     SessionsModule,
   ],
 

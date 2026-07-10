@@ -20,7 +20,7 @@ export class MailService {
     sendSmtpEmail.sender = {
       name:
         this.configService.get<string>('BREVO_SENDER_NAME') ??
-        'App Boilerplate',
+        'Application',
       email: this.configService.getOrThrow<string>('BREVO_SENDER_EMAIL'),
     };
     sendSmtpEmail.to = [{ email: to }];

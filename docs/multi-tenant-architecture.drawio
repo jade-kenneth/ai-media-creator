@@ -17,12 +17,12 @@
     <!-- ===================== ACTOR BOXES y=96, height=66 ===================== -->
 
     <!-- Actor 1: Admin App  center_x=185 -->
-    <mxCell id="a1" value="&lt;b&gt;Admin App&lt;/b&gt;&lt;br&gt;Next.js Panel&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;apps/org-system-admin/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="1">
+    <mxCell id="a1" value="&lt;b&gt;Admin App&lt;/b&gt;&lt;br&gt;Next.js Panel&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;apps/app-web/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="1">
       <mxGeometry x="110" y="96" width="150" height="66" as="geometry" />
     </mxCell>
 
     <!-- Actor 2: Mobile App  center_x=355 -->
-    <mxCell id="a2" value="&lt;b&gt;Mobile App&lt;/b&gt;&lt;br&gt;Expo React Native&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;apps/org-system-mobile/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="1">
+    <mxCell id="a2" value="&lt;b&gt;Mobile App&lt;/b&gt;&lt;br&gt;Expo React Native&lt;br&gt;&lt;font style=&quot;font-size:8px;&quot; color=&quot;#888888&quot;&gt;apps/app-mobile/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;align=center;" vertex="1" parent="1">
       <mxGeometry x="280" y="96" width="150" height="66" as="geometry" />
     </mxCell>
 
@@ -157,7 +157,7 @@
     <!-- Phase 3: Scoped DB Access -->
 
     <!-- ⑦ Service → MongoDB: scoped query -->
-    <mxCell id="m7" value="⑦ members.find({ organizationId: &quot;abc123&quot;, ...filters })" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
+    <mxCell id="m7" value="⑦ users.find({ organizationId: &quot;abc123&quot;, ...filters })" style="html=1;strokeColor=#006600;fontColor=#006600;fontSize=9;fontStyle=1;startArrow=none;endArrow=open;endFill=1;" edge="1" parent="1">
       <mxGeometry relative="1" as="geometry">
         <mxPoint x="740" y="522" as="sourcePoint"/>
         <mxPoint x="930" y="522" as="targetPoint"/>

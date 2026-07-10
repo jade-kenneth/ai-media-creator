@@ -1,5 +1,5 @@
-import { GuidedOnboardingScreen } from '@/features/auth/guided-onboarding-screen';
+import { OrganizationPickerScreen } from '@/features/auth/organization-picker-screen';
 
 export default function OrganizationPickerRoute() {
-  return <GuidedOnboardingScreen initialStep="organization" />;
+  return <OrganizationPickerScreen />;
 }

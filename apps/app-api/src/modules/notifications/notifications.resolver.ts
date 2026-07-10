@@ -1,17 +1,14 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import {
-  UserRole,
-  type MarkAllNotificationsAsReadResult,
-  type Notification,
-  type NotificationConnection,
-  type NotificationsFilterInput,
+import type {
+  MarkAllNotificationsAsReadResult,
+  Notification,
+  NotificationConnection,
+  NotificationsFilterInput,
 } from '../../graphql/generated/graphql';
 import type { RepositorySort } from 'src/libs/repository';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { Roles } from '../auth/decorators/roles.decorator';
 import { GraphqlAuthGuard } from '../auth/guards/graphql-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
 import type { AuthenticatedUser } from '../auth/types/auth-context';
 import { NotificationsService } from './notifications.service';
 
@@ -20,8 +17,7 @@ export class NotificationsResolver {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Query('myNotifications')
-  @UseGuards(GraphqlAuthGuard, RolesGuard)
-  @Roles(UserRole.MEMBER)
+  @UseGuards(GraphqlAuthGuard)
   async myNotifications(
     @Args('filter') filter?: NotificationsFilterInput,
     @Args('sort') sort?: RepositorySort<Notification>,
@@ -39,8 +35,7 @@ export class NotificationsResolver {
   }
 
   @Mutation('markNotificationAsRead')
-  @UseGuards(GraphqlAuthGuard, RolesGuard)
-  @Roles(UserRole.MEMBER)
+  @UseGuards(GraphqlAuthGuard)
   async markNotificationAsRead(
     @Args('id') id: string,
     @CurrentUser() user?: AuthenticatedUser,
@@ -49,8 +44,7 @@ export class NotificationsResolver {
   }
 
   @Mutation('markAllNotificationsAsRead')
-  @UseGuards(GraphqlAuthGuard, RolesGuard)
-  @Roles(UserRole.MEMBER)
+  @UseGuards(GraphqlAuthGuard)
   async markAllNotificationsAsRead(
     @CurrentUser() user?: AuthenticatedUser,
   ): Promise<MarkAllNotificationsAsReadResult> {

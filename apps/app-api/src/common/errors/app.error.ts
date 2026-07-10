@@ -76,30 +76,3 @@ export class InvalidCredentialsError extends AppError {
     super(message, 'INVALID_CREDENTIALS', 401, details);
   }
 }
-
-export class RegistrationPendingError extends AppError {
-  constructor(
-    message = 'Your registration is still pending approval.',
-    details?: AppErrorDetails,
-  ) {
-    super(message, 'REGISTRATION_PENDING', 403, details);
-  }
-}
-
-export class RegistrationRejectedError extends AppError {
-  constructor(
-    message = 'Your registration was rejected.',
-    details?: AppErrorDetails,
-  ) {
-    super(message, 'REGISTRATION_REJECTED', 403, details);
-  }
-}
-
-export class NotAffiliatedMemberError extends AppError {
-  constructor(
-    message = 'You are not a registered member of this organization.',
-    details?: AppErrorDetails,
-  ) {
-    super(message, 'NOT_AFFILIATED_MEMBER', 403, details);
-  }
-}

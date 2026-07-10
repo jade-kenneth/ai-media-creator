@@ -10,23 +10,18 @@ import type {
 const EXPO_PUSH_API_URL = 'https://exp.host/--/api/v2/push/send';
 const EXPO_PUSH_CHUNK_SIZE = 100;
 
-interface SendAnnouncementPublishedPushInput {
-  announcementId: string;
+export interface SendPushNotificationInput {
   body: string;
   title: string;
   userIds: string[];
+  data?: Record<string, string>;
 }
 
 interface SendTestPushInput {
   body: string;
   title: string;
   userId?: string | null;
-}
-
-interface SendRegistrationStatusPushInput {
-  body: string;
-  title: string;
-  userIds: string[];
+  organizationId: string;
 }
 
 interface SendTestPushResult {
@@ -67,22 +62,38 @@ export class PushNotificationsService {
     private readonly configService: ConfigService,
   ) {}
 
-  async sendAnnouncementPublished(
-    input: SendAnnouncementPublishedPushInput,
-  ): Promise<void> {
-    await this.sendToUsers({
-      userIds: input.userIds,
-      title: input.title,
-      body: input.body,
-      data: {
-        announcementId: input.announcementId,
-        type: 'announcement',
-      },
-    });
+  async sendToUsers(input: SendPushNotificationInput): Promise<number> {
+    if (
+      input.userIds.length === 0 ||
+      !this.configService.get<boolean>('EXPO_PUSH_ENABLED')
+    ) {
+      return 0;
+    }
+
+    const records = await this.pushTokensRepository
+      .list({
+        userId: {
+          in: Array.from(new Set(input.userIds)),
+        },
+        platform: {
+          in: [PushPlatform.ANDROID, PushPlatform.IOS],
+        },
+      })
+      .collect();
+
+    return this.sendRecords(
+      records,
+      input.title,
+      input.body,
+      input.data ?? {},
+    );
   }
 
   async sendTestPush(input: SendTestPushInput): Promise<SendTestPushResult> {
     const filter: Record<string, unknown> = {
+      organizationId: {
+        equal: input.organizationId,
+      },
       platform: {
         in: [PushPlatform.ANDROID, PushPlatform.IOS],
       },
@@ -92,16 +103,29 @@ export class PushNotificationsService {
       filter.userId = { equal: input.userId };
     }
 
-    const pushTokenRecords = await this.pushTokensRepository
-      .list(filter)
-      .collect();
+    const records = await this.pushTokensRepository.list(filter).collect();
+    const tokenCount = await this.sendRecords(
+      records,
+      input.title,
+      input.body,
+      { type: 'test' },
+    );
 
-    const uniquePushTokenRecords = deduplicatePushTokens(
-      pushTokenRecords,
-    ).filter((record) => isExpoPushToken(record.token));
+    return { tokenCount };
+  }
 
-    if (uniquePushTokenRecords.length === 0) {
-      return { tokenCount: 0 };
+  private async sendRecords(
+    records: PushTokenRecord[],
+    title: string,
+    body: string,
+    data: Record<string, string>,
+  ): Promise<number> {
+    const uniqueRecords = deduplicatePushTokens(records).filter((record) =>
+      isExpoPushToken(record.token),
+    );
+
+    if (uniqueRecords.length === 0) {
+      return 0;
     }
 
     const accessToken = this.configService.get<string>(
@@ -109,96 +133,21 @@ export class PushNotificationsService {
     );
 
     for (const recordsChunk of chunkRecords(
-      uniquePushTokenRecords,
+      uniqueRecords,
       EXPO_PUSH_CHUNK_SIZE,
     )) {
       const messages = recordsChunk.map<ExpoPushMessage>((record) => ({
         to: record.token,
-        title: input.title,
-        body: input.body,
+        title,
+        body,
         sound: 'default',
-        data: { type: 'test' },
+        data,
       }));
 
       await this.sendChunk(messages, recordsChunk, accessToken);
     }
 
-    return { tokenCount: uniquePushTokenRecords.length };
-  }
-
-  async sendRegistrationApproved(
-    input: SendRegistrationStatusPushInput,
-  ): Promise<void> {
-    await this.sendToUsers({
-      userIds: input.userIds,
-      title: input.title,
-      body: input.body,
-      data: {
-        type: 'REGISTRATION_APPROVED',
-      },
-    });
-  }
-
-  async sendRegistrationRejected(
-    input: SendRegistrationStatusPushInput,
-  ): Promise<void> {
-    await this.sendToUsers({
-      userIds: input.userIds,
-      title: input.title,
-      body: input.body,
-      data: {
-        type: 'REGISTRATION_REJECTED',
-      },
-    });
-  }
-
-  private async sendToUsers(params: {
-    userIds: string[];
-    title: string;
-    body: string;
-    data: Record<string, string>;
-  }): Promise<void> {
-    if (!this.configService.get<boolean>('EXPO_PUSH_ENABLED')) {
-      return;
-    }
-
-    const pushTokenRecords = await this.pushTokensRepository
-      .list({
-        userId: {
-          in: params.userIds,
-        },
-        platform: {
-          in: [PushPlatform.ANDROID, PushPlatform.IOS],
-        },
-      })
-      .collect();
-
-    const uniquePushTokenRecords = deduplicatePushTokens(
-      pushTokenRecords,
-    ).filter((record) => isExpoPushToken(record.token));
-
-    if (uniquePushTokenRecords.length === 0) {
-      return;
-    }
-
-    const accessToken = this.configService.get<string>(
-      'EXPO_PUSH_ACCESS_TOKEN',
-    );
-
-    for (const recordsChunk of chunkRecords(
-      uniquePushTokenRecords,
-      EXPO_PUSH_CHUNK_SIZE,
-    )) {
-      const messages = recordsChunk.map<ExpoPushMessage>((record) => ({
-        to: record.token,
-        title: params.title,
-        body: params.body,
-        sound: 'default',
-        data: params.data,
-      }));
-
-      await this.sendChunk(messages, recordsChunk, accessToken);
-    }
+    return uniqueRecords.length;
   }
 
   private async sendChunk(
@@ -260,20 +209,15 @@ export class PushNotificationsService {
     }
 
     const invalidRecords = tickets.flatMap((ticket, index) => {
-      if (ticket.status !== 'error') {
-        return [];
-      }
-
-      if (ticket.details?.error !== 'DeviceNotRegistered') {
+      if (
+        ticket.status !== 'error' ||
+        ticket.details?.error !== 'DeviceNotRegistered'
+      ) {
         return [];
       }
 
       return [recordsChunk[index]].filter(Boolean);
     });
-
-    if (invalidRecords.length === 0) {
-      return;
-    }
 
     await Promise.all(
       invalidRecords.map((record) =>

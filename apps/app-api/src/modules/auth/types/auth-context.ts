@@ -1,5 +1,4 @@
 import type { Request, Response } from 'express';
-import type { LoaderRegistry } from 'src/common/batch/loader-registry';
 import type { UserRole } from 'src/graphql/generated/graphql';
 
 export enum TokenType {
@@ -28,7 +27,6 @@ export interface AuthenticatedRequest extends Request {
   user?: AuthenticatedUser;
   tenantId?: string;
   tenantSlug?: string;
-  __loaders?: LoaderRegistry;
 }
 
 export interface GraphqlContext {

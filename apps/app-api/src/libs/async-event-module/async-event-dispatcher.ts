@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { KafkaEventProducer } from './kafka.producer';
-import { AsyncEvent, AsyncEventPayloads, AsyncEventType } from './types';
+import type { AsyncEvent, AsyncEventType } from './types';
 
 @Injectable()
 export class AsyncEventDispatcher {
   constructor(private readonly producer: KafkaEventProducer) {}
 
-  async dispatch<TType extends AsyncEventType>(
+  async dispatch<TData, TType extends AsyncEventType = string>(
     type: TType,
-    data: AsyncEventPayloads[TType],
+    data: TData,
     options?: { id?: string },
-  ) {
-    console.log(type, 'type');
-    const event: AsyncEvent<TType> = {
+  ): Promise<void> {
+    const event: AsyncEvent<TData, TType> = {
       type,
       data,
       id: options?.id ?? randomUUID(),

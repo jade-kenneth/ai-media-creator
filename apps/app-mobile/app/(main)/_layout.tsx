@@ -27,40 +27,12 @@ export default function MainLayout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
-        name="announcements/index"
-        options={{ title: t('navigation.announcements') }}
-      />
-      <Stack.Screen
-        name="announcements/[id]"
-        options={{ title: t('navigation.announcementDetails') }}
-      />
-      <Stack.Screen
-        name="requests/[id]"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="schedules/index"
-        options={{ title: t('navigation.schedules') }}
-      />
-      <Stack.Screen
-        name="schedules/[id]"
-        options={{ title: t('navigation.scheduleDetails') }}
-      />
-      <Stack.Screen
-        name="emergency-contacts/index"
-        options={{ title: t('navigation.emergencyContacts') }}
-      />
-      <Stack.Screen
-        name="community-polls/index"
-        options={{ title: t('navigation.communityPoll') }}
-      />
-      <Stack.Screen
-        name="event-recaps/index"
-        options={{ title: t('navigation.eventRecaps') }}
-      />
-      <Stack.Screen
         name="profile/edit"
         options={{ title: t('navigation.editProfile') }}
+      />
+      <Stack.Screen
+        name="profile/delete-account"
+        options={{ title: t('navigation.deleteAccount') }}
       />
     </Stack>
   );

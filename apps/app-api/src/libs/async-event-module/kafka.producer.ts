@@ -1,15 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Kafka, Producer } from 'kafkajs';
+import type { Kafka, Producer } from 'kafkajs';
 import { AsyncEventTokens } from './tokens';
-import {
-  AsyncEvent,
-  type AsyncEventModuleOptions,
-  AsyncEventType,
-} from './types';
+import type { AsyncEvent, AsyncEventModuleOptions } from './types';
 
 @Injectable()
 export class KafkaEventProducer {
-  private producer: Producer;
+  private producer!: Producer;
 
   constructor(
     @Inject(AsyncEventTokens.Kafka) private readonly kafka: Kafka,
@@ -17,12 +13,12 @@ export class KafkaEventProducer {
     private readonly options: AsyncEventModuleOptions,
   ) {}
 
-  async onModuleInit() {
+  async onModuleInit(): Promise<void> {
     this.producer = this.kafka.producer();
     await this.producer.connect();
   }
 
-  async emit<TType extends AsyncEventType>(event: AsyncEvent<TType>) {
+  async emit(event: AsyncEvent): Promise<void> {
     await this.producer.send({
       topic: `async-event-${this.options.context}`,
       messages: [

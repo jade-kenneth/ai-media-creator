@@ -1,32 +1,7 @@
 enum UserRole {
-  MEMBER
+  USER
   ADMIN
   SUPER_ADMIN
-}
-
-enum RegistrationStatus {
-  pending_approval
-  approved
-  rejected
-}
-
-enum RegistrationRejectionReason {
-  INCOMPLETE_INFORMATION
-  INVALID_IDENTITY
-  NOT_A_MEMBER
-  DUPLICATE_ACCOUNT
-  UNDERAGE
-  INVALID_CONTACT_DETAILS
-  SUSPICIOUS_ACTIVITY
-  OTHER
-}
-
-type RegistrationReview {
-  reviewedBy: ID
-  reviewedByUser: User
-  reviewedAt: DateTime
-  rejectionReason: RegistrationRejectionReason
-  rejectionNote: String
 }
 
 type User implements Node {
@@ -35,12 +10,11 @@ type User implements Node {
   role: UserRole!
   organizationId: String
   isActive: Boolean!
-  registrationStatus: RegistrationStatus!
-  registrationReview: RegistrationReview
-  position: String!
+  firstName: String
+  lastName: String
+  position: String
   createdAt: DateTime!
   updatedAt: DateTime!
-  memberProfile: MemberProfile
 }
 
 type AuthPayload {
@@ -57,19 +31,19 @@ input LoginInput {
   organizationSlug: String
 }
 
-input RegisterMemberInput {
+input RegisterUserInput {
   organizationSlug: String!
-  firstName: String!
-  lastName: String!
-  middleName: String
-  birthdate: DateTime
-  gender: Gender
   email: String!
-  contactNumber: String
-  address: String
-  purok: String
   password: String!
   confirmPassword: String!
+  firstName: String
+  lastName: String
+}
+
+input UpdateMyProfileInput {
+  firstName: String
+  lastName: String
+  position: String
 }
 
 extend type Query {
@@ -77,7 +51,8 @@ extend type Query {
 }
 
 extend type Mutation {
-  registerMember(input: RegisterMemberInput!): AuthPayload!
+  registerUser(input: RegisterUserInput!): AuthPayload!
+  updateMyProfile(input: UpdateMyProfileInput!): User!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
 }

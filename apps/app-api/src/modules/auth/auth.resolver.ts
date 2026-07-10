@@ -4,7 +4,8 @@ import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-ar
 import type {
   AuthPayload,
   LoginInput,
-  RegisterMemberInput,
+  RegisterUserInput,
+  UpdateMyProfileInput,
   User,
 } from '../../graphql/generated/graphql';
 import { AuthService } from './auth.service';
@@ -17,24 +18,35 @@ import type { AuthenticatedUser } from './types/auth-context';
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Mutation('registerMember')
+  @Mutation('registerUser')
   @Public()
-  async registerMember(
-    @ServiceValidatedArgs('input') input: RegisterMemberInput,
+  async registerUser(
+    @ServiceValidatedArgs('input') input: RegisterUserInput,
   ): Promise<AuthPayload> {
-    return this.authService.registerMember(input);
+    return this.authService.registerUser(input);
   }
 
   @Mutation('login')
   @Public()
-  async login(@ServiceValidatedArgs('input') input: LoginInput): Promise<AuthPayload> {
+  async login(
+    @ServiceValidatedArgs('input') input: LoginInput,
+  ): Promise<AuthPayload> {
     return this.authService.login(input);
+  }
+
+  @Mutation('updateMyProfile')
+  @UseGuards(GraphqlAuthGuard)
+  async updateMyProfile(
+    @ServiceValidatedArgs('input') input: UpdateMyProfileInput,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<User> {
+    return this.authService.updateMyProfile(user, input);
   }
 
   @Mutation('logout')
   @UseGuards(GraphqlAuthGuard)
-  logout(): boolean {
-    return this.authService.logout();
+  async logout(@CurrentUser() user: AuthenticatedUser): Promise<boolean> {
+    return this.authService.logout(user);
   }
 
   @Query('me')

@@ -1,4 +1,3 @@
-/** build 10x */
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import {
   MiddlewareConsumer,
@@ -8,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -33,22 +31,17 @@ import {
 import { createGraphqlErrorFormatter } from './graphql/format-error';
 import { AccountDeletionRequestsModule } from './modules/account-deletion-requests/account-deletion-requests.module';
 import { AdminManagementModule } from './modules/admin-management/admin-management.module';
-import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { AuthModule } from './modules/auth/auth.module';
 import type { GraphqlContext } from './modules/auth/types/auth-context';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
-
-// import { AsyncEventModule } from './libs/async-event-module/async-event-module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { MailModule } from './modules/mail/mail.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PushNotificationsModule } from './modules/push-notifications/push-notifications.module';
 import { PushTokensModule } from './modules/push-tokens/push-tokens.module';
-import { MembersModule } from './modules/members/members.module';
 import { S3Module } from './modules/s3/s3.module';
+import { SchedulerLocksModule } from './modules/scheduler-locks/scheduler-locks.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { UsersModule } from './modules/users/users.module';
-import { WaitlistModule } from './modules/waitlist/waitlist.module';
 import { HealthResolver } from './resolver/health.resolver';
 import { NodeResolver } from './resolver/node.resolver';
 
@@ -72,12 +65,6 @@ import { NodeResolver } from './resolver/node.resolver';
 
         return createThrottlerOptions(securityConfig);
       },
-    }),
-    EventEmitterModule.forRoot({
-      wildcard: false,
-      delimiter: '.',
-      maxListeners: 10,
-      verboseMemoryLeak: true,
     }),
     ScheduleModule.forRoot(),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -110,29 +97,15 @@ import { NodeResolver } from './resolver/node.resolver';
     AuthModule,
     AccountDeletionRequestsModule,
     AdminManagementModule,
-    AnnouncementsModule,
     OrganizationsModule,
-    DashboardModule,
     MailModule,
     NotificationsModule,
     PushNotificationsModule,
     PushTokensModule,
-    MembersModule,
     S3Module,
+    SchedulerLocksModule,
     SessionsModule,
     UsersModule,
-    WaitlistModule,
-    // AsyncEventModule.forRootAsync({
-    //   useFactory: () => {
-    //     return {
-    //       context: 'app',
-    //       kafka: {
-    //         brokers: [process.env.KAFKA_URL ?? 'localhost:9092'],
-    //       },
-    //       concurrency: 8,
-    //     };
-    //   },
-    // }),
   ],
 
   controllers: [AppController],

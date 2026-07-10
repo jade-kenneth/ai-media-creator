@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { AsyncEventType } from './types';
+import type { AsyncEventType } from './types';
 
 export const ASYNC_EVENT_HANDLER = 'ASYNC_EVENT_HANDLER';
 

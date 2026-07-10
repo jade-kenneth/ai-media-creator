@@ -73,6 +73,7 @@ export class PushTokensService {
 
     await this.pushTokensRepository.update(tokenFilter, {
       userId,
+      organizationId: organizationId ?? null,
       deviceMetadata,
       updatedAt: now,
     });

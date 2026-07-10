@@ -1,5 +1,4 @@
 import {
-  RegistrationStatus,
   UserRole,
   type User,
 } from 'src/graphql/generated/graphql';
@@ -45,8 +44,7 @@ describe('UsersService batch lookups', () => {
     expect(result.get('user-1')).toMatchObject<Partial<User>>({
       id: 'user-1',
       email: 'one@example.com',
-      position: 'Admin',
-      memberProfile: null,
+      position: null,
     });
     expect(result.get('user-2')?.position).toBe('Captain');
   });
@@ -92,8 +90,6 @@ function userRecord(overrides: Partial<UserRecord>): UserRecord {
     role: UserRole.ADMIN,
     organizationId: 'organization-id',
     isActive: true,
-    registrationStatus: RegistrationStatus.approved,
-    registrationReview: null,
     firstName: null,
     lastName: null,
     position: null,

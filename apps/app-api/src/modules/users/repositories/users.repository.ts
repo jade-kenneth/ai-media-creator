@@ -1,27 +1,14 @@
-import { Connection, Schema, Types } from 'mongoose';
-import type { RegistrationReview, User } from 'src/graphql/generated/graphql';
-import {
-  RegistrationRejectionReason,
-  RegistrationStatus,
-} from 'src/graphql/generated/graphql';
+import { Connection, Types } from 'mongoose';
+import { UserRole, type User } from 'src/graphql/generated/graphql';
 import { MongooseRepository } from 'src/libs/moongose-repository';
 import { Repository } from 'src/libs/repository';
 
-export interface RegistrationReviewRecord extends Omit<
-  RegistrationReview,
-  'reviewedByUser'
-> {
-  reviewedByUser?: null;
-}
-
-export interface UserRecord extends Omit<
-  User,
-  'memberProfile' | 'registrationReview' | 'position'
-> {
+export interface UserRecord
+  extends Omit<
+    User,
+    'organizationId' | 'firstName' | 'lastName' | 'position'
+  > {
   passwordHash: string;
-  registrationStatus: RegistrationStatus;
-  registrationReview?: RegistrationReviewRecord | null;
-  memberProfile?: null;
   organizationId?: string | null;
   firstName?: string | null;
   lastName?: string | null;
@@ -29,23 +16,6 @@ export interface UserRecord extends Omit<
 }
 
 export type UsersRepository = Repository<UserRecord>;
-
-const RegistrationReviewSchema = new Schema<RegistrationReviewRecord>(
-  {
-    reviewedBy: String,
-    reviewedAt: Date,
-    rejectionReason: {
-      type: String,
-      enum: Object.values(RegistrationRejectionReason),
-      default: null,
-    },
-    rejectionNote: String,
-  },
-  {
-    _id: false,
-    id: false,
-  },
-);
 
 export async function UsersRepositoryFactory(
   connection: Connection,
@@ -57,14 +27,11 @@ export async function UsersRepositoryFactory(
       id: Types.ObjectId,
       email: String,
       passwordHash: String,
-      role: String,
-      isActive: Boolean,
-      registrationStatus: {
+      role: {
         type: String,
-        enum: Object.values(RegistrationStatus),
-        default: RegistrationStatus.pending_approval,
+        enum: Object.values(UserRole),
       },
-      registrationReview: RegistrationReviewSchema,
+      isActive: Boolean,
       organizationId: String,
       firstName: String,
       lastName: String,
@@ -74,7 +41,7 @@ export async function UsersRepositoryFactory(
     },
     [
       [{ email: 1 }, { unique: true }],
-      [{ organizationId: 1, registrationStatus: 1 }],
+      [{ organizationId: 1, role: 1, isActive: 1 }],
     ],
   );
 }

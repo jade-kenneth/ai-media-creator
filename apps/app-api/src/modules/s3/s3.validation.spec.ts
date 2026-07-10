@@ -4,11 +4,11 @@ describe('createPresignedUploadUrlBodySchema', () => {
   it('accepts supported image uploads under allowed folders', () => {
     expect(
       createPresignedUploadUrlBodySchema.parse({
-        uploadPathPrefix: 'gallery',
+        uploadPathPrefix: 'avatars',
         contentType: 'IMAGE/WEBP',
       }),
     ).toEqual({
-      uploadPathPrefix: 'gallery',
+      uploadPathPrefix: 'avatars',
       contentType: 'image/webp',
     });
   });
@@ -31,7 +31,7 @@ describe('createPresignedUploadUrlBodySchema', () => {
   });
 
   it('rejects traversal and absolute upload prefixes', () => {
-    for (const uploadPathPrefix of ['../gallery', '/gallery']) {
+    for (const uploadPathPrefix of ['../avatars', '/avatars']) {
       const result = createPresignedUploadUrlBodySchema.safeParse({
         uploadPathPrefix,
         contentType: 'image/jpeg',
@@ -43,7 +43,7 @@ describe('createPresignedUploadUrlBodySchema', () => {
 
   it('rejects unsupported content types', () => {
     const result = createPresignedUploadUrlBodySchema.safeParse({
-      uploadPathPrefix: 'gallery',
+      uploadPathPrefix: 'avatars',
       contentType: 'image/svg+xml',
     });
 
@@ -60,7 +60,7 @@ describe('createPresignedUploadUrlBodySchema', () => {
 
   it('rejects caller-supplied keys instead of upload prefixes', () => {
     const result = createPresignedUploadUrlBodySchema.safeParse({
-      uploadPathPrefix: 'gallery/photo.png',
+      uploadPathPrefix: 'avatars/photo.png',
       contentType: 'image/jpeg',
     });
 

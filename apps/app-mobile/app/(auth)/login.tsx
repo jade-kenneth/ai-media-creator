@@ -1,5 +1,5 @@
-import { GuidedOnboardingScreen } from '@/features/auth/guided-onboarding-screen';
+import { LoginScreen } from '@/features/auth/login-screen';
 
 export default function LoginRoute() {
-  return <GuidedOnboardingScreen initialStep="login" />;
+  return <LoginScreen />;
 }

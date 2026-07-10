@@ -10,7 +10,7 @@ import {
   createMongoConnectionOptions,
   resolveEnvFilePaths,
 } from '../config/runtime-config';
-import { RegistrationStatus, UserRole } from '../graphql/generated/graphql';
+import { UserRole } from '../graphql/generated/graphql';
 import type {
   UserRecord,
   UsersRepository,
@@ -20,13 +20,13 @@ import { TOKENS } from '../types/tokens';
 
 const PASSWORD_SALT_ROUNDS = 10;
 export const seedAdminEnvSchema = z.object({
-  DEFAULT_ADMIN_EMAIL: z.email().trim().default('admin@organization.local'),
+  DEFAULT_ADMIN_EMAIL: z.email().trim().default('admin@example.com'),
   DEFAULT_ADMIN_PASSWORD: z.string().trim().min(8).default('ChangeMe123!'),
 });
 export type SeedDefaultAdminEnv = z.infer<typeof seedAdminEnvSchema>;
 
 export const seedSuperAdminEnvSchema = z.object({
-  DEFAULT_SUPER_ADMIN_EMAIL: z.email().trim().default('superadmin@organization.local'),
+  DEFAULT_SUPER_ADMIN_EMAIL: z.email().trim().default('superadmin@example.com'),
   DEFAULT_SUPER_ADMIN_PASSWORD: z.string().trim().min(8).default('SuperAdmin123!'),
 });
 export type SeedSuperAdminEnv = z.infer<typeof seedSuperAdminEnvSchema>;
@@ -105,7 +105,6 @@ export async function seedDefaultAdmin(
         passwordHash,
         role: UserRole.ADMIN,
         isActive: true,
-        registrationStatus: RegistrationStatus.approved,
         organizationId: organizationId ?? null,
         updatedAt: now,
       },
@@ -121,7 +120,6 @@ export async function seedDefaultAdmin(
       passwordHash,
       role: UserRole.ADMIN,
       isActive: true,
-      registrationStatus: RegistrationStatus.approved,
       organizationId: organizationId ?? null,
       createdAt: now,
       updatedAt: now,
@@ -139,7 +137,6 @@ export async function seedDefaultAdmin(
         passwordHash,
         role: UserRole.ADMIN,
         isActive: true,
-        registrationStatus: RegistrationStatus.approved,
         organizationId: organizationId ?? null,
         updatedAt: now,
       },
@@ -168,7 +165,6 @@ export async function seedDefaultSuperAdmin(
         passwordHash,
         role: UserRole.SUPER_ADMIN,
         isActive: true,
-        registrationStatus: RegistrationStatus.approved,
         organizationId: null,
         updatedAt: now,
       },
@@ -184,7 +180,6 @@ export async function seedDefaultSuperAdmin(
       passwordHash,
       role: UserRole.SUPER_ADMIN,
       isActive: true,
-      registrationStatus: RegistrationStatus.approved,
       organizationId: null,
       createdAt: now,
       updatedAt: now,
@@ -202,7 +197,6 @@ export async function seedDefaultSuperAdmin(
         passwordHash,
         role: UserRole.SUPER_ADMIN,
         isActive: true,
-        registrationStatus: RegistrationStatus.approved,
         organizationId: null,
         updatedAt: now,
       },

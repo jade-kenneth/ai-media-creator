@@ -1,5 +1,6 @@
-import { UseGuards } from '@nestjs/common';
+import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { Mutation, Resolver } from '@nestjs/graphql';
+import { CurrentTenant } from 'src/common/decorators/current-tenant.decorator';
 import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import {
   UserRole,
@@ -22,11 +23,17 @@ export class PushNotificationsResolver {
   @Roles(UserRole.ADMIN)
   async sendTestPushNotification(
     @ServiceValidatedArgs('input') input: SendTestPushNotificationInput,
+    @CurrentTenant() tenantId?: string,
   ): Promise<SendTestPushNotificationResult> {
+    if (!tenantId) {
+      throw new ForbiddenException('An active tenant is required.');
+    }
+
     return this.pushNotificationsService.sendTestPush({
       title: input.title,
       body: input.body,
       userId: input.userId,
+      organizationId: tenantId,
     });
   }
 }

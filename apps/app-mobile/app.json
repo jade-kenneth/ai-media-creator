@@ -3,14 +3,12 @@
     "name": "App Boilerplate",
     "slug": "app-mobile",
     "version": "1.0.0",
-    "description": "Member mobile app boilerplate: auth, organizations (multi-tenant), announcements, notifications and push.",
+    "description": "Project-agnostic multi-tenant Expo starter with authentication, profiles, notifications, theming, and i18n.",
     "orientation": "default",
-    "icon": "./assets/logo.png",
     "scheme": "appboilerplate",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "icon": "./assets/logo.png",
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"],
@@ -19,11 +17,6 @@
       "bundleIdentifier": "com.example.appmobile"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/logo.png",
-        "backgroundColor": "#ffffff",
-        "monochromeImage": "./assets/logo.png"
-      },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.example.appmobile",
@@ -31,18 +24,13 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
-      "./plugins/withAdiRegistration",
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/logo.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
             "backgroundColor": "#000000"
@@ -54,12 +42,10 @@
         "expo-notifications",
         {
           "defaultChannel": "default",
-          "icon": "./assets/logo.png",
           "enableBackgroundRemoteNotifications": true,
           "color": "#0f172a"
         }
       ],
-      "@react-native-community/datetimepicker",
       "expo-localization"
     ],
     "experiments": {

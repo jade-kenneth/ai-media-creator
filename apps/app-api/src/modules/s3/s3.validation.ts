@@ -2,9 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { z } from 'zod';
 
 export const ALLOWED_UPLOAD_PREFIXES = [
-  'announcements',
-  'editor',
-  'gallery',
+  'avatars',
   'organizations/logos',
   'uploads',
 ] as const;

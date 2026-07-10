@@ -1,12 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
-import { RepositoryFilter } from 'src/libs/repository';
+import { NotFoundError } from 'src/common/errors/app.error';
+import type { RepositoryFilter } from 'src/libs/repository';
 import { TOKENS } from 'src/types/tokens';
-import type { User } from '../../graphql/generated/graphql';
-import { RegistrationStatus, UserRole } from '../../graphql/generated/graphql';
+import {
+  UserRole,
+  type UpdateMyProfileInput,
+  type User,
+} from '../../graphql/generated/graphql';
 import type {
-  RegistrationReviewRecord,
   UserRecord,
   UsersRepository,
 } from './repositories/users.repository';
@@ -19,18 +22,10 @@ interface CreateUserInput {
   role: UserRole;
   isActive: boolean;
   organizationId?: string | null;
-  registrationStatus?: RegistrationStatus;
-  registrationReview?: RegistrationReviewRecord | null;
   firstName?: string | null;
   lastName?: string | null;
   position?: string | null;
 }
-
-type MemberUserFilter = {
-  isActive: boolean;
-  registrationStatus: RegistrationStatus;
-  organizationId?: string | null;
-};
 
 @Injectable()
 export class UsersService {
@@ -42,11 +37,7 @@ export class UsersService {
   async findById(id: string): Promise<User | null> {
     const user = await this.findRecord({ id });
 
-    if (!user) {
-      return null;
-    }
-
-    return toUser(user);
+    return user ? toUser(user) : null;
   }
 
   async findManyByIds(ids: string[]): Promise<Map<string, User>> {
@@ -58,11 +49,7 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.findRecord({ email: normalizeEmail(email) });
 
-    if (!user) {
-      return null;
-    }
-
-    return toUser(user);
+    return user ? toUser(user) : null;
   }
 
   async findRecordById(id: string): Promise<UserRecord | null> {
@@ -97,13 +84,6 @@ export class UsersService {
 
   async createUser(input: CreateUserInput): Promise<User> {
     const now = new Date();
-
-    const registrationStatus =
-      input.registrationStatus ??
-      (input.role === UserRole.MEMBER
-        ? RegistrationStatus.pending_approval
-        : RegistrationStatus.approved);
-
     const user = await this.usersRepository.create({
       id: new Types.ObjectId().toHexString(),
       email: normalizeEmail(input.email),
@@ -111,11 +91,9 @@ export class UsersService {
       role: input.role,
       isActive: input.isActive,
       organizationId: input.organizationId ?? null,
-      registrationStatus,
-      registrationReview: input.registrationReview ?? null,
-      firstName: input.firstName ?? null,
-      lastName: input.lastName ?? null,
-      position: input.position ?? null,
+      firstName: normalizeOptionalText(input.firstName),
+      lastName: normalizeOptionalText(input.lastName),
+      position: normalizeOptionalText(input.position),
       createdAt: now,
       updatedAt: now,
     });
@@ -123,35 +101,31 @@ export class UsersService {
     return toUser(user);
   }
 
-  async findActiveMemberUserIds(
-    organizationId?: string | null,
-  ): Promise<string[]> {
-    return this.findMemberUserIds({
-      isActive: { equal: true },
-      registrationStatus: { equal: RegistrationStatus.approved },
-      ...(organizationId ? { organizationId } : {}),
-    });
-  }
+  async updateMyProfile(
+    id: string,
+    input: UpdateMyProfileInput,
+  ): Promise<User> {
+    const patch: Partial<UserRecord> = {};
 
-  async findMemberUserIds(
-    filter?: RepositoryFilter<MemberUserFilter>,
-  ): Promise<string[]> {
-    const memberUsers = await this.usersRepository
-      .list({
-        ...filter,
-        role: {
-          equal: UserRole.MEMBER,
-        },
-      })
-      .collect();
+    if (input.firstName !== undefined) {
+      patch.firstName = normalizeOptionalText(input.firstName);
+    }
 
-    return memberUsers.map((user) => user.id);
-  }
+    if (input.lastName !== undefined) {
+      patch.lastName = normalizeOptionalText(input.lastName);
+    }
 
-  async findMemberUserIdsByActivityFilter(
-    filter?: MemberUserFilter,
-  ): Promise<string[]> {
-    return this.findMemberUserIds(filter);
+    if (input.position !== undefined) {
+      patch.position = normalizeOptionalText(input.position);
+    }
+
+    const updatedUser = await this.updateRecordById(id, patch);
+
+    if (!updatedUser) {
+      throw new NotFoundError('User not found.');
+    }
+
+    return toUser(updatedUser);
   }
 
   async updateRecordById(
@@ -184,13 +158,11 @@ export class UsersService {
       lastName: string;
       position: string;
     },
-    reviewedBy?: string,
   ): Promise<User> {
     const passwordHash = await bcrypt.hash(
       password,
       ADMIN_PASSWORD_SALT_ROUNDS,
     );
-    const now = new Date();
 
     return this.createUser({
       email,
@@ -198,18 +170,9 @@ export class UsersService {
       role: UserRole.ADMIN,
       isActive: true,
       organizationId,
-      registrationStatus: RegistrationStatus.approved,
-      registrationReview: reviewedBy
-        ? {
-            reviewedBy,
-            reviewedAt: now,
-            rejectionReason: null,
-            rejectionNote: null,
-          }
-        : null,
-      firstName: profile?.firstName?.trim() || 'Organization',
-      lastName: profile?.lastName?.trim() || 'Admin',
-      position: profile?.position?.trim() || 'Organization Admin',
+      firstName: profile?.firstName ?? 'Organization',
+      lastName: profile?.lastName ?? 'Admin',
+      position: profile?.position ?? 'Organization Admin',
     });
   }
 
@@ -241,7 +204,9 @@ export class UsersService {
     });
   }
 
-  async findAdminEmailsByOrganizationId(organizationId: string): Promise<string[]> {
+  async findAdminEmailsByOrganizationId(
+    organizationId: string,
+  ): Promise<string[]> {
     const admins = await this.usersRepository
       .list({
         role: { equal: UserRole.ADMIN },
@@ -274,31 +239,21 @@ function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function toUser(user: UserRecord): User {
-  const { passwordHash, memberProfile, ...userData } = user;
-  void passwordHash;
-  void memberProfile;
-  const registrationStatus =
-    user.registrationStatus ??
-    (user.isActive
-      ? RegistrationStatus.approved
-      : RegistrationStatus.pending_approval);
+function normalizeOptionalText(value?: string | null): string | null {
+  return value?.trim() || null;
+}
 
+function toUser(user: UserRecord): User {
   return {
-    ...userData,
-    position:
-      user.role === UserRole.MEMBER
-        ? 'Member'
-        : user.role === UserRole.SUPER_ADMIN
-          ? 'Super Admin'
-          : user.position?.trim() || 'Admin',
-    registrationStatus,
-    registrationReview: user.registrationReview
-      ? {
-          ...user.registrationReview,
-          reviewedByUser: null,
-        }
-      : null,
-    memberProfile: null,
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    organizationId: user.organizationId ?? null,
+    isActive: user.isActive,
+    firstName: user.firstName ?? null,
+    lastName: user.lastName ?? null,
+    position: user.position ?? null,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
   };
 }

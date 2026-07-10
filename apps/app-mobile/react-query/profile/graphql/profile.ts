@@ -1,41 +1,25 @@
-import { gql } from "graphql-request";
+import { gql } from 'graphql-request';
 
-export const MEMBER_PROFILE_FRAGMENT = gql`
-  fragment MemberProfileRecord on MemberProfile {
+export const USER_PROFILE_FRAGMENT = gql`
+  fragment UserProfileRecord on User {
     id
-    userId
+    email
+    role
+    organizationId
+    isActive
     firstName
     lastName
-    middleName
-    fullName
-    birthdate
-    gender
-    address
-    purok
-    contactNumber
+    position
     createdAt
     updatedAt
-    user {
-      id
-      email
-    }
   }
-`;
-
-export const MY_PROFILE_QUERY = gql`
-  query MyProfile {
-    myProfile {
-      ...MemberProfileRecord
-    }
-  }
-  ${MEMBER_PROFILE_FRAGMENT}
 `;
 
 export const UPDATE_MY_PROFILE_MUTATION = gql`
-  mutation UpdateMyProfile($input: UpdateMemberProfileInput!) {
+  mutation UpdateMyProfile($input: UpdateMyProfileInput!) {
     updateMyProfile(input: $input) {
-      ...MemberProfileRecord
+      ...UserProfileRecord
     }
   }
-  ${MEMBER_PROFILE_FRAGMENT}
+  ${USER_PROFILE_FRAGMENT}
 `;

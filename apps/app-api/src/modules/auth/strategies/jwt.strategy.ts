@@ -7,10 +7,8 @@ import {
   SessionTimeoutError,
 } from 'src/common/errors/app.error';
 import { SessionsService } from 'src/modules/sessions/sessions.service';
-import { UserRole } from 'src/graphql/generated/graphql';
 import { UsersService } from '../../users/users.service';
 import { toAuthenticatedUser } from '../auth-user.mapper';
-import { assertMemberCanAuthenticate } from '../registration-approval';
 import type { AuthenticatedUser, JwtPayload } from '../types/auth-context';
 
 @Injectable()
@@ -41,9 +39,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new SessionTimeoutError();
     }
 
-    assertMemberCanAuthenticate(user);
-
-    if (user.role !== UserRole.MEMBER && !user.isActive) {
+    if (!user.isActive) {
       throw new UnauthorizedException('User account is inactive.');
     }
 

@@ -1,7 +1,5 @@
-export {
-  RegistrationRejectionReason,
-  REGISTRATION_REJECTION_REASON_CODES,
-  getRegistrationRejectionReasonMessage,
-} from './registration-rejection-reason';
-
-export type { RegistrationRejectionReasonCode } from './registration-rejection-reason';
+/**
+ * Export product-neutral constants, schemas, and types shared by two or more
+ * applications from this package.
+ */
+export {};

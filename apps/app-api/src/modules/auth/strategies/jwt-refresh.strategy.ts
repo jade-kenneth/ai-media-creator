@@ -2,11 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserRole } from 'src/graphql/generated/graphql';
 import { SessionsService } from 'src/modules/sessions/sessions.service';
 import { UsersService } from 'src/modules/users/users.service';
 import { toAuthenticatedUser } from '../auth-user.mapper';
-import { assertMemberCanAuthenticate } from '../registration-approval';
 import { JwtPayload, TokenType, type AuthenticatedUser } from '../types/auth-context';
 
 @Injectable()
@@ -41,9 +39,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
       throw new UnauthorizedException('Authentication required.');
     }
 
-    assertMemberCanAuthenticate(user);
-
-    if (user.role !== UserRole.MEMBER && !user.isActive) {
+    if (!user.isActive) {
       throw new UnauthorizedException('User account is inactive.');
     }
 

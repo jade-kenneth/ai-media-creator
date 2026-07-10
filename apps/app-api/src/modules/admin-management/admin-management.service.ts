@@ -21,7 +21,6 @@ export class AdminManagementService {
 
   async createAdminAccount(
     input: CreateAdminAccountInput,
-    superAdminId: string,
   ): Promise<AdminAccount> {
     const email = input.email.trim().toLowerCase();
 
@@ -46,7 +45,6 @@ export class AdminManagementService {
         lastName: input.lastName.trim(),
         position: input.position.trim(),
       },
-      superAdminId,
     );
 
     const record = await this.usersService.findRecordById(user.id);
@@ -148,7 +146,7 @@ export class AdminManagementService {
 
 function toAdminAccount(record: StoredUserRecord): AdminAccount {
   if (!record.organizationId) {
-    throw new NotFoundError('Admin account is missing a organization.');
+    throw new NotFoundError('Admin account is missing an organization.');
   }
 
   return {

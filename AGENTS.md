@@ -4,7 +4,7 @@
 
 - Nx monorepo
 - apps/app-mobile = React Native Expo
-- apps/app-admin = Next.js admin web app
+- apps/app-web = Next.js admin web app
 - apps/app-api = NestJS GraphQL API
 - packages/shared-constants = types/constants/schemas shared across apps (`@app/shared-constants`)
 - Mobile uses NativeWind

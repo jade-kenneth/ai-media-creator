@@ -7,11 +7,9 @@ import type {
   UpdateAdminAccountInput,
 } from '../../graphql/generated/graphql';
 import { UserRole } from '../../graphql/generated/graphql';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { GraphqlAuthGuard } from '../auth/guards/graphql-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import type { AuthenticatedUser } from '../auth/types/auth-context';
 import { AdminManagementService } from './admin-management.service';
 
 @Resolver('AdminAccount')
@@ -32,12 +30,8 @@ export class AdminManagementResolver {
   @Roles(UserRole.SUPER_ADMIN)
   async createAdminAccount(
     @ServiceValidatedArgs('input') input: CreateAdminAccountInput,
-    @CurrentUser() currentUser: AuthenticatedUser,
   ): Promise<AdminAccount> {
-    return this.adminManagementService.createAdminAccount(
-      input,
-      currentUser.id,
-    );
+    return this.adminManagementService.createAdminAccount(input);
   }
 
   @Mutation('updateAdminAccount')

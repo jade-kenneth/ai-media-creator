@@ -1,19 +1,15 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { NotFoundError } from 'src/common/errors/app.error';
 import type { RepositoryFilter, RepositorySort } from 'src/libs/repository';
 import { TOKENS } from 'src/types/tokens';
-import {
-  AnnouncementCategory,
+import type {
+  MarkAllNotificationsAsReadResult,
+  Notification,
+  NotificationConnection,
+  NotificationsFilterInput,
   NotificationType,
-  type Announcement,
-  type MarkAllNotificationsAsReadResult,
-  type Notification,
-  type NotificationConnection,
-  type NotificationsFilterInput,
 } from '../../graphql/generated/graphql';
-import { PushNotificationsService } from '../push-notifications/push-notifications.service';
-import { UsersService } from '../users/users.service';
 import type { NotificationsRepository } from './repositories/notifications.repository';
 
 const DEFAULT_MY_NOTIFICATIONS_SORT: RepositorySort<Notification> = {
@@ -21,24 +17,21 @@ const DEFAULT_MY_NOTIFICATIONS_SORT: RepositorySort<Notification> = {
   id: 'DESC',
 };
 
-interface CreateNotificationInput {
+export interface CreateNotificationInput {
   userId: string;
   title: string;
   message: string;
   type: NotificationType;
   relatedEntityId?: string | null;
+  organizationId?: string | null;
   createdAt?: Date;
 }
 
 @Injectable()
 export class NotificationsService {
-  private readonly logger = new Logger(NotificationsService.name);
-
   constructor(
     @Inject(TOKENS.NOTIFICATIONS_REPOSITORY)
     private readonly notificationsRepository: NotificationsRepository,
-    private readonly usersService: UsersService,
-    private readonly pushNotificationsService: PushNotificationsService,
   ) {}
 
   async myNotifications(
@@ -74,13 +67,8 @@ export class NotificationsService {
 
     if (!notification.isRead) {
       await this.notificationsRepository.update(
-        {
-          id,
-          userId,
-        },
-        {
-          isRead: true,
-        },
+        { id, userId },
+        { isRead: true },
       );
     }
 
@@ -118,70 +106,9 @@ export class NotificationsService {
       type: input.type,
       isRead: false,
       relatedEntityId: input.relatedEntityId ?? null,
+      organizationId: input.organizationId ?? null,
       createdAt: input.createdAt ?? new Date(),
     });
-  }
-
-  /**
-   * Example fan-out notification: when an announcement is published, create an
-   * in-app notification for every active member of the organization and send a
-   * matching push notification. Use this as the template for your own
-   * domain-specific notifications.
-   */
-  async createAnnouncementPublishedNotifications(
-    announcement: Pick<Announcement, 'id' | 'title' | 'category'>,
-    organizationId?: string | null,
-  ): Promise<number> {
-    const recipientIds =
-      await this.usersService.findActiveMemberUserIds(organizationId);
-
-    if (recipientIds.length === 0) {
-      return 0;
-    }
-
-    const createdAt = new Date();
-    const type =
-      announcement.category === AnnouncementCategory.EMERGENCY
-        ? NotificationType.EMERGENCY_ANNOUNCEMENT
-        : NotificationType.ANNOUNCEMENT;
-    const title =
-      type === NotificationType.EMERGENCY_ANNOUNCEMENT
-        ? 'Emergency announcement'
-        : 'New announcement';
-    const message = `"${announcement.title}" is now available.`;
-
-    await Promise.all(
-      recipientIds.map((userId) =>
-        this.createNotification({
-          userId,
-          title,
-          message,
-          type,
-          relatedEntityId: announcement.id,
-          createdAt,
-        }),
-      ),
-    );
-
-    try {
-      await this.pushNotificationsService.sendAnnouncementPublished({
-        userIds: recipientIds,
-        title,
-        body: message,
-        announcementId: announcement.id,
-      });
-    } catch (error) {
-      const reason =
-        error instanceof Error
-          ? error.message
-          : 'Unknown push notification error.';
-
-      this.logger.warn(
-        `Push notifications failed for announcement ${announcement.id}: ${reason}`,
-      );
-    }
-
-    return recipientIds.length;
   }
 
   private async findNotificationForUserOrThrow(

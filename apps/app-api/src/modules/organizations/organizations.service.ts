@@ -80,7 +80,7 @@ export class OrganizationsService {
     const adminEmail = input.adminEmail.trim().toLowerCase();
 
     if (slugExists) {
-      throw new ConflictError('A organization with this slug already exists.');
+      throw new ConflictError('An organization with this slug already exists.');
     }
 
     if (await this.usersService.existsByEmail(adminEmail)) {

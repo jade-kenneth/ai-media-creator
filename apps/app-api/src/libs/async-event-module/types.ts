@@ -1,34 +1,19 @@
-export interface AsyncEventPayloads {
-  SuccessfulSignup: {
-    emailAddress: string;
-    firstName: string;
-  };
-  PasswordResetRequested: {
-    emailAddress: string;
-    resetToken: string;
-  };
+export type AsyncEventType = string;
 
-  JoinWaitlist: {
-    emailAddress: string;
-  };
-}
-
-export type AsyncEventType = keyof AsyncEventPayloads;
-
-export interface AsyncEvent<TType extends AsyncEventType = AsyncEventType> {
+export interface AsyncEvent<TData = unknown, TType extends AsyncEventType = string> {
   type: TType;
-  data: AsyncEventPayloads[TType];
+  data: TData;
   id: string;
 }
+
 export interface AsyncEventModuleOptions {
-  context: string; // topic suffix
+  context: string;
   kafka: {
     brokers: string[];
     clientId?: string;
-  };
-  redis?: {
-    host: string;
-    port: number;
+    ssl?: boolean;
+    username?: string;
+    password?: string;
   };
   concurrency?: number;
 }

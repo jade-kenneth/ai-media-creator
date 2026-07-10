@@ -1,11 +1,10 @@
 import { z } from 'zod';
 
 const DEFAULT_CORS_ORIGINS = [
-  'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'http://localhost:19006',
-  'http://127.0.0.1:19006',
-  'http://localhost:3001',
+  'http://localhost:4302',
+  'http://127.0.0.1:4302',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
 ];
 const DEFAULT_CORS_METHODS = [
   'GET',
@@ -46,7 +45,6 @@ export const envSchema = z.object({
     .min(1, 'AWS_SECRET_ACCESS_KEY is required.'),
   AWS_S3_BUCKET: z.string().trim().min(1, 'AWS_S3_BUCKET is required.'),
   AWS_S3_PUBLIC_BASE_URL: z.string().trim().url().optional(),
-  REGISTRATION_EMAIL_MASCOT_URL: z.string().trim().url().optional(),
   EXPO_PUSH_ENABLED: z.preprocess(
     normalizeBooleanEnv,
     z.boolean().default(true),
@@ -99,7 +97,7 @@ export const envSchema = z.object({
     .trim()
     .email('BREVO_SENDER_EMAIL must be a valid email.')
     .min(1, 'BREVO_SENDER_EMAIL is required.'),
-  BREVO_SENDER_NAME: z.string().trim().min(1).default('App Boilerplate'),
+  BREVO_SENDER_NAME: z.string().trim().min(1).default('Application'),
 });
 
 export function validateEnv(config: Record<string, unknown>) {

@@ -34,14 +34,6 @@ export default function AuthLayout() {
       />
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
-      <Stack.Screen
-        name="registration-pending"
-        options={{ gestureEnabled: false }}
-      />
-      <Stack.Screen
-        name="registration-rejected"
-        options={{ gestureEnabled: false }}
-      />
     </Stack>
   );
 }

@@ -1,26 +1,18 @@
 import { gql } from 'graphql-request';
 
-export const AUTH_REGISTRATION_REVIEW_FRAGMENT = gql`
-  fragment AuthRegistrationReview on RegistrationReview {
-    reviewedBy
-    reviewedAt
-    rejectionReason
-    rejectionNote
-  }
-`;
-
 export const AUTH_USER_FRAGMENT = gql`
   fragment AuthUser on User {
     id
     email
     role
+    organizationId
     isActive
-    registrationStatus
-    registrationReview {
-      ...AuthRegistrationReview
-    }
+    firstName
+    lastName
+    position
+    createdAt
+    updatedAt
   }
-  ${AUTH_REGISTRATION_REVIEW_FRAGMENT}
 `;
 
 export const LOGIN_MUTATION = gql`
@@ -38,9 +30,9 @@ export const LOGIN_MUTATION = gql`
   ${AUTH_USER_FRAGMENT}
 `;
 
-export const REGISTER_MEMBER_MUTATION = gql`
-  mutation RegisterMember($input: RegisterMemberInput!) {
-    registerMember(input: $input) {
+export const REGISTER_USER_MUTATION = gql`
+  mutation RegisterUser($input: RegisterUserInput!) {
+    registerUser(input: $input) {
       accessToken
       refreshToken
       user {

@@ -18,14 +18,7 @@ import {
   subscribeToPushTokenRefresh,
 } from '@/features/notifications/push-notifications';
 import { queryClient } from '@/providers/query-provider';
-import {
-  announcementRequest,
-  announcementsQueryKeys,
-} from '@/react-query/announcements/announcements-operations';
-import {
-  NotificationType,
-  SortDirection,
-} from '@/react-query/generated__types';
+import { SortDirection } from '@/react-query/generated__types';
 import {
   markNotificationAsReadRequest,
   myNotificationsRequest,
@@ -35,45 +28,6 @@ import { useSession } from './AuthProvider';
 
 function buildSessionKey(accessToken: string, role: string) {
   return `${role}:${accessToken.slice(0, 16)}`;
-}
-
-const ANNOUNCEMENT_NOTIFICATION_TYPES = new Set<NotificationType>([
-  NotificationType.Announcement,
-  NotificationType.EmergencyAnnouncement,
-]);
-
-const REGISTRATION_NOTIFICATION_TYPES = new Set<NotificationType>([
-  NotificationType.RegistrationApproved,
-  NotificationType.RegistrationRejected,
-]);
-
-function payloadMatchesNotificationType(
-  rawType: string,
-  type: NotificationType,
-) {
-  const normalized = rawType.toLowerCase();
-
-  if (normalized === 'announcement') {
-    return ANNOUNCEMENT_NOTIFICATION_TYPES.has(type);
-  }
-
-  if (normalized === 'test') {
-    return type === NotificationType.System;
-  }
-
-  if (normalized === 'registration_approved') {
-    return type === NotificationType.RegistrationApproved;
-  }
-
-  if (normalized === 'registration_rejected') {
-    return type === NotificationType.RegistrationRejected;
-  }
-
-  if (normalized.includes('registration')) {
-    return REGISTRATION_NOTIFICATION_TYPES.has(type);
-  }
-
-  return true;
 }
 
 async function syncAppBadgeCount() {
@@ -109,11 +63,7 @@ async function markNotificationAsReadFromPushData(data: unknown) {
     return;
   }
 
-  const entityId =
-    parsed.relatedEntityId ??
-    parsed.pollSuggestionId ??
-    parsed.announcementId ??
-    parsed.requestId;
+  const entityId = parsed.relatedEntityId;
   if (!entityId) return;
 
   const unreadResponse = await myNotificationsRequest({
@@ -126,40 +76,13 @@ async function markNotificationAsReadFromPushData(data: unknown) {
 
   const matchingRecord = unreadResponse.data.myNotifications.edges
     .map((edge) => edge.node)
-    .find((notification) => {
-      if (notification.relatedEntityId !== entityId) return false;
-      return payloadMatchesNotificationType(parsed.rawType, notification.type);
-    });
+    .find((notification) => notification.relatedEntityId === entityId);
 
   if (!matchingRecord || matchingRecord.isRead) return;
 
   await markNotificationAsReadRequest({ id: matchingRecord.id }).catch(() => {
     // Ignore read sync errors during navigation.
   });
-}
-
-async function prefetchQueriesForNotificationData(data: unknown) {
-  const parsed = parsePushNotificationData(data);
-  const normalizedType = parsed.rawType.toUpperCase();
-  const id = parsed.announcementId ?? parsed.relatedEntityId;
-
-  // The boilerplate only ships the announcements feed as an example domain.
-  // Add `case` branches here for your own notification payload types.
-  if (id && (parsed.rawType === 'announcement' || normalizedType.includes('ANNOUNCEMENT'))) {
-    await queryClient.prefetchQuery({
-      queryKey: announcementsQueryKeys.detail(id),
-      queryFn: async () => {
-        const result = await announcementRequest({ id });
-        if (!result.ok) {
-          const error = new Error(result.error.message);
-          error.name = result.error.name;
-          throw error;
-        }
-
-        return result.data;
-      },
-    });
-  }
 }
 
 export function PushNotificationsProvider({ children }: PropsWithChildren) {
@@ -194,15 +117,12 @@ export function PushNotificationsProvider({ children }: PropsWithChildren) {
       const data = lastResponse.notification.request.content.data;
       if (!data || typeof data !== 'object') return;
 
-      await Promise.allSettled([
-        markNotificationAsReadFromPushData(data).finally(() => {
-          void queryClient.invalidateQueries({
-            queryKey: notificationsQueryKeys.all,
-          });
-          void syncAppBadgeCount();
-        }),
-        prefetchQueriesForNotificationData(data),
-      ]);
+      await markNotificationAsReadFromPushData(data).finally(() => {
+        void queryClient.invalidateQueries({
+          queryKey: notificationsQueryKeys.all,
+        });
+        void syncAppBadgeCount();
+      });
 
       const route = resolveRouteTargetFromData(data);
       router.push(route as Parameters<typeof router.push>[0]);
@@ -277,15 +197,12 @@ export function PushNotificationsProvider({ children }: PropsWithChildren) {
         const data = response.notification.request.content.data;
         if (!data || typeof data !== 'object') return;
 
-        await Promise.allSettled([
-          markNotificationAsReadFromPushData(data).finally(() => {
-            void queryClient.invalidateQueries({
-              queryKey: notificationsQueryKeys.all,
-            });
-            void syncAppBadgeCount();
-          }),
-          prefetchQueriesForNotificationData(data),
-        ]);
+        await markNotificationAsReadFromPushData(data).finally(() => {
+          void queryClient.invalidateQueries({
+            queryKey: notificationsQueryKeys.all,
+          });
+          void syncAppBadgeCount();
+        });
 
         const route = resolveRouteTargetFromData(data);
         router.push(route as Parameters<typeof router.push>[0]);

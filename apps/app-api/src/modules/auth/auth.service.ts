@@ -4,35 +4,28 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { StringValue } from 'ms';
 import {
   ConflictError,
   InvalidCredentialsError,
-  NotAffiliatedMemberError,
   ValidationError,
 } from 'src/common/errors/app.error';
 import {
-  RegistrationStatus,
   UserRole,
   type AuthPayload,
   type LoginInput,
-  type RegisterMemberInput,
+  type RegisterUserInput,
+  type UpdateMyProfileInput,
   type User,
 } from '../../graphql/generated/graphql';
 import { OrganizationsService } from '../organizations/organizations.service';
-import {
-  REGISTRATION_EVENTS,
-  RegistrationSubmittedEvent,
-} from '../members/events/registration.events';
-import { MembersService } from '../members/members.service';
 import { SessionsService } from '../sessions/sessions.service';
 import { UsersService } from '../users/users.service';
-import { assertMemberCanAuthenticate } from './registration-approval';
 import type { AuthenticatedUser, JwtPayload } from './types/auth-context';
 import { TokenType } from './types/auth-context';
+
 const PASSWORD_SALT_ROUNDS = 10;
 const TOKEN_TYPE = 'Bearer';
 
@@ -42,16 +35,16 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
-    private readonly membersService: MembersService,
     private readonly sessionService: SessionsService,
     private readonly organizationsService: OrganizationsService,
-    private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async registerMember(input: RegisterMemberInput): Promise<AuthPayload> {
-    validateRegistrationInput(input);
+  async registerUser(input: RegisterUserInput): Promise<AuthPayload> {
+    validateRegisterUserInput(input);
 
-    const organization = await this.organizationsService.findBySlug(input.organizationSlug);
+    const organization = await this.organizationsService.findBySlug(
+      input.organizationSlug,
+    );
 
     if (!organization || !organization.isActive) {
       throw new ConflictError('Organization not found or inactive.');
@@ -65,38 +58,27 @@ export class AuthService {
       input.password,
       PASSWORD_SALT_ROUNDS,
     );
-
-    const user = await this.createMemberUser(
-      input.email,
+    const user = await this.createUserAccount({
+      email: input.email,
       passwordHash,
-      organization.id,
-    );
+      organizationId: organization.id,
+      firstName: input.firstName,
+      lastName: input.lastName,
+    });
+    const jti = crypto.randomUUID();
 
     try {
-      await this.membersService.createProfile({
-        userId: user.id,
-        organizationId: organization.id,
-        firstName: input.firstName,
-        lastName: input.lastName,
-        contactNumber: input.contactNumber,
+      await this.sessionService.createSession({
+        accountId: user.id,
+        jti,
+        dateTimeCreated: new Date(),
+        dateTimeLastRefreshed: new Date(),
       });
     } catch (error) {
       await this.usersService.deleteById(user.id).catch(() => undefined);
       throw error;
     }
 
-    this.eventEmitter.emit(
-      REGISTRATION_EVENTS.SUBMITTED,
-      new RegistrationSubmittedEvent(
-        organization.id,
-        organization.name,
-        input.firstName,
-        input.lastName,
-        input.email,
-      ),
-    );
-
-    const jti = crypto.randomUUID();
     return this.buildAuthPayload(user, jti, organization.slug);
   }
 
@@ -116,13 +98,13 @@ export class AuthService {
       throw new InvalidCredentialsError();
     }
 
-    assertMemberCanAuthenticate(userRecord);
-
-    if (userRecord.role !== UserRole.MEMBER && !userRecord.isActive) {
+    if (!userRecord.isActive) {
       throw new UnauthorizedException('User account is inactive.');
     }
 
-    if (input.organizationSlug && userRecord.organizationId != null) {
+    let tenantSlug: string | undefined;
+
+    if (input.organizationSlug) {
       const selectedOrganization = await this.organizationsService.findBySlug(
         input.organizationSlug,
       );
@@ -132,8 +114,22 @@ export class AuthService {
       }
 
       if (userRecord.organizationId !== selectedOrganization.id.toString()) {
-        throw new NotAffiliatedMemberError();
+        throw new ForbiddenException(
+          'User is not affiliated with this organization.',
+        );
       }
+
+      tenantSlug = selectedOrganization.slug;
+    } else if (userRecord.organizationId) {
+      const organization = await this.organizationsService.findByIdOrNull(
+        userRecord.organizationId,
+      );
+
+      if (!organization?.isActive) {
+        throw new ForbiddenException('Organization not found or inactive.');
+      }
+
+      tenantSlug = organization.slug;
     }
 
     const user = await this.usersService.findById(userRecord.id);
@@ -153,15 +149,6 @@ export class AuthService {
       dateTimeLastRefreshed: new Date(),
     });
 
-    let tenantSlug: string | undefined;
-
-    if (userRecord.organizationId) {
-      const organization = await this.organizationsService.findByIdOrNull(
-        userRecord.organizationId,
-      );
-      tenantSlug = organization?.slug;
-    }
-
     return this.buildAuthPayload(user, jti, tenantSlug);
   }
 
@@ -175,32 +162,42 @@ export class AuthService {
     return user;
   }
 
+  async updateMyProfile(
+    currentUser: AuthenticatedUser,
+    input: UpdateMyProfileInput,
+  ): Promise<User> {
+    return this.usersService.updateMyProfile(currentUser.id, input);
+  }
+
   async buildAuthPayloadForUser(user: User, jti: string): Promise<AuthPayload> {
     let tenantSlug: string | undefined;
+
     if (user.organizationId) {
-      const organization = await this.organizationsService.findByIdOrNull(user.organizationId);
+      const organization = await this.organizationsService.findByIdOrNull(
+        user.organizationId,
+      );
       tenantSlug = organization?.slug;
     }
+
     return this.buildAuthPayload(user, jti, tenantSlug);
   }
 
-  logout(): boolean {
-    return true;
+  async logout(currentUser: AuthenticatedUser): Promise<boolean> {
+    return this.sessionService.deleteSessionByJti(currentUser.jti);
   }
 
-  private async createMemberUser(
-    email: string,
-    passwordHash: string,
-    organizationId: string,
-  ): Promise<User> {
+  private async createUserAccount(input: {
+    email: string;
+    passwordHash: string;
+    organizationId: string;
+    firstName?: string | null;
+    lastName?: string | null;
+  }): Promise<User> {
     try {
       return await this.usersService.createUser({
-        email,
-        passwordHash,
-        role: UserRole.MEMBER,
-        isActive: false,
-        organizationId,
-        registrationStatus: RegistrationStatus.pending_approval,
+        ...input,
+        role: UserRole.USER,
+        isActive: true,
       });
     } catch (error) {
       if (isDuplicateKeyError(error)) {
@@ -221,7 +218,6 @@ export class AuthService {
       jti,
       tenantSlug,
     );
-
     const decodedAccessToken = this.jwtService.decode(accessToken);
 
     return {
@@ -258,7 +254,6 @@ export class AuthService {
         expiresIn: parseJwtExpiration(accessTokenExpiration),
       },
     );
-
     const refreshToken = await this.jwtService.signAsync(
       toJwtPayload(user, TokenType.REFRESH, jti, tenantSlug),
       {
@@ -278,7 +273,7 @@ function parseJwtExpiration(value: string): number | StringValue {
   return value as StringValue;
 }
 
-function validateRegistrationInput(input: RegisterMemberInput): void {
+function validateRegisterUserInput(input: RegisterUserInput): void {
   if (input.password !== input.confirmPassword) {
     throw new ValidationError('Passwords do not match.', {
       field: 'confirmPassword',

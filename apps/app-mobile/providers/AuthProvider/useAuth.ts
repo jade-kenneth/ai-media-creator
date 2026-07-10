@@ -1,5 +1,7 @@
 import { createContext, useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, DeviceEventEmitter } from 'react-native';
+
+import { AUTH_STATE_CHANGE_EVENT } from '@/utils/constants';
 
 import { getSession } from './service';
 
@@ -62,10 +64,17 @@ export const useAuth = (): UseAuthReturn => {
       'change',
       handleAppStateChange,
     );
+    const authSubscription = DeviceEventEmitter.addListener(
+      AUTH_STATE_CHANGE_EVENT,
+      () => {
+        void fetchSession();
+      },
+    );
 
     return () => {
       isMountedRef.current = false;
       subscription.remove();
+      authSubscription.remove();
     };
   }, []);
 

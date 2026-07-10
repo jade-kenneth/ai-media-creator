@@ -2,15 +2,15 @@ import {
   registerPushNotificationsForSession,
   unregisterPushTokenForCurrentDevice,
 } from '@/features/notifications/push-notifications';
-import { store } from '@/providers/AuthProvider/store';
+import { notifyAuthChange, store } from '@/providers/AuthProvider/store';
 import { queryClient } from '@/providers/query-provider';
 import type {
   LoginMutation,
   LoginMutationVariables,
   LogoutMutation,
   MeQuery,
-  RegisterMemberMutation,
-  RegisterMemberMutationVariables,
+  RegisterUserMutation,
+  RegisterUserMutationVariables,
 } from '@/react-query/generated__types';
 
 import { client, GraphqlRequestOptions } from '../graphql-client';
@@ -19,12 +19,12 @@ import {
   LOGIN_MUTATION,
   LOGOUT_MUTATION,
   ME_QUERY,
-  REGISTER_MEMBER_MUTATION,
+  REGISTER_USER_MUTATION,
 } from './graphql/auth';
 
 export const authQueryKeys = {
   me: ['auth', 'me'] as const,
-  registerMember: ['auth', 'register-member'] as const,
+  registerUser: ['auth', 'register-user'] as const,
 };
 
 function toError(name: string, message: string) {
@@ -55,14 +55,14 @@ export function logoutRequest() {
   return client.request<LogoutMutation>(LOGOUT_MUTATION, undefined);
 }
 
-export function registerMemberRequest(
-  variables: RegisterMemberMutationVariables,
+export function registerUserRequest(
+  variables: RegisterUserMutationVariables,
   options?: GraphqlRequestOptions,
 ) {
   return client.request<
-    RegisterMemberMutation,
-    RegisterMemberMutationVariables
-  >(REGISTER_MEMBER_MUTATION, variables, options);
+    RegisterUserMutation,
+    RegisterUserMutationVariables
+  >(REGISTER_USER_MUTATION, variables, options);
 }
 
 export function getCurrentUser() {
@@ -102,6 +102,7 @@ export const useLoginMutation = defineMutation<
       refreshToken: res.data.login.refreshToken,
       role: res.data.login.user.role,
     });
+    notifyAuthChange();
 
     queryClient.setQueryData(meQueryKey, {
       me: res.data.login.user,
@@ -115,41 +116,40 @@ export const useLoginMutation = defineMutation<
   suppressGlobalErrorToast: true,
 });
 
-export const useRegisterMemberMutation = defineMutation<
-  RegisterMemberMutation,
-  RegisterMemberMutationVariables
+export const useRegisterUserMutation = defineMutation<
+  RegisterUserMutation,
+  RegisterUserMutationVariables
 >({
-  mutationFn: async (variables?: RegisterMemberMutationVariables) => {
+  mutationFn: async (variables?: RegisterUserMutationVariables) => {
     if (!variables) {
-      return Promise.reject(
-        new Error('Register member variables are required.'),
-      );
+      return Promise.reject(new Error('Registration variables are required.'));
     }
 
-    const res = await registerMemberRequest(variables);
+    const res = await registerUserRequest(variables);
 
     if (!res.ok) {
       throw toError(res.error.name, res.error.message);
     }
 
     await store.set({
-      accessToken: res.data.registerMember.accessToken,
-      refreshToken: res.data.registerMember.refreshToken,
-      role: res.data.registerMember.user.role,
+      accessToken: res.data.registerUser.accessToken,
+      refreshToken: res.data.registerUser.refreshToken,
+      role: res.data.registerUser.user.role,
     });
+    notifyAuthChange();
 
     queryClient.setQueryData(meQueryKey, {
-      me: res.data.registerMember.user,
+      me: res.data.registerUser.user,
     } satisfies MeQuery);
 
     registerPushAfterAuth(
-      res.data.registerMember.accessToken,
-      res.data.registerMember.user.role,
+      res.data.registerUser.accessToken,
+      res.data.registerUser.user.role,
     );
 
     return res.data;
   },
-  mutationKey: authQueryKeys.registerMember,
+  mutationKey: authQueryKeys.registerUser,
   suppressGlobalErrorToast: true,
 });
 
@@ -167,6 +167,7 @@ export const useLogoutMutation = defineMutation<LogoutMutation>({
       return res.data;
     } finally {
       await store.clearSession();
+      notifyAuthChange();
       queryClient.removeQueries({ queryKey: authQueryKeys.me });
     }
   },

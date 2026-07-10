@@ -1,93 +1,63 @@
-# Generic Prompt: Update Agent Docs for a Prototype-to-Implementation Port
+# Full-Stack Application Boilerplate
 
-Use this prompt when a project is being moved from a prototype or previous implementation into a new production implementation, and the project agent instructions need to be updated accordingly.
+Project-agnostic Nx monorepo for a multi-tenant product with a web admin,
+Expo mobile app, and NestJS GraphQL API.
 
-````md
-Update `[AGENT_DOC_FILE]` so it reflects the current `[TARGET_IMPLEMENTATION]` instead of the previous `[SOURCE_IMPLEMENTATION]`.
+## Included platform capabilities
 
-## Context
+- JWT authentication with refresh-token sessions and role-based access
+- Multi-tenant organizations and tenant-aware request handling
+- Super-admin organization and tenant-admin account management
+- MongoDB repositories, cursor pagination, and request-scoped batching
+- S3 uploads with presigned URLs
+- In-app notifications, Expo push tokens, and test push delivery
+- Account-deletion request workflow
+- Internationalization, theming, responsive admin UI, and mobile navigation
+- Rate limiting, CORS/security headers, structured logging, and health checks
 
-The project is being ported from `[SOURCE_IMPLEMENTATION]` to `[TARGET_IMPLEMENTATION]`. The old prototype remains important and should be treated as the canonical visual, content, and interaction reference while building the new implementation.
+Business-specific examples, content, branding, and assets are intentionally not
+included. Add product features within the owning app and put only genuinely
+shared contracts or pure logic in `packages/`.
 
-Use the reference directory convention from `prompt.md`: the prototype should live in a repo-root folder named after the project, followed by `Reference`.
+## Workspace
 
-Example:
+| Project | Stack | Purpose |
+| --- | --- | --- |
+| `apps/app-api` | NestJS, GraphQL, MongoDB | API and reusable platform services |
+| `apps/app-web` | Next.js, shadcn/ui | Tenant and super-admin web app |
+| `apps/app-mobile` | Expo, React Native, NativeWind | Tenant-aware mobile starter app |
+| `packages/shared-constants` | TypeScript | Cross-app constants and contracts |
 
-- Project name: `StavWebsite`
-- Reference directory: `StavWebsiteReference/`
+## Getting started
 
-Project-specific values:
+Prerequisites: Node.js 20+ and npm.
 
-- Project name: `[PROJECT_NAME]`
-- Agent docs file: `[AGENT_DOC_FILE]`
-- Source implementation: `[SOURCE_IMPLEMENTATION]`
-- Target implementation: `[TARGET_IMPLEMENTATION]`
-- Reference prototype directory: `[PROJECT_NAME]Reference/`
-- Reference entry file: `[REFERENCE_ENTRY_FILE]`
-- Reference component/source directory: `[REFERENCE_SOURCE_DIR]`
-- Reference styles directory: `[REFERENCE_STYLES_DIR]`
-- Reference screenshots directory: `[REFERENCE_SCREENSHOTS_DIR]`
-- Archived explorations directory, if any: `[REFERENCE_ARCHIVE_DIR]`
-- Target tech stack rows: `[TARGET_TECH_STACK_ROWS]`
-- Local environment: `[LOCAL_ENVIRONMENT]`
-- Site root: `[SITE_ROOT]`
-
-## Required Changes
-
-### 1. Update the Tech Stack table
-
-Replace rows that describe the previous prototype or old implementation, such as:
-
-- Format - static HTML, React prototype, single-page app, exported build, or other previous packaging
-- Entry - prototype HTML entry file, static app bootstrap file, or old app entry point
-- Routing - hash routing, client-only routing, static routes, or old route map
-- State - prototype-only state management such as local component state, localStorage, or mock state
-- Media/image handling - prototype-only drag/drop, localStorage, hardcoded assets, or mock media handling
-
-Add rows that describe the current target implementation. Keep this generic and use the actual project stack, for example:
-
-- Platform/CMS/framework - `[TARGET_PLATFORM_OR_FRAMEWORK]`
-- Theme/template/app shell - `[TARGET_THEME_OR_APP_SHELL]`
-- Plugins/packages/integrations - `[TARGET_PLUGINS_OR_PACKAGES]`
-- Runtime/build tooling - `[TARGET_RUNTIME_OR_BUILD_TOOLING]`
-- Local env - `[LOCAL_ENVIRONMENT]`, site root at `[SITE_ROOT]`
-
-If the project uses different stack categories, use the categories from `[TARGET_TECH_STACK_ROWS]` instead of forcing the examples above.
-
-Preserve existing rows for fonts, colors, visual style, brand rules, content strategy, and other still-valid project guidance.
-
-### 2. Add a "Reference Site" section
-
-Insert this section before "File Rules" or the equivalent implementation-rules section:
-
-```md
-## Reference Site
-
-`[PROJECT_NAME]Reference/` contains the original `[SOURCE_IMPLEMENTATION]` prototype and is the canonical source of truth for design and functionality. When building anything in `[TARGET_IMPLEMENTATION]`, consult this directory first:
-
-- `[REFERENCE_ENTRY_FILE]` - entry point; shows full page structure and routing
-- `[REFERENCE_SOURCE_DIR]` - page components, shared chrome, app shell, routing, and content data
-- `[REFERENCE_STYLES_DIR]` - design tokens, layout rules, and page-specific styles
-- `[REFERENCE_SCREENSHOTS_DIR]` - visual reference for each page and state
-- `[REFERENCE_ARCHIVE_DIR]` - archived explorations or context-only experiments, if present
-
-Match the reference site's design tokens, spacing, page structure, content, and interactions when porting to `[TARGET_IMPLEMENTATION]` unless explicitly told otherwise.
+```bash
+npm install
+cp .env.example .env
+npm run api
+npm run web
+npm run mobile
 ```
 
-If one of the listed reference files or directories does not exist, omit that bullet rather than inventing it.
+Configure MongoDB, JWT, S3, email, and Expo push credentials in `.env` before
+using the related integrations. App-specific public environment variables are
+documented in each app's `.env.example`.
 
-### 3. Keep the rest of the instructions coherent
+## Useful commands
 
-Review nearby sections for stale references to the old implementation. Update only what is necessary to make the agent docs accurate for the target implementation.
+```bash
+npm run build
+npm run lint
+npm run typecheck
+npm test --workspaces --if-present
+```
 
-Do not remove project-specific content requirements, business constraints, accessibility notes, design principles, or source-of-truth rules unless they directly conflict with the target implementation.
+GraphQL client types are generated from the local API schema:
 
-## Output
+```bash
+npm run codegen --workspace=app-web
+npm run codegen --workspace=app-mobile
+```
 
-After editing, provide:
-
-1. A short summary of what changed.
-2. The file path updated.
-3. Any assumptions made about placeholders or missing reference directories.
-4. A raw diff only if requested.
-````
+See `docs/` for the retained platform architecture and operational notes.
