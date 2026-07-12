@@ -1,5 +1,7 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
+Source revision: `jade-kenneth/skills-source@43848dc699b90ecb7d8038657b5219a6ff83c8f3`
+
 You are the EXECUTOR on this project. Claude Design produced the UI/UX and plan;
 Claude Code distilled them into the two docs below. Your job is to build, faithfully.
 
@@ -23,7 +25,7 @@ Claude Code distilled them into the two docs below. Your job is to build, faithf
 
 ## How to use the skill index
 Each skill below lists WHEN it applies and WHERE its full instructions live
-(inside .skills-source/, which is synced into this repo on npm install).
+(inside .skills-source/, which is hydrated from the committed lock file).
 Before working on a surface or component a skill covers, OPEN and READ its
 full instructions at the listed path. The one-line description is a router,
 not the rule set. If .skills-source/ is missing, run: npm run sync-skills
@@ -160,7 +162,6 @@ GraphQL operations return typed domain payloads directly. Do not wrap successful
 - Test observable behavior and contract shape, not private implementation details.
 - Include rejected input and authorization cases, not only the happy path.
 
-
 # Project Structure
 
 > Reach for this document when deciding where new code belongs, moving files, adding a feature, or reviewing whether a change respects the boilerplate's Nx monorepo boundaries.
@@ -254,7 +255,6 @@ Before adding a file, ask:
 - Does an equivalent feature already establish the folder pattern?
 - Is the code genuinely shared, pure, and free of framework dependencies?
 - Will placing it here keep the change scoped and discoverable?
-
 
 # Workflow
 
@@ -493,7 +493,6 @@ The boilerplate has no established PR history, so use this compatible baseline:
 ```
 
 Keep PRs scoped to one task. Call out generated files, contract changes, security-sensitive behavior, and follow-up work explicitly.
-
 
 ## Stack skills (routed index — read the full file before touching its surface)
 
