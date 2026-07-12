@@ -17,6 +17,8 @@ node_modules
 .settings/
 *.sublime-workspace
 .skills-source
+.skills-source.download-*
+.skills-source.backup-*
 
 # IDE - VSCode
 .vscode/*
@@ -54,8 +56,8 @@ Thumbs.db
 # Expo
 node_modules/
 .expo/
-apps/brgy-system-mobile/android/
-apps/brgy-system-mobile/ios/
+apps/app-mobile/android/
+apps/app-mobile/ios/
 .yarn/
 dist/
 npm-debug.*
@@ -67,9 +69,9 @@ npm-debug.*
 *.orig.*
 web-build/
 cache/
-./apps/brgy-system-mobile/app.json
-./apps/brgy-system-mobile/google-services.json
-./apps/brgy-system-mobile/android/service-account.json
+/apps/app-mobile/app.json
+/apps/app-mobile/google-services.json
+/apps/app-mobile/android/service-account.json
 
 # Next.js
 .next
