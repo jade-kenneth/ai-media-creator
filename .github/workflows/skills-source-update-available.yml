@@ -1,0 +1,50 @@
+name: skills-source-update-available
+
+on:
+  repository_dispatch:
+    types: [skills-source-updated]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Full skills-source commit SHA to compare with the lock
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare source revision with committed lock
+        env:
+          DISPATCH_SHA: ${{ github.event.client_payload.sha }}
+          MANUAL_SHA: ${{ inputs.sha }}
+        run: |
+          SOURCE_SHA="${DISPATCH_SHA:-$MANUAL_SHA}"
+          LOCKED_SHA="$(node -p "require('./skills-source.lock.json').sha")"
+          if ! printf '%s' "$SOURCE_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::The dispatched skills-source revision is not a full commit SHA."
+            exit 1
+          fi
+          if [ "$SOURCE_SHA" = "$LOCKED_SHA" ]; then
+            echo "skills-source is already locked at $SOURCE_SHA" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          {
+            echo "## skills-source update available"
+            echo
+            echo "Locked: \`$LOCKED_SHA\`"
+            echo "Available: \`$SOURCE_SHA\`"
+            echo
+            echo "Apply and review with:"
+            echo '```bash'
+            echo "npm run update-skills -- --sha $SOURCE_SHA"
+            echo "npm run check-skills"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::warning::A newer skills-source revision is available: $SOURCE_SHA"
