@@ -11,6 +11,17 @@
   gap while reviewing, the fix goes upstream to skills-source, then regenerate.
 - Skills-source repo (for durable rule updates): https://github.com/jade-kenneth/skills-source
 
+## Skills synchronization
+
+- `skills-source.lock.json` is the reviewed source revision for this project.
+- `npm run sync-skills` hydrates that exact revision and regenerates `AGENTS.md`.
+- `npm run update-skills` intentionally advances the lock to latest `main` and
+  regenerates `AGENTS.md`; use `-- --sha <full-sha>` for a specific revision.
+- `npm run check-skills` verifies that committed generated instructions match the
+  lock. Do not bypass this check and do not edit generated `AGENTS.md` directly.
+- Normal installation only hydrates the locked `.skills-source/` snapshot. It does
+  not silently advance the lock or modify tracked files.
+
 ## Design (origin: Claude Design)
 
 - ALL product planning and UI/UX for this project was done in Claude Design and
