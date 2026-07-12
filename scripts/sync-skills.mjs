@@ -137,6 +137,15 @@ function check(lock) {
     const expected = fs.readFileSync(checkPath);
     const committed = fs.readFileSync(AGENTS_PATH);
     if (!expected.equals(committed)) {
+      try {
+        execFileSync(
+          'git',
+          ['diff', '--no-index', '--', AGENTS_PATH, checkPath],
+          { cwd: ROOT, stdio: 'inherit' },
+        );
+      } catch {
+        // git diff exits with status 1 when it successfully finds a difference.
+      }
       throw new Error(
         "AGENTS.md is stale. Run 'npm run sync-skills' and commit the result.",
       );
