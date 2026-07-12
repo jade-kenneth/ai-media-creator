@@ -9,7 +9,8 @@
     "build": "nx run-many -t build --all",
     "lint": "nx run-many -t lint --all",
     "typecheck": "nx run-many -t typecheck --all",
-    "sync-skills": "node scripts/sync-skills.mjs"
+    "sync-skills": "node scripts/sync-skills.mjs",
+    "postinstall": "node scripts/sync-skills.mjs || echo '⚠ skills sync failed (offline?) — run npm run sync-skills before building'"
   },
   "private": true,
   "devDependencies": {

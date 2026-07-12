@@ -9,6 +9,7 @@
   sessions, YOU sync phase status to Notion. Notion is never edited by the executor.
 - Conventions: AGENTS.md (generated) and .skills-source/conventions/. If you spot a
   gap while reviewing, the fix goes upstream to skills-source, then regenerate.
+- Skills-source repo (for durable rule updates): https://github.com/jade-kenneth/skills-source
 
 ## Design (origin: Claude Design)
 
@@ -23,9 +24,3 @@
   boilerplate UI (never wins).
 - [PROJECT]Reference.md + Task Plan are generated from design/ via /gen-build-docs.
   Tie-break between them: Reference wins on look/interaction, Task Plan on build order.
-
-```
-- [ ] 4.7 Add `.skills-source/` to `.gitignore` (it's a synced artifact) but **commit AGENTS.md and the whole `design/` tree** (Codex needs the former in-repo; the Fidelity QA checklist needs the latter frozen in git — an uncommitted prototype means "side-by-side comparison" has no target).
-
-**Checkpoint:** `npm run sync-skills` in any project pulls latest + regenerates AGENTS.md. New scaffolds do it automatically.
-```

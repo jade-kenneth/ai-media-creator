@@ -1,0 +1,19 @@
+name: skills-drift
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # If skills-source is PRIVATE, uncomment and add a read-only deploy key
+      # as the SKILLS_SOURCE_DEPLOY_KEY repo secret:
+      # - uses: webfactory/ssh-agent@v0.9.0
+      #   with:
+      #     ssh-private-key: ${{ secrets.SKILLS_SOURCE_DEPLOY_KEY }}
+      - run: npm run sync-skills
+      - run: |
+          git diff --exit-code AGENTS.md \
+          || (echo "::error::AGENTS.md is stale — run 'npm run sync-skills' locally and commit the result" && exit 1)
