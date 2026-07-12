@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Slot } from 'radix-ui';
+import { Slot } from '@radix-ui/react-slot';
 import * as React from 'react';
 
 import { cn } from '@/utils';
@@ -72,7 +72,7 @@ function Prose({
   asChild = false,
   ...props
 }: ProseProps) {
-  const Comp = asChild ? Slot.Root : 'div';
+  const Comp = asChild ? Slot : 'div';
 
   return (
     <Comp

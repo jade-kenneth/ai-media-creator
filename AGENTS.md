@@ -1,4 +1,32 @@
-# AGENTS.md — Project conventions (generated from skills-source, do not edit)
+# AGENTS.md — execution contract (generated from skills-source; do not edit)
+
+You are the EXECUTOR on this project. Claude Design produced the UI/UX and plan;
+Claude Code distilled them into the two docs below. Your job is to build, faithfully.
+
+## Read these first, in this order
+1. [PROJECT]Reference.md — UI & behavior source of truth. Screens are PORTED
+   VERBATIM from design/prototypes/, never rebuilt from a written description.
+2. [PROJECT] Task Plan.md — dependency-ordered phases. Work ONE phase at a time,
+   top to bottom. Check off [ ] → [~] (in progress) → [x] (done, QA passed).
+3. This file — code structure, naming, stack patterns, and the skill index below.
+
+## Non-negotiables
+- Conflict order: design/prototypes > design/system > design/planning >
+  this file (code structure ONLY) > boilerplate UI (never wins, always discarded).
+- Fidelity: a screen is done only when it passes every row of the Fidelity QA
+  checklist at the end of the Task Plan. "Close enough" is a failure.
+- Reuse-not-rebuild: auth, authz, GraphQL client/server, codegen, S3, CI are
+  provided ([BP]) — extend the existing primitive, never re-implement it.
+- Do not mark a phase [x] without running its QA rows. Do not skip ahead.
+- If the Reference and this file disagree on anything visual, the Reference wins.
+- If something is genuinely ambiguous, stop and ask instead of inventing.
+
+## How to use the skill index
+Each skill below lists WHEN it applies and WHERE its full instructions live
+(inside .skills-source/, which is synced into this repo on npm install).
+Before working on a surface or component a skill covers, OPEN and READ its
+full instructions at the listed path. The one-line description is a router,
+not the rule set. If .skills-source/ is missing, run: npm run sync-skills
 
 ## Conventions
 
@@ -234,6 +262,16 @@ Before adding a file, ask:
 
 This file is the canonical workflow source for generated project instructions. Update it here, then regenerate `AGENTS.md`; do not maintain a second editable copy in a skill or consumer repository.
 
+## Roles
+
+Project work is split across two agents with fixed responsibilities; apply the sections below through the lens of whichever role you occupy.
+
+- **Codex — the executor.** Builds against `AGENTS.md` and the project Task Plan, one phase at a time, updating phase checkboxes (`[ ]` → `[~]` → `[x]`) as work completes and passes its QA rows. Does not write to Notion.
+- **Claude Code — the planner and reviewer.** Distils the design export into the Reference and Task Plan, refines phases, reviews the executor's finished work against the Reference with the Fidelity QA gate, and syncs phase status to Notion during planning or review sessions. Does not implement features unless the user explicitly asks.
+- **Provenance of scope:** all product planning and UI/UX originates in Claude Design and arrives as the committed `design/` export. Neither agent invents UI; ambiguity is escalated to the user.
+
+When only one agent is present on a task, it still respects the boundary that matters most: nothing visual is rebuilt from prose, and no phase is marked complete without its validation.
+
 ## Change workflow
 
 Apply this sequence together with the user's request and the repository instructions that govern the affected files.
@@ -457,7 +495,7 @@ The boilerplate has no established PR history, so use this compatible baseline:
 Keep PRs scoped to one task. Call out generated files, contract changes, security-sensitive behavior, and follow-up work explicitly.
 
 
-## Stack skills
+## Stack skills (routed index — read the full file before touching its surface)
 
 ### api-app
 _"API implementation standards for apps/*-api (NestJS + Apollo GraphQL schema-first + Mongoose/MongoDB + TypeScript). USE when writing, reviewing, or refactoring any code in apps/*-api. TRIGGERS: creating modules, resolvers, services, repositories, GraphQL schema (SDL) changes, filters, sorting, pagination, search queries, mutations, guards, auth, multi-tenancy, scheduled jobs/cron, validation, file uploads, codegen, API tests. EXAMPLES: 'add a query', 'add a mutation', 'create a module', 'add a filter', 'paginate this list', 'add a field to the schema', 'write a repository', 'add a cron job', 'protect this resolver', 'add tenant scoping', 'regenerate GraphQL types'."_

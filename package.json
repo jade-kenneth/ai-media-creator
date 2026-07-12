@@ -14,16 +14,18 @@
   "private": true,
   "devDependencies": {
     "@nestjs/cli": "^11.0.21",
-    "@nx/eslint": "22.6.3",
-    "@nx/eslint-plugin": "22.6.3",
-    "@nx/expo": "^22.6.3",
-    "@nx/js": "22.6.3",
-    "@nx/next": "^22.6.3",
-    "@nx/webpack": "22.6.3",
+    "@nx/eslint": "22.7.6",
+    "@nx/eslint-plugin": "22.7.6",
+    "@nx/expo": "22.7.6",
+    "@nx/js": "22.7.6",
+    "@nx/next": "22.7.6",
+    "@nx/webpack": "22.7.6",
+    "@swc/core": "^1.15.43",
     "eslint": "^9.8.0",
-    "nx": "22.6.2",
+    "nx": "22.7.6",
     "shadcn": "^4.4.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.63.0"
   },
   "overrides": {
     "react": "19.1.0",
