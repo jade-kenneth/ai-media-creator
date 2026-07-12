@@ -528,7 +528,7 @@ _"Complete guide for designing and building beautiful, production-grade mobile i
 Full instructions: `.skills-source/skills/mobile-native-ui-design/SKILL.md`
 
 ### project-learning-auditor
-_>-_
+_Scan a project read-only and generate a self-contained HTML learning guide at reference/project-learning-audit/index.html. Use when a user wants repository onboarding, a mental model, architecture and full-stack flow explanations, frontend/backend/database pattern analysis, optimization or accessibility risks, prioritized audit cards, diagrams, comprehension tests, a learning path, or an appended topic deep dive. Produces documentation only and never edits app source, runs builds or tests, deploys, or commits._
 
 Full instructions: `.skills-source/skills/project-learning-auditor/SKILL.md`
 
