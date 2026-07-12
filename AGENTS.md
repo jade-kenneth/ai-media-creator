@@ -498,7 +498,7 @@ Keep PRs scoped to one task. Call out generated files, contract changes, securit
 ## Stack skills (routed index — read the full file before touching its surface)
 
 ### api-app
-_"API implementation standards for apps/*-api (NestJS + Apollo GraphQL schema-first + Mongoose/MongoDB + TypeScript). USE when writing, reviewing, or refactoring any code in apps/*-api. TRIGGERS: creating modules, resolvers, services, repositories, GraphQL schema (SDL) changes, filters, sorting, pagination, search queries, mutations, guards, auth, multi-tenancy, scheduled jobs/cron, validation, file uploads, codegen, API tests. EXAMPLES: 'add a query', 'add a mutation', 'create a module', 'add a filter', 'paginate this list', 'add a field to the schema', 'write a repository', 'add a cron job', 'protect this resolver', 'add tenant scoping', 'regenerate GraphQL types'."_
+_API implementation standards for apps/*-api (NestJS + Apollo GraphQL schema-first + Mongoose/MongoDB + TypeScript). USE when writing, reviewing, or refactoring any code in apps/*-api. TRIGGERS: creating modules, resolvers, services, repositories, GraphQL schema (SDL) changes, filters, sorting, pagination, search queries, mutations, guards, auth, multi-tenancy, scheduled jobs/cron, validation, file uploads, codegen, API tests. EXAMPLES: 'add a query', 'add a mutation', 'create a module', 'add a filter', 'paginate this list', 'add a field to the schema', 'write a repository', 'add a cron job', 'protect this resolver', 'add tenant scoping', 'regenerate GraphQL types'._
 
 Full instructions: `.skills-source/skills/api-app/SKILL.md`
 
@@ -518,12 +518,12 @@ _Repository-agnostic coordinator for bug fixes and enhancements. Uses the projec
 Full instructions: `.skills-source/skills/fix-and-enhance/SKILL.md`
 
 ### mobile-app
-_"Mobile app implementation standards for apps/*-mobile (React Native + Expo + TypeScript + TanStack Query + NativeWind). USE when writing, reviewing, or refactoring any code in apps/*-mobile. TRIGGERS: creating components, screens, hooks, providers, features, data fetching, forms, navigation, performance work, accessibility, analytics, caching, state management, keyboard handling, safe areas, folder structure decisions. EXAMPLES: 'add a feature', 'build a screen', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix keyboard hiding input', 'improve startup time', 'add safe area handling', 'handle Android back button'."_
+_Mobile app implementation standards for apps/*-mobile (React Native + Expo + TypeScript + TanStack Query + NativeWind). USE when writing, reviewing, or refactoring any code in apps/*-mobile. TRIGGERS: creating components, screens, hooks, providers, features, data fetching, forms, navigation, performance work, accessibility, analytics, caching, state management, keyboard handling, safe areas, folder structure decisions. EXAMPLES: 'add a feature', 'build a screen', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix keyboard hiding input', 'improve startup time', 'add safe area handling', 'handle Android back button'._
 
 Full instructions: `.skills-source/skills/mobile-app/SKILL.md`
 
 ### mobile-native-ui-design
-_"Complete guide for designing and building beautiful, production-grade mobile interfaces for iOS and Android. Covers aesthetic direction, design tokens, platform conventions, converge vs diverge, UX research, typography, color, motion, accessibility, brand, iconography, illustration, and navigation. When producing HTML mockups of mobile screens, translate every mobile spec to its closest CSS/HTML equivalent. USE for any mobile UI work. TRIGGERS: 'build a screen', 'build a component', 'design this', 'style this', 'does this look native?', 'iOS vs Android', 'platform parity', 'design tokens', 'motion spec', 'accessibility audit', 'touch targets', 'dark mode', 'FAB or no FAB?', 'bottom sheet or modal?', 'create a component', 'add navigation', 'add animation', 'review this screen', 'converge or diverge', 'make this beautiful', 'write once feel native', 'cross-platform mobile design', 'haptic spec', 'UX research plan', 'handoff checklist', 'design critique', 'platform conventions', 'same or different per platform?', 'navigation architecture', 'dark mode strategy', 'icon system', 'typography scale', 'spring physics', 'create a mockup', 'mockup html'."_
+_Design and review production-grade mobile interfaces for iOS and Android, including platform adaptation, tokens, typography, color, motion, navigation, accessibility, iconography, brand, research, and handoff. Use for any mobile UI screen or component, native-feel critique, iOS-versus-Android decision, dark-mode or touch-target audit, animation or haptic specification, navigation architecture, cross-platform design system, or mobile HTML mockup. Pair with the mobile implementation skill when writing application code._
 
 Full instructions: `.skills-source/skills/mobile-native-ui-design/SKILL.md`
 
@@ -553,12 +553,12 @@ _Create new skills, modify and improve existing skills, and measure skill perfor
 Full instructions: `.skills-source/skills/skill-creator/SKILL.md`
 
 ### web-app
-_"Web app implementation standards for apps/*-admin (Next.js App Router + React + TypeScript + TanStack Query + Tailwind + shadcn/ui). USE when writing, reviewing, or refactoring any code in apps/*-admin. TRIGGERS: creating components, hooks, providers, features, data fetching, forms, routing, SSR/SSG, performance work, SEO, accessibility, analytics, caching, state management, folder structure decisions. EXAMPLES: 'add a feature', 'build a page', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix a hydration error', 'improve LCP', 'add SEO metadata'."_
+_Web app implementation standards for apps/*-admin (Next.js App Router + React + TypeScript + TanStack Query + Tailwind + shadcn/ui). USE when writing, reviewing, or refactoring any code in apps/*-admin. TRIGGERS: creating components, hooks, providers, features, data fetching, forms, routing, SSR/SSG, performance work, SEO, accessibility, analytics, caching, state management, folder structure decisions. EXAMPLES: 'add a feature', 'build a page', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix a hydration error', 'improve LCP', 'add SEO metadata'._
 
 Full instructions: `.skills-source/skills/web-app/SKILL.md`
 
 ### web-ui-design
-_'Complete guide for designing and building production-grade web interfaces. Use for any web UI work: pages, dashboards, forms, tables, dialogs, drawers, navigation, responsive layouts, dark mode, accessibility, motion, charts, empty/loading/error states, and visual polish. Pair with `web-app` for implementation authority.'_
+_Complete guide for designing and building production-grade web interfaces. Use for any web UI work: pages, dashboards, forms, tables, dialogs, drawers, navigation, responsive layouts, dark mode, accessibility, motion, charts, empty/loading/error states, and visual polish. Pair with `web-app` for implementation authority._
 
 Full instructions: `.skills-source/skills/web-ui-design/SKILL.md`
 
