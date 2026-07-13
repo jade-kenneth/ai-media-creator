@@ -19,5 +19,5 @@ Project name: $ARGUMENTS
    production data, or other secrets.
 
 Do not design the screens or generate the engineering Reference and Task Plan in
-this wrapper. Claude Design creates the design export; `/gen-build-docs` consumes
+this wrapper. Claude Design creates the design export; `/finalize-build-docs` consumes
 that completed export afterward.

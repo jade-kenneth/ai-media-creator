@@ -50,7 +50,7 @@ npm run design:validate
 
 Validation requires at least one supported prototype contract and exactly one
 `design/handoff/` Design Reference and Design Handoff Plan. A missing design system or planning export
-produces a warning because `/gen-build-docs` has explicit fallback behavior for
+produces a warning because `/finalize-build-docs` has explicit fallback behavior for
 both.
 
 ## 4. Generate the paired build documents
@@ -58,11 +58,11 @@ both.
 Open Claude Code in the product repository and run:
 
 ```text
-/gen-build-docs <project name>
+/finalize-build-docs <project name>
 ```
 
 The project-level command delegates to the canonical locked instructions at
-`.skills-source/commands/gen-build-docs.md`. It starts from Claude Design's
+`.skills-source/commands/finalize-build-docs.md`. It starts from Claude Design's
 Design Reference and Design Handoff Plan, verifies them against every design file, scans the
 actual boilerplate, resolves `VERIFY IN REPO` assumptions, creates the trim audit,
 and writes reconciled canonical copies to the repository root with bidirectional
@@ -89,6 +89,9 @@ surface is marked `⚠ needs design`, and the Task Plan reuses retained architec
 Commit the untouched design export and generated documents so implementation PRs
 can be reviewed against the same source of truth.
 
-Codex then executes one Task Plan phase at a time. `AGENTS.md` governs code
-structure; the Reference wins on look and interaction; the Task Plan wins on build
-order and approach.
+Codex then executes one Task Plan phase at a time. Generated `AGENTS.md`
+automatically locates and reads the repository-root Reference and Task Plan before
+application work, so the user can simply request the feature, fix, named phase, or
+“next phase” without repeating document-loading instructions. `AGENTS.md` governs
+code structure; the Reference wins on look and interaction; the Task Plan wins on
+build order and approach.

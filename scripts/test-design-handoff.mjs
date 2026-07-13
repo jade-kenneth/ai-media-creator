@@ -49,7 +49,7 @@ try {
   assert.match(partial, /design handoff documents \(2\)/);
   assert.match(partial, /design\/handoff\/Sample Design Reference\.md/);
   assert.match(partial, /design\/handoff\/Sample Design Handoff Plan\.md/);
-  assert.match(partial, /\/gen-build-docs <project name>/);
+  assert.match(partial, /\/finalize-build-docs <project name>/);
 
   fs.writeFileSync(
     path.join(TEMP, 'design', 'handoff', 'Duplicate Design Reference.md'),

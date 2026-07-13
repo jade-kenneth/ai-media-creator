@@ -38,14 +38,14 @@ const prototypeContracts = groups.prototypes.filter(
 if (!prototypeContracts.length) {
   throw new Error(
     'No supported prototype contracts found under design/prototypes/. ' +
-      'Import screen--*.html, logo--*.html, or *.dc.html files before running /gen-build-docs.',
+      'Import screen--*.html, logo--*.html, or *.dc.html files before running /finalize-build-docs.',
   );
 }
 if (referenceDocs.length !== 1 || handoffPlans.length !== 1) {
   throw new Error(
     'Claude Design must export exactly one ' +
       'design/handoff/[PROJECT] Design Reference.md and one ' +
-      'design/handoff/[PROJECT] Design Handoff Plan.md before running /gen-build-docs.',
+      'design/handoff/[PROJECT] Design Handoff Plan.md before running /finalize-build-docs.',
   );
 }
 
@@ -61,5 +61,5 @@ console.log('\ndesign handoff documents (2)');
 console.log(`- design/${referenceDocs[0]}`);
 console.log(`- design/${handoffPlans[0]}`);
 console.log(
-  '\nDesign export is ready. In Claude Code run: /gen-build-docs <project name>',
+  '\nDesign export is ready. In Claude Code run: /finalize-build-docs <project name>',
 );

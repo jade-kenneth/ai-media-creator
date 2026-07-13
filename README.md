@@ -66,7 +66,7 @@ npm run design:validate
 Open Claude Code in the product repository and invoke:
 
 ```text
-/gen-build-docs <project name>
+/finalize-build-docs <project name>
 ```
 
 The project command delegates to the locked canonical command from skills-source
