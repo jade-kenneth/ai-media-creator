@@ -9,11 +9,10 @@ import { fileURLToPath } from 'node:url';
 const SCRIPTS = path.dirname(fileURLToPath(import.meta.url));
 const TEMP = fs.mkdtempSync(path.join(os.tmpdir(), 'sync-automation-'));
 
-function run(args, cwd, env = {}) {
+function run(args, cwd) {
   return execFileSync(args[0], args.slice(1), {
     cwd,
     encoding: 'utf8',
-    env: { ...process.env, ...env },
     stdio: ['ignore', 'pipe', 'pipe'],
   }).trim();
 }
@@ -164,11 +163,7 @@ function testSkillsBranchMembership() {
     /is not part of/,
   );
   run(['node', 'scripts/sync-skills.mjs', 'update', '--sha', mainSha], app);
-  run(
-    ['node', 'scripts/sync-skills.mjs', 'check'],
-    app,
-    { SKILLS_SOURCE_READ_TOKEN: 'test-read-token' },
-  );
+  run(['node', 'scripts/sync-skills.mjs', 'check'], app);
   run(
     ['node', 'scripts/sync-skills.mjs', 'update', '--sha', unmergedSha, '--allow-unmerged'],
     app,

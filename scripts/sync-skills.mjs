@@ -11,27 +11,10 @@ const SNAPSHOT_PATH = path.join(ROOT, '.skills-source');
 const AGENTS_PATH = path.join(ROOT, 'AGENTS.md');
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 
-function gitEnvironment() {
-  const token = process.env.SKILLS_SOURCE_READ_TOKEN?.trim();
-  if (!token) return process.env;
-
-  const authorization = Buffer.from(`x-access-token:${token}`).toString('base64');
-  return {
-    ...process.env,
-    GIT_CONFIG_COUNT: '2',
-    GIT_CONFIG_KEY_0: 'http.https://github.com/.extraheader',
-    GIT_CONFIG_VALUE_0: '',
-    GIT_CONFIG_KEY_1: 'http.https://github.com/.extraheader',
-    GIT_CONFIG_VALUE_1: `AUTHORIZATION: basic ${authorization}`,
-    GIT_TERMINAL_PROMPT: '0',
-  };
-}
-
 function git(args, cwd = ROOT) {
   return execFileSync('git', args, {
     cwd,
     encoding: 'utf8',
-    env: gitEnvironment(),
     stdio: ['ignore', 'pipe', 'inherit'],
   }).trim();
 }
@@ -99,15 +82,7 @@ function hydrate(lock) {
   try {
     git(['init', '--quiet'], tempPath);
     git(['remote', 'add', 'origin', lock.repository], tempPath);
-    try {
-      git(['fetch', '--quiet', '--depth', '1', 'origin', lock.sha], tempPath);
-    } catch {
-      throw new Error(
-        `Unable to fetch skills-source revision ${lock.sha}. ` +
-          'If the repository is private, configure the app-boilerplate Actions ' +
-          'secret SKILLS_SOURCE_READ_TOKEN with read-only Contents access to skills-source.',
-      );
-    }
+    git(['fetch', '--quiet', '--depth', '1', 'origin', lock.sha], tempPath);
     git(['checkout', '--quiet', '--detach', 'FETCH_HEAD'], tempPath);
 
     const actualSha = git(['rev-parse', 'HEAD'], tempPath);

@@ -122,11 +122,3 @@ npm run codegen --workspace=app-mobile
 Agent instructions are generated from the locked `skills-source` revision. Use
 `npm run sync-skills` to hydrate the locked revision, `npm run update-skills` to
 intentionally update it, and `npm run check-skills` to detect drift.
-
-Because `skills-source` is private, configure an app-boilerplate Actions secret
-named `SKILLS_SOURCE_READ_TOKEN`. Give its fine-grained token read-only
-`Contents` access to `jade-kenneth/skills-source` and no access to
-app-boilerplate. This is intentionally separate from
-`APP_BOILERPLATE_SYNC_TOKEN`, which lives in skills-source and can write only to
-app-boilerplate for update notifications. Never place either token in `.env` or
-commit it.
