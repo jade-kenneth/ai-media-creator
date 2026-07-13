@@ -1,0 +1,23 @@
+name: boilerplate-contribution-check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Detect reusable foundation changes
+        env:
+          BOILERPLATE_CONTRIBUTION_BASE: origin/${{ github.base_ref }}
+        run: npm run boilerplate:contributions

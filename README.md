@@ -53,6 +53,21 @@ npm run typecheck
 npm test --workspaces --if-present
 ```
 
+When this template becomes a new product repository, initialize its upstream
+boilerplate tracking once:
+
+```bash
+npm run boilerplate:setup
+git add boilerplate.lock.json
+git commit -m "chore: record boilerplate starting revision"
+```
+
+Use `npm run boilerplate:check` to report later template updates and
+`npm run boilerplate:contributions` to detect product changes that may be worth
+porting back as reusable architecture. See
+[`docs/boilerplate-updates.md`](docs/boilerplate-updates.md) for the reviewed
+update and contribution workflow.
+
 GraphQL client types are generated from the local API schema:
 
 ```bash
