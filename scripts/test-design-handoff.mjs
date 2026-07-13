@@ -33,10 +33,20 @@ try {
 
   fs.mkdirSync(path.join(TEMP, 'design', 'prototypes'), { recursive: true });
   fs.writeFileSync(path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'), '<main>Home</main>\n');
+  assert.match(run(false), /must export exactly one/);
+  fs.writeFileSync(path.join(TEMP, 'design', 'SampleReference.md'), '# Reference\n');
+  fs.writeFileSync(path.join(TEMP, 'design', 'Sample Task Plan.md'), '# Task Plan\n');
   const partial = run(true);
   assert.match(partial, /prototypes \(1\)/);
   assert.match(partial, /warning: design\/system\/ is missing or empty/);
+  assert.match(partial, /paired build documents \(2\)/);
+  assert.match(partial, /design\/SampleReference\.md/);
+  assert.match(partial, /design\/Sample Task Plan\.md/);
   assert.match(partial, /\/gen-build-docs <project name>/);
+
+  fs.writeFileSync(path.join(TEMP, 'design', 'DuplicateReference.md'), '# Duplicate\n');
+  assert.match(run(false), /must export exactly one/);
+  fs.rmSync(path.join(TEMP, 'design', 'DuplicateReference.md'));
 
   fs.mkdirSync(path.join(TEMP, 'design', 'system'), { recursive: true });
   fs.mkdirSync(path.join(TEMP, 'design', 'planning'), { recursive: true });

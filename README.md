@@ -54,7 +54,8 @@ Before design work begins, open Claude Code in the product repository and run:
 
 This creates `design/CLAUDE_DESIGN_PROMPT.md`. Paste that file into Claude
 Design, complete the design, and copy the export into `design/prototypes/`,
-`design/system/`, and `design/planning/`. Then run:
+`design/system/`, and `design/planning/`, including the design-root
+`[PROJECT]Reference.md` and `[PROJECT] Task Plan.md`. Then run:
 
 ```bash
 npm run sync-skills
@@ -68,7 +69,8 @@ Open Claude Code in the product repository and invoke:
 ```
 
 The project command delegates to the locked canonical command from skills-source
-and generates the paired `[PROJECT]Reference.md` and `[PROJECT] Task Plan.md`.
+and reconciles Claude Design's exported pair with the actual boilerplate into
+canonical repository-root copies.
 See [`docs/design-handoff.md`](docs/design-handoff.md) for inputs, security rules,
 completeness checks, and the executor handoff.
 

@@ -11,7 +11,8 @@ Project name: $ARGUMENTS
 2. Read `.skills-source/commands/gen-build-docs.md` in full. If the locked snapshot
    is missing, run `npm run sync-skills` first.
 3. Execute that canonical command exactly, using the project name above wherever
-   the canonical command refers to `$ARGUMENTS`.
+   the canonical command refers to `$ARGUMENTS`. Start from the paired documents
+   exported at the design root; do not invent an independent replacement pair.
 4. Never ask the user to paste a connection string, password, token, or credential.
    Confirm only the environment-variable name, its configured/unconfigured status,
    and sanitized non-secret identifiers.

@@ -17,7 +17,8 @@ decisions. It writes `design/CLAUDE_DESIGN_PROMPT.md`. Review that file and past
 its complete contents into Claude Design.
 
 Claude Design then creates the actual screen contracts, design system, planning
-documents, interactions, responsive behavior, states, and export report. This
+documents, interactions, responsive behavior, states, export report, and the
+design-authored `[PROJECT]Reference.md` and `[PROJECT] Task Plan.md`. This
 preparation command does not generate UI or engineering build documents itself.
 
 ## 2. Import the export
@@ -26,9 +27,11 @@ Copy the Claude Design output into these authority-separated folders:
 
 ```text
 design/
-├── prototypes/  # screen--*.html, logo--*.html, and *.dc.html contracts
-├── system/      # tokens, typography, color, motion, and voice
-└── planning/    # flows, IA, journeys, scope, and PRD fragments
+├── prototypes/              # screen--*.html, logo--*.html, *.dc.html contracts
+├── system/                  # tokens, typography, color, motion, and voice
+├── planning/                # flows, IA, journeys, scope, PRD fragments
+├── [PROJECT]Reference.md     # Claude Design's UI and behavior source
+└── [PROJECT] Task Plan.md    # Claude Design's design-derived phased plan
 ```
 
 Do not rename or rewrite prototype files merely to satisfy a convention. The
@@ -43,9 +46,10 @@ npm run check-skills
 npm run design:validate
 ```
 
-Validation requires at least one supported prototype contract. A missing design
-system or planning export produces a warning because `/gen-build-docs` has explicit
-fallback behavior for both.
+Validation requires at least one supported prototype contract and exactly one
+design-root Reference and Task Plan. A missing design system or planning export
+produces a warning because `/gen-build-docs` has explicit fallback behavior for
+both.
 
 ## 4. Generate the paired build documents
 
@@ -56,10 +60,12 @@ Open Claude Code in the product repository and run:
 ```
 
 The project-level command delegates to the canonical locked instructions at
-`.skills-source/commands/gen-build-docs.md`. It inventories every design file,
-checks prototype completeness, scans the actual boilerplate, creates the trim
-audit, and writes the paired `[PROJECT]Reference.md` and
-`[PROJECT] Task Plan.md` with bidirectional section/phase links and Fidelity QA.
+`.skills-source/commands/gen-build-docs.md`. It starts from Claude Design's
+exported paired documents, verifies them against every design file, scans the
+actual boilerplate, resolves `VERIFY IN REPO` assumptions, creates the trim audit,
+and writes reconciled canonical copies to the repository root with bidirectional
+section/phase links and Fidelity QA. The untouched design-root pair remains the
+original Claude Design handoff.
 
 Be ready to confirm:
 
