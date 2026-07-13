@@ -90,15 +90,31 @@ function detectStartingSha(lock) {
     .split('\n')
     .filter(Boolean)) {
     const [sha, tree] = line.split('\u001f');
-    if (!upstreamByTree.has(tree)) upstreamByTree.set(tree, sha);
+    const matches = upstreamByTree.get(tree) || [];
+    matches.push(sha);
+    upstreamByTree.set(tree, matches);
   }
   const roots = git(['rev-list', '--max-parents=0', 'HEAD'])
     .split('\n')
     .filter(Boolean);
+  const candidates = new Set();
   for (const root of roots) {
     const tree = git(['rev-parse', `${root}^{tree}`]);
-    const match = upstreamByTree.get(tree);
-    if (match) return match;
+    const matches = upstreamByTree.get(tree) || [];
+    if (matches.length > 1) {
+      throw new Error(
+        'The product source tree matches multiple boilerplate revisions. ' +
+          "Run 'npm run boilerplate:setup -- --sha <full-source-sha>'.",
+      );
+    }
+    if (matches.length === 1) candidates.add(matches[0]);
+  }
+  if (candidates.size === 1) return [...candidates][0];
+  if (candidates.size > 1) {
+    throw new Error(
+      'Multiple product roots match different boilerplate revisions. ' +
+        "Run 'npm run boilerplate:setup -- --sha <full-source-sha>'.",
+    );
   }
 
   throw new Error(
