@@ -26,6 +26,10 @@ If the source revision cannot be detected, provide the exact commit explicitly:
 npm run boilerplate:setup -- --sha <full-source-sha>
 ```
 
+If the same source tree appears at multiple upstream revisions, setup treats the
+match as ambiguous and requires this explicit SHA rather than marking a newer
+revision as reviewed.
+
 ## Check for updates
 
 ```bash
