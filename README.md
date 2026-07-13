@@ -44,6 +44,27 @@ Configure MongoDB, JWT, S3, email, and Expo push credentials in `.env` before
 using the related integrations. App-specific public environment variables are
 documented in each app's `.env.example`.
 
+## Claude Design handoff
+
+After creating a product repository, copy the Claude Design export into
+`design/prototypes/`, `design/system/`, and `design/planning/`. Then run:
+
+```bash
+npm run sync-skills
+npm run design:validate
+```
+
+Open Claude Code in the product repository and invoke:
+
+```text
+/gen-build-docs <project name>
+```
+
+The project command delegates to the locked canonical command from skills-source
+and generates the paired `[PROJECT]Reference.md` and `[PROJECT] Task Plan.md`.
+See [`docs/design-handoff.md`](docs/design-handoff.md) for inputs, security rules,
+completeness checks, and the executor handoff.
+
 Before starting product work, follow the
 [customization checklist](docs/getting-started/customize.md) to initialize
 boilerplate tracking, rename workspace identifiers, replace starter

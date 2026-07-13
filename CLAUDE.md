@@ -35,3 +35,8 @@
   boilerplate UI (never wins).
 - [PROJECT]Reference.md + Task Plan are generated from design/ via /gen-build-docs.
   Tie-break between them: Reference wins on look/interaction, Task Plan on build order.
+- Before `/gen-build-docs`, run `npm run design:validate`. The project-level slash
+  command delegates to the canonical locked command in
+  `.skills-source/commands/gen-build-docs.md`; do not maintain a second build-doc format.
+- Database planning names the environment variable and sanitized target only.
+  Never request or write a connection string, credential, password, or token.

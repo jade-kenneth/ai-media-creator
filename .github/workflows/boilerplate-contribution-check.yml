@@ -23,3 +23,5 @@ jobs:
         run: npm run boilerplate:contributions
       - name: Test synchronization automation
         run: npm run test:sync-automation
+      - name: Test Claude Design handoff
+        run: npm run test:design-handoff
