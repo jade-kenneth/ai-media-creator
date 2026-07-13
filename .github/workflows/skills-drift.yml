@@ -15,4 +15,6 @@ jobs:
         with:
           node-version: 20
       - name: Verify generated instructions against the committed lock
+        env:
+          SKILLS_SOURCE_READ_TOKEN: ${{ secrets.SKILLS_SOURCE_READ_TOKEN }}
         run: npm run check-skills
