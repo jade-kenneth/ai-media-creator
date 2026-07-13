@@ -1,16 +1,27 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@5087c7676b6bc935829782f8728d7a8d22f43e23`
+Source revision: `jade-kenneth/skills-source@5576c097575dd23fe9735c2507d8900003160717`
 
-You are the EXECUTOR on this project. Claude Design produced the UI/UX and plan;
-Claude Code distilled them into the two docs below. Your job is to build, faithfully.
+You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
+Claude Code reconciled it with this repository. Your job is to build faithfully.
 
-## Read these first, in this order
-1. [PROJECT]Reference.md — UI & behavior source of truth. Screens are PORTED
-   VERBATIM from design/prototypes/, never rebuilt from a written description.
-2. [PROJECT] Task Plan.md — dependency-ordered phases. Work ONE phase at a time,
-   top to bottom. Check off [ ] → [~] (in progress) → [x] (done, QA passed).
-3. This file — code structure, naming, stack patterns, and the skill index below.
+## Automatic project context — no repeated user instruction required
+Before planning, editing, reviewing, or implementing application code:
+
+1. Locate exactly one repository-root file matching `*Reference.md` and exactly
+   one matching `* Task Plan.md`. Exclude `design/`, `.skills-source/`,
+   dependency folders, generated output, and nested copies.
+2. Read both files completely. The Reference owns verified UI and behavior; the
+   Task Plan owns dependency order, scope, phase status, and Fidelity QA.
+3. Read this AGENTS.md for code structure, naming, stack patterns, and skills.
+4. If either root document is missing or more than one candidate exists, stop and
+   ask which canonical pair governs the work instead of guessing.
+
+The user does not need to repeat “read AGENTS.md, the Reference, and the Task
+Plan.” Treat that context load as the default start of every application task.
+For an implementation request, follow the phase the user names; otherwise resume
+the single `[~]` phase, or start the first unblocked `[ ]` phase when none is in
+progress. Check `[ ]` → `[~]` → `[x]` only after the phase's QA rows pass.
 
 ## Non-negotiables
 - Conflict order: design/prototypes > design/system > design/planning >
