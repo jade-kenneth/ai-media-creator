@@ -1,5 +1,5 @@
 ---
-description: Finalize the project Reference and Task Plan from the locked Claude Design handoff and actual repository
+description: Finalize the project Product Specification and Implementation Plan from the locked Claude Design handoff and actual repository
 argument-hint: [project name]
 ---
 
@@ -18,6 +18,6 @@ Project name: $ARGUMENTS
    Confirm only the environment-variable name, its configured/unconfigured status,
    and sanitized non-secret identifiers.
 
-Do not create a competing Reference or Task Plan format in this wrapper. Their
+Do not create a competing Product Specification or Implementation Plan format in this wrapper. Their
 contents, cross-links, trim audit, phase structure, and Fidelity QA gate are owned
 by the locked canonical command.

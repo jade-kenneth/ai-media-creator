@@ -67,8 +67,8 @@ Design Reference and Design Handoff Plan, verifies them against every design fil
 actual boilerplate, resolves `VERIFY IN REPO` assumptions, creates the trim audit,
 and writes reconciled canonical copies to the repository root with bidirectional
 section/phase links and Fidelity QA. The untouched files under `design/handoff/` remain the original Claude Design
-handoff. The repository-root `[PROJECT]Reference.md` and
-`[PROJECT] Task Plan.md` are the finalized engineering documents.
+handoff. The repository-root `Product Specification.md` and
+`Implementation Plan.md` are the finalized engineering documents.
 
 Be ready to confirm:
 
@@ -84,14 +84,14 @@ ambiguous app mapping, or a material stack conflict instead of inventing an answ
 
 ## 5. Review and commit the handoff
 
-Verify that every prototype has a Reference section, every planned-but-unprototyped
-surface is marked `⚠ needs design`, and the Task Plan reuses retained architecture.
+Verify that every prototype has a Product Specification section, every planned-but-unprototyped
+surface is marked `⚠ needs design`, and the Implementation Plan reuses retained architecture.
 Commit the untouched design export and generated documents so implementation PRs
 can be reviewed against the same source of truth.
 
-Codex then executes one Task Plan phase at a time. Generated `AGENTS.md`
-automatically locates and reads the repository-root Reference and Task Plan before
+Codex then executes one Implementation Plan phase at a time. Generated `AGENTS.md`
+automatically locates and reads the repository-root `Product Specification.md` and `Implementation Plan.md` before
 application work, so the user can simply request the feature, fix, named phase, or
 “next phase” without repeating document-loading instructions. `AGENTS.md` governs
-code structure; the Reference wins on look and interaction; the Task Plan wins on
+code structure; the Product Specification wins on look and interaction; the Implementation Plan wins on
 build order and approach.

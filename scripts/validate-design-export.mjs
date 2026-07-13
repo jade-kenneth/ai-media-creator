@@ -61,5 +61,6 @@ console.log('\ndesign handoff documents (2)');
 console.log(`- design/${referenceDocs[0]}`);
 console.log(`- design/${handoffPlans[0]}`);
 console.log(
-  '\nDesign export is ready. In Claude Code run: /finalize-build-docs <project name>',
+  '\nDesign export is ready. In Claude Code run: /finalize-build-docs <project name>\n' +
+    'Finalization creates Product Specification.md and Implementation Plan.md at the repository root.',
 );
