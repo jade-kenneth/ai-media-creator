@@ -1,0 +1,22 @@
+{
+  "foundationPaths": [
+    ".github/**",
+    "apps/app-api/src/common/**",
+    "apps/app-api/src/config/**",
+    "apps/app-api/src/libs/**",
+    "apps/app-web/src/components/**",
+    "apps/app-web/src/lib/**",
+    "apps/app-web/src/providers/**",
+    "apps/app-mobile/src/components/**",
+    "apps/app-mobile/src/lib/**",
+    "apps/app-mobile/src/providers/**",
+    "packages/**",
+    "scripts/**"
+  ],
+  "productPaths": [
+    "apps/app-api/src/modules/**",
+    "apps/app-api/src/scripts/**",
+    "apps/app-web/src/features/**",
+    "apps/app-mobile/src/features/**"
+  ]
+}
