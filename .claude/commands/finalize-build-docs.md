@@ -13,7 +13,9 @@ Project name: $ARGUMENTS
 3. Execute that canonical command exactly, using the project name above wherever
    the canonical command refers to `$ARGUMENTS`. Start from the Design Reference
    and Design Handoff Plan under `design/handoff/`; do not invent independent
-   replacement source documents.
+   replacement source documents. Treat only each prototype's `data-app-root` as
+   production UI and translate mobile HTML to native Expo/React Native primitives;
+   never ship preview shells or prototype HTML in a WebView.
 4. Never ask the user to paste a connection string, password, token, or credential.
    Confirm only the environment-variable name, its configured/unconfigured status,
    and sanitized non-secret identifiers.

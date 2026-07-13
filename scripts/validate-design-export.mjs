@@ -34,11 +34,50 @@ const prototypeContracts = groups.prototypes.filter(
     /(^|\/)logo--[^/]+\.html$/i.test(file) ||
     /\.dc\.html$/i.test(file),
 );
+const screenContracts = prototypeContracts.filter(
+  (file) => !/(^|\/)logo--[^/]+\.html$/i.test(file),
+);
+const supportedSurfaces = new Set(['web', 'mobile', 'tablet', 'desktop']);
+const screenMetadata = [];
+const metadataErrors = [];
 
-if (!prototypeContracts.length) {
+for (const file of screenContracts) {
+  const html = fs.readFileSync(path.join(DESIGN, file), 'utf8');
+  const surfaces = [
+    ...html.matchAll(/<[a-z][^>]*\bdata-prototype-surface\s*=\s*["']([^"']+)["'][^>]*>/gi),
+  ];
+  const appRoots = html.match(/<[a-z][^>]*\bdata-app-root\b[^>]*>/gi) || [];
+
+  if (surfaces.length !== 1) {
+    metadataErrors.push(
+      `design/${file} must declare exactly one data-prototype-surface; found ${surfaces.length}.`,
+    );
+  }
+  const surface = surfaces[0]?.[1]?.toLowerCase() || '';
+  if (surface && !supportedSurfaces.has(surface)) {
+    metadataErrors.push(
+      `design/${file} uses unsupported surface "${surface}"; use web, mobile, tablet, or desktop.`,
+    );
+  }
+  if (appRoots.length !== 1) {
+    metadataErrors.push(
+      `design/${file} must contain exactly one data-app-root; found ${appRoots.length}.`,
+    );
+  }
+  if (surfaces.length === 1 && supportedSurfaces.has(surface) && appRoots.length === 1) {
+    screenMetadata.push({ file, surface });
+  }
+}
+
+if (!screenContracts.length) {
   throw new Error(
-    'No supported prototype contracts found under design/prototypes/. ' +
-      'Import screen--*.html, logo--*.html, or *.dc.html files before running /finalize-build-docs.',
+    'No supported screen prototype contracts found under design/prototypes/. ' +
+      'Import screen--*.html or *.dc.html files before running /finalize-build-docs.',
+  );
+}
+if (metadataErrors.length) {
+  throw new Error(
+    'Prototype production-boundary validation failed:\n- ' + metadataErrors.join('\n- '),
   );
 }
 if (referenceDocs.length !== 1 || handoffPlans.length !== 1) {
@@ -56,6 +95,10 @@ for (const [group, files] of Object.entries(groups)) {
   if (!files.length) {
     console.log(`- warning: design/${group}/ is missing or empty`);
   }
+}
+console.log(`\nscreen prototype contracts (${screenMetadata.length})`);
+for (const { file, surface } of screenMetadata) {
+  console.log(`- design/${file} [${surface}]`);
 }
 console.log('\ndesign handoff documents (2)');
 console.log(`- design/${referenceDocs[0]}`);

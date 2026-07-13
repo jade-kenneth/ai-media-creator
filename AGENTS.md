@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@37cdb1709b178a5867c5b76723d27b8340135f12`
+Source revision: `jade-kenneth/skills-source@6c01f16e98c0ebbc830f6073cc4b831abf42398a`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -29,6 +29,11 @@ progress. Check `[ ]` → `[~]` → `[x]` only after the phase's QA rows pass.
   this file (code structure ONLY) > boilerplate UI (never wins, always discarded).
 - Fidelity: a screen is done only when it passes every row of the Fidelity QA
   checklist at the end of the Implementation Plan. "Close enough" is a failure.
+- Prototype boundary: implement only `data-app-root`; never ship device frames,
+  preview shells, presentation canvases, annotations, or presentation-only content.
+- Platform-native conversion: web may reuse compatible markup; Expo/React Native
+  must use native primitives and must not ship prototype HTML in a WebView or copy
+  fixed preview dimensions into a production container.
 - Reuse-not-rebuild: auth, authz, GraphQL client/server, codegen, S3, CI are
   provided ([BP]) — extend the existing primitive, never re-implement it.
 - Do not mark a phase [x] without running its QA rows. Do not skip ahead.

@@ -72,6 +72,8 @@ Open Claude Code in the product repository and invoke:
 The project command delegates to the locked canonical command from skills-source
 and reconciles Claude Design's exported pair with the actual boilerplate into
 the canonical repository-root `Product Specification.md` and `Implementation Plan.md`.
+Only each prototype's `data-app-root` becomes production UI. Preview/device shells
+are excluded, and mobile HTML is translated into native Expo/React Native primitives.
 See [`docs/design-handoff.md`](docs/design-handoff.md) for inputs, security rules,
 completeness checks, and the executor handoff.
 
