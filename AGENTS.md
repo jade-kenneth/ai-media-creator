@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@43848dc699b90ecb7d8038657b5219a6ff83c8f3`
+Source revision: `jade-kenneth/skills-source@5087c7676b6bc935829782f8728d7a8d22f43e23`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX and plan;
 Claude Code distilled them into the two docs below. Your job is to build, faithfully.
@@ -176,7 +176,7 @@ GraphQL operations return typed domain payloads directly. Do not wrap successful
 │   └── app-mobile/             # Expo React Native application
 ├── packages/
 │   └── shared-constants/       # Cross-app types, constants, schemas, and pure logic
-├── .agents/skills/             # Agent tooling and workspace instructions
+├── .skills-source/             # Locked reusable skills and conventions
 ├── AGENTS.md                   # Repository-wide agent rules
 ├── nx.json                     # Nx plugins and task configuration
 ├── package.json                # Root scripts and npm workspaces
@@ -242,7 +242,7 @@ Rules:
 ## Agent instructions
 
 - Treat the root `AGENTS.md` as the repository-wide authority.
-- Use relevant instructions under `.agents/skills/` when the task matches them.
+- Use relevant instructions under `.skills-source/skills/` when the task matches them.
 - Keep reusable guidance product-neutral; do not hardcode paths from another project.
 - Update instructions only when a durable repository rule changes, not for one-off implementation details.
 
