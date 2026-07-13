@@ -1,34 +1,35 @@
 # Project structure
 
-Use this guide when deciding where new code belongs or reviewing whether a change respects the Nx workspace boundaries.
+Reusable ownership and placement rules are owned by
+[`skills-source/conventions/project-structure.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/project-structure.md)
+and embedded in the generated root `AGENTS.md`. The locked detailed source is:
 
-## Applications
+```text
+.skills-source/conventions/project-structure.md
+```
 
-- `apps/app-api`: NestJS GraphQL API, persistence, authentication, integrations, and server-only orchestration.
-- `apps/app-web`: Next.js tenant and super-admin interface.
-- `apps/app-mobile`: Expo tenant-aware mobile application.
+## Workspace map
 
-Application-specific components, hooks, schemas, services, and business rules stay inside their owning app.
+| Path | Owner |
+| --- | --- |
+| `apps/app-api` | NestJS GraphQL/REST API, persistence, auth, integrations, and server orchestration |
+| `apps/app-web` | Next.js tenant and super-admin web application |
+| `apps/app-mobile` | Expo tenant-aware mobile application |
+| `packages/shared-constants` | Stable product-neutral contracts and pure logic used across apps |
 
-## Shared packages
+Use the full **Project Structure** section in `AGENTS.md` for API module layout,
+feature organization, GraphQL placement, generated files, and the placement
+checklist. Do not maintain another copy of those rules here.
 
-Use `packages/` only for code that is consumed by multiple applications and has a clear stable contract. Good candidates include shared constants, domain-neutral types, validation contracts, and pure utility functions.
+## Boilerplate boundary
 
-Do not move code into a shared package merely to shorten an import path. Avoid shared packages that depend on one app's framework internals, environment variables, database models, or UI assumptions.
+In product repositories, product-specific API modules/scripts and web/mobile
+features belong to the product. Reusable architecture, common utilities, libs,
+providers, security boundaries, repository abstractions, shared packages, and
+third-party integration scaffolds remain possible boilerplate contributions.
 
-## Feature placement
+Run the advisory detector on a product branch with:
 
-Keep a feature vertically discoverable. Place its UI, state, API operations, tests, and local helpers close together according to the conventions of the owning application. Cross-feature imports should go through an intentional public module boundary rather than reaching into another feature's internals.
-
-## Generated and synchronized files
-
-Treat `AGENTS.md` and hydrated skill-source content as generated inputs. Update their source or synchronization process instead of manually patching generated output.
-
-## Before adding a file
-
-Ask:
-
-1. Which application owns this behavior?
-2. Is the code genuinely reused today, rather than possibly reused later?
-3. Does the location make tests and ownership obvious?
-4. Does it introduce an unnecessary dependency between apps or features?
+```bash
+npm run boilerplate:contributions
+```

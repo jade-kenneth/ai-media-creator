@@ -1,70 +1,59 @@
-# Development workflow
+# Workspace workflow commands
 
-Use this workflow for features, fixes, enhancements, and refactors.
+The canonical change workflow, roles, task phases, validation policy, commit
+style, and pull-request style are owned by
+[`skills-source/conventions/workflow.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/workflow.md)
+and embedded in the generated root `AGENTS.md`. The locked detailed source is:
 
-## 1. Define the task
-
-Record the problem, desired outcome, scope boundaries, acceptance criteria, risks, and relevant commands. Break larger work into phases with checkboxes that describe observable outcomes.
-
-Example:
-
-```md
-## Phase 1 — API contract
-- [ ] Define validated input and output types
-- [ ] Enforce authorization and tenant isolation
-- [ ] Cover success and rejected cases
+```text
+.skills-source/conventions/workflow.md
 ```
 
-Update checkboxes only when the corresponding result is complete and verified.
+This page is only an operational command index for this workspace.
 
-## 2. Create a focused branch
+## Application validation
 
-Use a short descriptive branch name such as:
-
-- `feat/account-invitations`
-- `fix/tenant-upload-access`
-- `chore/update-agent-skills`
-
-Do not mix unrelated cleanup into the same branch.
-
-## 3. Implement in small slices
-
-Prefer a thin complete path over disconnected layers. Keep generated files, migrations, schemas, clients, tests, and documentation synchronized with the source change that requires them.
-
-## 4. Validate
-
-Run the relevant checks, normally:
+Run focused project checks first, then the broadest practical workspace checks:
 
 ```bash
 npm run lint
 npm run typecheck
-npm run build
 npm test --workspaces --if-present
-npm run check-skills
+npm run build
 ```
 
-Run narrower tests during development, then the broadest practical checks before opening the pull request.
+## Generated GraphQL clients
 
-## 5. Commit intentionally
+After changing SDL, regenerate the affected clients instead of editing generated
+files:
 
-Use imperative Conventional Commit-style messages where practical:
+```bash
+npm run codegen --workspace=app-web
+npm run codegen --workspace=app-mobile
+```
 
-- `feat: add tenant invitation flow`
-- `fix: enforce upload ownership`
-- `docs: clarify local setup`
-- `chore: update locked skills revision`
+## Skills instructions
 
-Each commit should represent a coherent change and leave the repository in an understandable state.
+```bash
+npm run sync-skills
+npm run check-skills
+npm run update-skills -- --sha <full-skills-source-sha>
+```
 
-## 6. Prepare the pull request
+`sync-skills` restores the currently approved revision. `update-skills`
+intentionally selects a new reviewed revision.
 
-Explain:
+## Boilerplate code tracking in product repositories
 
-- what changed
-- why it changed
-- user or developer impact
-- security or contract considerations
-- validation performed
-- generated files or follow-up work
+```bash
+npm run boilerplate:setup
+npm run boilerplate:check
+npm run boilerplate:contributions
+npm run boilerplate:ack -- --sha <full-app-boilerplate-sha>
+```
 
-Keep pull requests scoped to one task. Mark incomplete or exploratory work as draft.
+These commands discover and record updates; they do not merge code. Review and
+port applicable boilerplate commits on a dedicated product branch.
+
+Do not add general workflow prose here. Change the canonical `skills-source`
+workflow and regenerate `AGENTS.md` instead.
