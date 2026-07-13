@@ -3,7 +3,24 @@
 Run this workflow in the product repository created from app-boilerplate, never in
 the reusable boilerplate source repository.
 
-## 1. Import the export
+## 1. Prepare the Claude Design prompt
+
+Open Claude Code in the new product repository and run:
+
+```text
+/prepare-claude-design <project name>
+```
+
+The project command delegates to the canonical locked instructions and asks only
+for missing product, user, surface, flow, brand, platform, accessibility, and scope
+decisions. It writes `design/CLAUDE_DESIGN_PROMPT.md`. Review that file and paste
+its complete contents into Claude Design.
+
+Claude Design then creates the actual screen contracts, design system, planning
+documents, interactions, responsive behavior, states, and export report. This
+preparation command does not generate UI or engineering build documents itself.
+
+## 2. Import the export
 
 Copy the Claude Design output into these authority-separated folders:
 
@@ -18,7 +35,7 @@ Do not rename or rewrite prototype files merely to satisfy a convention. The
 canonical command supports both named screen exports and `*.dc.html` Design
 Component exports.
 
-## 2. Hydrate and validate
+## 3. Hydrate and validate
 
 ```bash
 npm run sync-skills
@@ -30,7 +47,7 @@ Validation requires at least one supported prototype contract. A missing design
 system or planning export produces a warning because `/gen-build-docs` has explicit
 fallback behavior for both.
 
-## 3. Generate the paired build documents
+## 4. Generate the paired build documents
 
 Open Claude Code in the product repository and run:
 
@@ -56,7 +73,7 @@ Be ready to confirm:
 The command must stop for missing prototypes, unexplained planned screens, an
 ambiguous app mapping, or a material stack conflict instead of inventing an answer.
 
-## 4. Review and commit the handoff
+## 5. Review and commit the handoff
 
 Verify that every prototype has a Reference section, every planned-but-unprototyped
 surface is marked `⚠ needs design`, and the Task Plan reuses retained architecture.

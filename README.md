@@ -46,8 +46,15 @@ documented in each app's `.env.example`.
 
 ## Claude Design handoff
 
-After creating a product repository, copy the Claude Design export into
-`design/prototypes/`, `design/system/`, and `design/planning/`. Then run:
+Before design work begins, open Claude Code in the product repository and run:
+
+```text
+/prepare-claude-design <project name>
+```
+
+This creates `design/CLAUDE_DESIGN_PROMPT.md`. Paste that file into Claude
+Design, complete the design, and copy the export into `design/prototypes/`,
+`design/system/`, and `design/planning/`. Then run:
 
 ```bash
 npm run sync-skills

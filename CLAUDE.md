@@ -24,6 +24,9 @@
 
 ## Design (origin: Claude Design)
 
+- For a new product, run `/prepare-claude-design <project name>` first. It
+  creates the copy-ready `design/CLAUDE_DESIGN_PROMPT.md`; paste that prompt into
+  Claude Design and import the completed export before running `/gen-build-docs`.
 - ALL product planning and UI/UX for this project was done in Claude Design and
   exported to design/. That export is the origin of look, behavior, and scope.
   This boilerplate contributes BACKEND PLUMBING ONLY; its UI is discarded.
