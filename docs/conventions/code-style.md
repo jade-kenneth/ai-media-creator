@@ -1,8 +1,9 @@
 # Code style in this workspace
 
-Reusable code-style rules are owned by
-[`skills-source/conventions/code-style.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/code-style.md).
-This repository consumes the reviewed revision recorded in
+Reusable code-style rules are owned by `skills-source`. Its
+[`conventions/code-style.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/code-style.md)
+page is the upstream editing location and may be newer than this project's
+approved rules. This repository consumes the reviewed revision recorded in
 `skills-source.lock.json` and embeds it in the generated root `AGENTS.md`.
 
 Before changing application code, read the **Code Style** section of `AGENTS.md`.

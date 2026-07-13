@@ -1,8 +1,10 @@
 # Project structure
 
-Reusable ownership and placement rules are owned by
-[`skills-source/conventions/project-structure.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/project-structure.md)
-and embedded in the generated root `AGENTS.md`. The locked detailed source is:
+Reusable ownership and placement rules are owned by `skills-source`. Its
+[`conventions/project-structure.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/project-structure.md)
+page is the upstream editing location and may be newer than this project's
+approved rules. The reviewed rules are embedded in the generated root
+`AGENTS.md`. The locked detailed source is:
 
 ```text
 .skills-source/conventions/project-structure.md

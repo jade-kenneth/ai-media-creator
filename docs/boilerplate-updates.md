@@ -15,8 +15,16 @@ git commit -m "chore: record boilerplate starting revision"
 ```
 
 The command safely adds the `boilerplate` remote when missing, fetches `main`,
-and records the revision the new product starts from. Re-running it is safe. It
-refuses to overwrite a remote with an unexpected URL.
+and detects the revision the product was actually created from. It uses shared
+Git history for a normal clone and the initial tree for a GitHub template copy.
+It never silently marks a newer upstream revision as reviewed. Re-running it is
+safe, and it refuses to overwrite a remote with an unexpected URL.
+
+If the source revision cannot be detected, provide the exact commit explicitly:
+
+```bash
+npm run boilerplate:setup -- --sha <full-source-sha>
+```
 
 ## Check for updates
 

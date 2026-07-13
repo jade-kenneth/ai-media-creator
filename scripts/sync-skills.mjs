@@ -126,6 +126,48 @@ function requestedSha() {
   return sha;
 }
 
+function verifyShaOnConfiguredRef(lock, sha) {
+  const tempPath = path.join(
+    os.tmpdir(),
+    `skills-source-membership-${process.pid}-${Date.now()}`,
+  );
+  fs.rmSync(tempPath, { recursive: true, force: true });
+  fs.mkdirSync(tempPath, { recursive: true });
+
+  try {
+    git(['init', '--quiet'], tempPath);
+    git(['remote', 'add', 'origin', lock.repository], tempPath);
+    git(
+      [
+        'fetch',
+        '--quiet',
+        '--no-tags',
+        'origin',
+        `refs/heads/${lock.ref}:refs/remotes/origin/${lock.ref}`,
+      ],
+      tempPath,
+    );
+    try {
+      git(
+        [
+          'merge-base',
+          '--is-ancestor',
+          sha,
+          `refs/remotes/origin/${lock.ref}`,
+        ],
+        tempPath,
+      );
+    } catch {
+      throw new Error(
+        `${sha} is not part of ${lock.repository}#${lock.ref}. ` +
+          'Use --allow-unmerged only for an intentional, reviewed exception.',
+      );
+    }
+  } finally {
+    fs.rmSync(tempPath, { recursive: true, force: true });
+  }
+}
+
 function check(lock) {
   hydrate(lock);
   const checkPath = path.join(
@@ -168,9 +210,13 @@ switch (command) {
     generateAgents(lock);
     break;
   case 'update': {
+    const requested = requestedSha();
+    if (requested && !process.argv.includes('--allow-unmerged')) {
+      verifyShaOnConfiguredRef(lock, requested);
+    }
     const nextLock = {
       ...lock,
-      sha: requestedSha() || resolveLatestSha(lock),
+      sha: requested || resolveLatestSha(lock),
     };
     writeLock(nextLock);
     hydrate(nextLock);

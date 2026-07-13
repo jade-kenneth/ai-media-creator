@@ -64,11 +64,47 @@ function ensureRemote(lock) {
   return git(['rev-parse', `refs/remotes/boilerplate/${lock.ref}`]);
 }
 
-function requestedSha() {
+function requestedSha({ required = true } = {}) {
   const index = process.argv.indexOf('--sha');
   const sha = index === -1 ? '' : process.argv[index + 1] || '';
+  if (!sha && !required) return '';
   if (!SHA_PATTERN.test(sha)) throw new Error('--sha must be a full 40-character commit SHA.');
   return sha;
+}
+
+function assertUpstreamAncestor(lock, sha, latest) {
+  try {
+    git(['merge-base', '--is-ancestor', sha, latest]);
+  } catch {
+    throw new Error(`${sha} is not part of boilerplate/${lock.ref}.`);
+  }
+}
+
+function detectStartingSha(lock) {
+  const upstreamRef = `refs/remotes/boilerplate/${lock.ref}`;
+  const sharedHistory = tryGit(['merge-base', 'HEAD', upstreamRef]);
+  if (SHA_PATTERN.test(sharedHistory)) return sharedHistory;
+
+  const upstreamByTree = new Map();
+  for (const line of git(['log', '--format=%H%x1f%T', upstreamRef])
+    .split('\n')
+    .filter(Boolean)) {
+    const [sha, tree] = line.split('\u001f');
+    if (!upstreamByTree.has(tree)) upstreamByTree.set(tree, sha);
+  }
+  const roots = git(['rev-list', '--max-parents=0', 'HEAD'])
+    .split('\n')
+    .filter(Boolean);
+  for (const root of roots) {
+    const tree = git(['rev-parse', `${root}^{tree}`]);
+    const match = upstreamByTree.get(tree);
+    if (match) return match;
+  }
+
+  throw new Error(
+    'Unable to identify the boilerplate revision used to create this product. ' +
+      "Run 'npm run boilerplate:setup -- --sha <full-source-sha>'.",
+  );
 }
 
 function classify(subject, body) {
@@ -104,8 +140,13 @@ function setup() {
   }
   const latest = ensureRemote(lock);
   if (!lock.reviewedThroughSha) {
-    writeLock({ ...lock, reviewedThroughSha: latest });
-    console.log(`Initialized boilerplate lock at ${latest}.`);
+    const startingSha = requestedSha({ required: false }) || detectStartingSha(lock);
+    assertUpstreamAncestor(lock, startingSha, latest);
+    writeLock({ ...lock, reviewedThroughSha: startingSha });
+    console.log(`Initialized boilerplate lock at source revision ${startingSha}.`);
+    if (startingSha !== latest) {
+      console.log(`Latest upstream is ${latest}; run 'npm run boilerplate:check' to review updates.`);
+    }
   } else {
     console.log(`Reviewed through: ${lock.reviewedThroughSha}`);
     console.log(`Latest upstream: ${latest}`);
@@ -122,11 +163,7 @@ function check() {
   if (!lock.reviewedThroughSha) {
     throw new Error("Boilerplate lock is not initialized. Run 'npm run boilerplate:setup' and commit the lock file.");
   }
-  try {
-    git(['merge-base', '--is-ancestor', lock.reviewedThroughSha, latest]);
-  } catch {
-    throw new Error('The reviewed revision is not an ancestor of latest upstream. Review history manually.');
-  }
+  assertUpstreamAncestor(lock, lock.reviewedThroughSha, latest);
   const commits = availableCommits(lock.reviewedThroughSha, latest);
   if (!commits.length) {
     console.log(`Boilerplate is current at ${latest}.`);
@@ -159,11 +196,7 @@ function acknowledge() {
   }
   const latest = ensureRemote(lock);
   const sha = requestedSha();
-  try {
-    git(['merge-base', '--is-ancestor', sha, latest]);
-  } catch {
-    throw new Error(`${sha} is not part of boilerplate/${lock.ref}.`);
-  }
+  assertUpstreamAncestor(lock, sha, latest);
   writeLock({ ...lock, reviewedThroughSha: sha });
   console.log(`Recorded boilerplate review through ${sha}.`);
   console.log('Commit boilerplate.lock.json with the update or review PR.');
