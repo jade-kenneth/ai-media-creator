@@ -44,6 +44,12 @@ Configure MongoDB, JWT, S3, email, and Expo push credentials in `.env` before
 using the related integrations. App-specific public environment variables are
 documented in each app's `.env.example`.
 
+Before starting product work, follow the
+[customization checklist](docs/getting-started/customize.md) to initialize
+boilerplate tracking, rename workspace identifiers, replace starter
+presentation, configure environments, and verify that placeholder values do not
+leak into a deployment.
+
 ## Useful commands
 
 ```bash
@@ -51,6 +57,7 @@ npm run build
 npm run lint
 npm run typecheck
 npm test --workspaces --if-present
+npm run check-skills
 ```
 
 When this template becomes a new product repository, initialize its upstream
@@ -75,4 +82,12 @@ npm run codegen --workspace=app-web
 npm run codegen --workspace=app-mobile
 ```
 
-See `docs/` for the retained platform architecture and operational notes.
+## Engineering conventions
+
+- [Project structure](docs/conventions/project-structure.md)
+- [Code style](docs/conventions/code-style.md)
+- [Development workflow](docs/conventions/workflow.md)
+
+Agent instructions are generated from the locked `skills-source` revision. Use
+`npm run sync-skills` to hydrate the locked revision, `npm run update-skills` to
+intentionally update it, and `npm run check-skills` to detect drift.
