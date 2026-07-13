@@ -1,42 +1,38 @@
-# Code style
+# Code style in this workspace
 
-Use these rules for new code and focused refactors. Follow the local application pattern when it is more specific.
+Reusable code-style rules are owned by
+[`skills-source/conventions/code-style.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/code-style.md).
+This repository consumes the reviewed revision recorded in
+`skills-source.lock.json` and embeds it in the generated root `AGENTS.md`.
 
-## Naming
+Before changing application code, read the **Code Style** section of `AGENTS.md`.
+Detailed locked source is available locally at:
 
-- Use descriptive names that communicate domain intent.
-- Use `PascalCase` for components, classes, types, and enums.
-- Use `camelCase` for functions, variables, hooks, and object properties.
-- Prefix React hooks with `use`.
-- Avoid generic names such as `data`, `item`, `handler`, or `utils` when a domain-specific name is available.
+```text
+.skills-source/conventions/code-style.md
+```
 
-## TypeScript
+Do not copy general naming, TypeScript, validation, error, GraphQL, persistence,
+or testing rules into this document. That would create a second editable source.
 
-- Prefer explicit domain types over `any` and broad type assertions.
-- Validate untrusted input at the boundary.
-- Keep public function contracts small and intentional.
-- Model impossible states out of the type system where practical.
+## Workspace-specific application
 
-## Error handling
+- Follow the closest implementation in the owning app before adding a pattern.
+- Treat GraphQL SDL as the API contract and regenerate web/mobile client types
+  with their existing `codegen` workspace commands.
+- Use the existing GraphQL clients, React Query wrappers, API error hierarchy,
+  repository abstractions, authentication, tenancy, and integration scaffolds.
+- Keep product behavior in its owning app; put code in `packages/` only when it
+  has a stable cross-app contract.
 
-- Fail with actionable, domain-appropriate errors.
-- Preserve the original cause when translating infrastructure errors.
-- Do not expose secrets, stack traces, database details, or provider payloads to clients.
-- Log enough structured context to diagnose failures without logging credentials or sensitive personal data.
+## Changing a reusable rule
 
-## API contracts
+Change the canonical file in `skills-source`, validate it there, and then adopt
+the reviewed revision here:
 
-GraphQL operations return typed domain payloads directly. Do not add an extra REST-style response envelope such as `{ success, message, data }` unless an external integration explicitly requires it.
+```bash
+npm run update-skills -- --sha <full-skills-source-sha>
+npm run check-skills
+```
 
-Keep authorization and tenant checks on the server. Client-side visibility is not an authorization boundary.
-
-## UI and state
-
-- Keep server state in the established query layer.
-- Keep transient interface state local unless multiple distant surfaces truly share it.
-- Reuse established components before introducing a parallel pattern.
-- Include loading, empty, error, disabled, and success states for user-triggered operations.
-
-## Testing
-
-Test observable behavior and contract shape rather than private implementation details. Include rejected input, authorization, tenant isolation, and error cases—not only the happy path.
+Never edit generated `AGENTS.md` to make a durable rule change.
