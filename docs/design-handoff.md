@@ -40,6 +40,26 @@ Do not rename or rewrite prototype files merely to satisfy a convention. The
 canonical command supports both named screen exports and `*.dc.html` Design
 Component exports.
 
+Every screen prototype must identify its target and production boundary:
+
+```html
+<body data-prototype-surface="mobile">
+  <div data-preview-shell>
+    <main data-app-root>
+      <!-- Actual application screen -->
+    </main>
+  </div>
+</body>
+```
+
+Use `web`, `mobile`, `tablet`, or `desktop` as the surface. Device frames,
+desktop centering canvases, browser chrome, labels, and annotations stay outside
+`data-app-root`; mark presentation annotations
+`data-handoff="presentation-only"`. A reference phone size is only a comparison
+viewport. Expo/React Native implementation uses native primitives, navigation,
+safe areas, scrolling, keyboard behavior, gestures, and sheets—not a WebView or
+copied DOM/CSS.
+
 ## 3. Hydrate and validate
 
 ```bash
@@ -48,7 +68,8 @@ npm run check-skills
 npm run design:validate
 ```
 
-Validation requires at least one supported prototype contract and exactly one
+Validation requires at least one supported screen prototype, exactly one supported
+`data-prototype-surface` and one `data-app-root` per screen, and exactly one
 `design/handoff/` Design Reference and Design Handoff Plan. A missing design system or planning export
 produces a warning because `/finalize-build-docs` has explicit fallback behavior for
 both.
@@ -79,8 +100,9 @@ Be ready to confirm:
   renames or removals;
 - stack overrides, or that the existing boilerplate stack wins.
 
-The command must stop for missing prototypes, unexplained planned screens, an
-ambiguous app mapping, or a material stack conflict instead of inventing an answer.
+The command must stop for missing prototypes, missing or duplicate production
+boundaries, unexplained planned screens, an ambiguous app mapping, or a material
+stack conflict instead of inventing an answer.
 
 ## 5. Review and commit the handoff
 

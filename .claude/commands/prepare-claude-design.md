@@ -14,7 +14,9 @@ Project name: $ARGUMENTS
 3. Write the result to `design/CLAUDE_DESIGN_PROMPT.md` as required by the
    canonical command. The prompt must require Claude Design's export to include
    `design/handoff/[PROJECT] Design Reference.md` and
-   `design/handoff/[PROJECT] Design Handoff Plan.md`.
+   `design/handoff/[PROJECT] Design Handoff Plan.md`. Every screen prototype must
+   also declare one supported `data-prototype-surface` and exactly one
+   `data-app-root`; preview/device shells remain outside that boundary.
 4. Never request or include passwords, connection strings, tokens, API keys,
    production data, or other secrets.
 

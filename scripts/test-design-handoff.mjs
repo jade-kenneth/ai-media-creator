@@ -29,10 +29,17 @@ function run(expectSuccess) {
 }
 
 try {
-  assert.match(run(false), /No supported prototype contracts found/);
+  assert.match(run(false), /No supported screen prototype contracts found/);
 
   fs.mkdirSync(path.join(TEMP, 'design', 'prototypes'), { recursive: true });
   fs.writeFileSync(path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'), '<main>Home</main>\n');
+  assert.match(run(false), /Prototype production-boundary validation failed/);
+  assert.match(run(false), /must declare exactly one data-prototype-surface/);
+  assert.match(run(false), /must contain exactly one data-app-root/);
+  fs.writeFileSync(
+    path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
+    '<style>[data-app-root]{width:100%}</style><body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div><script>document.querySelector("[data-app-root]")</script></body>\n',
+  );
   assert.match(run(false), /must export exactly one/);
   fs.mkdirSync(path.join(TEMP, 'design', 'handoff'), { recursive: true });
   fs.writeFileSync(
@@ -45,12 +52,24 @@ try {
   );
   const partial = run(true);
   assert.match(partial, /prototypes \(1\)/);
+  assert.match(partial, /screen prototype contracts \(1\)/);
+  assert.match(partial, /design\/prototypes\/Home\.dc\.html \[mobile\]/);
   assert.match(partial, /warning: design\/system\/ is missing or empty/);
   assert.match(partial, /design handoff documents \(2\)/);
   assert.match(partial, /design\/handoff\/Sample Design Reference\.md/);
   assert.match(partial, /design\/handoff\/Sample Design Handoff Plan\.md/);
   assert.match(partial, /\/finalize-build-docs <project name>/);
   assert.match(partial, /Product Specification\.md and Implementation Plan\.md/);
+
+  fs.writeFileSync(
+    path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
+    '<body data-prototype-surface="mobile"><main data-app-root>One</main><main data-app-root>Two</main></body>\n',
+  );
+  assert.match(run(false), /must contain exactly one data-app-root; found 2/);
+  fs.writeFileSync(
+    path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
+    '<style>[data-app-root]{width:100%}</style><body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div><script>document.querySelector("[data-app-root]")</script></body>\n',
+  );
 
   fs.writeFileSync(
     path.join(TEMP, 'design', 'handoff', 'Duplicate Design Reference.md'),

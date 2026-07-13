@@ -30,8 +30,10 @@
 - ALL product planning and UI/UX for this project was done in Claude Design and
   exported to design/. That export is the origin of look, behavior, and scope.
   This boilerplate contributes BACKEND PLUMBING ONLY; its UI is discarded.
-- design/prototypes/ — pixel-exact, behavior-exact contract. Ported verbatim;
-  never rebuilt from a written description. Never loose inspiration.
+- design/prototypes/ — pixel-exact, behavior-exact contract inside each screen's
+  `data-app-root`. Exclude device frames, preview shells, desktop canvases, and
+  presentation-only annotations. Preserve outcomes exactly, but translate mobile
+  HTML into native Expo/React Native primitives rather than WebView or copied DOM/CSS.
 - design/system/ — normative tokens/type/color/motion/voice.
 - design/planning/ — context only (flows, IA, scope). Never ported as markup.
 - Conflict order: prototypes > system > planning > repo conventions (code only) >
