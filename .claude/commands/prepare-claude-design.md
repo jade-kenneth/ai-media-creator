@@ -18,6 +18,6 @@ Project name: $ARGUMENTS
 4. Never request or include passwords, connection strings, tokens, API keys,
    production data, or other secrets.
 
-Do not design the screens or generate the engineering Reference and Task Plan in
+Do not design the screens or generate the engineering Product Specification or Implementation Plan in
 this wrapper. Claude Design creates the design export; `/finalize-build-docs` consumes
 that completed export afterward.
