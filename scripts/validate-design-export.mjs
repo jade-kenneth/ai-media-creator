@@ -21,15 +21,14 @@ const groups = {
   prototypes: filesUnder(path.join(DESIGN, 'prototypes')),
   system: filesUnder(path.join(DESIGN, 'system')),
   planning: filesUnder(path.join(DESIGN, 'planning')),
+  handoff: filesUnder(path.join(DESIGN, 'handoff')),
 };
-const designRootFiles = fs.existsSync(DESIGN)
-  ? fs.readdirSync(DESIGN, { withFileTypes: true })
-      .filter((entry) => entry.isFile())
-      .map((entry) => entry.name)
-      .sort()
-  : [];
-const referenceDocs = designRootFiles.filter((file) => /Reference\.md$/i.test(file));
-const taskPlanDocs = designRootFiles.filter((file) => / Task Plan\.md$/i.test(file));
+const referenceDocs = groups.handoff.filter(
+  (file) => /(^|\/)[^/]+ Design Reference\.md$/i.test(file),
+);
+const handoffPlans = groups.handoff.filter(
+  (file) => /(^|\/)[^/]+ Design Handoff Plan\.md$/i.test(file),
+);
 const prototypeContracts = groups.prototypes.filter(
   (file) => /(^|\/)screen--[^/]+\.html$/i.test(file) ||
     /(^|\/)logo--[^/]+\.html$/i.test(file) ||
@@ -42,10 +41,11 @@ if (!prototypeContracts.length) {
       'Import screen--*.html, logo--*.html, or *.dc.html files before running /gen-build-docs.',
   );
 }
-if (referenceDocs.length !== 1 || taskPlanDocs.length !== 1) {
+if (referenceDocs.length !== 1 || handoffPlans.length !== 1) {
   throw new Error(
-    'Claude Design must export exactly one design/[PROJECT]Reference.md and one ' +
-      'design/[PROJECT] Task Plan.md before running /gen-build-docs.',
+    'Claude Design must export exactly one ' +
+      'design/handoff/[PROJECT] Design Reference.md and one ' +
+      'design/handoff/[PROJECT] Design Handoff Plan.md before running /gen-build-docs.',
   );
 }
 
@@ -57,9 +57,9 @@ for (const [group, files] of Object.entries(groups)) {
     console.log(`- warning: design/${group}/ is missing or empty`);
   }
 }
-console.log('\npaired build documents (2)');
+console.log('\ndesign handoff documents (2)');
 console.log(`- design/${referenceDocs[0]}`);
-console.log(`- design/${taskPlanDocs[0]}`);
+console.log(`- design/${handoffPlans[0]}`);
 console.log(
   '\nDesign export is ready. In Claude Code run: /gen-build-docs <project name>',
 );

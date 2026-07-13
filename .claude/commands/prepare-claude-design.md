@@ -13,7 +13,8 @@ Project name: $ARGUMENTS
    the canonical command refers to `$ARGUMENTS`.
 3. Write the result to `design/CLAUDE_DESIGN_PROMPT.md` as required by the
    canonical command. The prompt must require Claude Design's export to include
-   `design/[PROJECT]Reference.md` and `design/[PROJECT] Task Plan.md`.
+   `design/handoff/[PROJECT] Design Reference.md` and
+   `design/handoff/[PROJECT] Design Handoff Plan.md`.
 4. Never request or include passwords, connection strings, tokens, API keys,
    production data, or other secrets.
 

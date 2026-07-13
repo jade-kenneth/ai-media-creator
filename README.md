@@ -54,8 +54,9 @@ Before design work begins, open Claude Code in the product repository and run:
 
 This creates `design/CLAUDE_DESIGN_PROMPT.md`. Paste that file into Claude
 Design, complete the design, and copy the export into `design/prototypes/`,
-`design/system/`, and `design/planning/`, including the design-root
-`[PROJECT]Reference.md` and `[PROJECT] Task Plan.md`. Then run:
+`design/system/`, and `design/planning/`, including
+`design/handoff/[PROJECT] Design Reference.md` and
+`design/handoff/[PROJECT] Design Handoff Plan.md`. Then run:
 
 ```bash
 npm run sync-skills

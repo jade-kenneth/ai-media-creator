@@ -18,7 +18,8 @@ its complete contents into Claude Design.
 
 Claude Design then creates the actual screen contracts, design system, planning
 documents, interactions, responsive behavior, states, export report, and the
-design-authored `[PROJECT]Reference.md` and `[PROJECT] Task Plan.md`. This
+design-authored `[PROJECT] Design Reference.md` and
+`[PROJECT] Design Handoff Plan.md`. This
 preparation command does not generate UI or engineering build documents itself.
 
 ## 2. Import the export
@@ -30,8 +31,9 @@ design/
 ├── prototypes/              # screen--*.html, logo--*.html, *.dc.html contracts
 ├── system/                  # tokens, typography, color, motion, and voice
 ├── planning/                # flows, IA, journeys, scope, PRD fragments
-├── [PROJECT]Reference.md     # Claude Design's UI and behavior source
-└── [PROJECT] Task Plan.md    # Claude Design's design-derived phased plan
+└── handoff/
+    ├── [PROJECT] Design Reference.md
+    └── [PROJECT] Design Handoff Plan.md
 ```
 
 Do not rename or rewrite prototype files merely to satisfy a convention. The
@@ -47,7 +49,7 @@ npm run design:validate
 ```
 
 Validation requires at least one supported prototype contract and exactly one
-design-root Reference and Task Plan. A missing design system or planning export
+`design/handoff/` Design Reference and Design Handoff Plan. A missing design system or planning export
 produces a warning because `/gen-build-docs` has explicit fallback behavior for
 both.
 
@@ -61,11 +63,12 @@ Open Claude Code in the product repository and run:
 
 The project-level command delegates to the canonical locked instructions at
 `.skills-source/commands/gen-build-docs.md`. It starts from Claude Design's
-exported paired documents, verifies them against every design file, scans the
+Design Reference and Design Handoff Plan, verifies them against every design file, scans the
 actual boilerplate, resolves `VERIFY IN REPO` assumptions, creates the trim audit,
 and writes reconciled canonical copies to the repository root with bidirectional
-section/phase links and Fidelity QA. The untouched design-root pair remains the
-original Claude Design handoff.
+section/phase links and Fidelity QA. The untouched files under `design/handoff/` remain the original Claude Design
+handoff. The repository-root `[PROJECT]Reference.md` and
+`[PROJECT] Task Plan.md` are the finalized engineering documents.
 
 Be ready to confirm:
 
