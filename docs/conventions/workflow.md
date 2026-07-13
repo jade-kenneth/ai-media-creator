@@ -1,9 +1,11 @@
 # Workspace workflow commands
 
 The canonical change workflow, roles, task phases, validation policy, commit
-style, and pull-request style are owned by
-[`skills-source/conventions/workflow.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/workflow.md)
-and embedded in the generated root `AGENTS.md`. The locked detailed source is:
+style, and pull-request style are owned by `skills-source`. Its
+[`conventions/workflow.md`](https://github.com/jade-kenneth/skills-source/blob/main/conventions/workflow.md)
+page is the upstream editing location and may be newer than this project's
+approved rules. The reviewed rules are embedded in the generated root
+`AGENTS.md`. The locked detailed source is:
 
 ```text
 .skills-source/conventions/workflow.md
@@ -41,7 +43,9 @@ npm run update-skills -- --sha <full-skills-source-sha>
 ```
 
 `sync-skills` restores the currently approved revision. `update-skills`
-intentionally selects a new reviewed revision.
+intentionally selects a new reviewed revision and normally requires that an
+explicit SHA belongs to the configured `skills-source/main`. Use
+`--allow-unmerged` only for an intentional, reviewed exception.
 
 ## Boilerplate code tracking in product repositories
 

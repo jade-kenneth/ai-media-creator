@@ -21,3 +21,5 @@ jobs:
         env:
           BOILERPLATE_CONTRIBUTION_BASE: origin/${{ github.base_ref }}
         run: npm run boilerplate:contributions
+      - name: Test synchronization automation
+        run: npm run test:sync-automation
