@@ -80,7 +80,7 @@ viewport. Expo/React Native implementation uses native primitives, navigation,
 safe areas, scrolling, keyboard behavior, gestures, and sheets—not a WebView or
 copied DOM/CSS.
 
-## 3. Hydrate and validate
+## 3. Declare and validate a design release
 
 ```bash
 npm run sync-skills
@@ -88,28 +88,32 @@ npm run check-skills
 npm run design:validate
 ```
 
-Validation requires at least one supported screen prototype, exactly one supported
-`data-prototype-surface` and one `data-app-root` per screen, and exactly one
-`design/handoff/` Design Reference and Design Handoff Plan. A missing design system or planning export
-produces a warning because `/finalize-build-docs` has explicit fallback behavior for
-both.
+Every export must include `design/design-release.json`. Batch 1 is the first
+coherent buildable slice. New ready scope increments `batch`; corrections to the
+same scope increment `revision`. The repository-owned
+`design/design-sync.lock.json` records the last successfully reconciled release
+and prototype hashes. Claude Design must never create or edit that lock.
 
-## 4. Generate the paired build documents
+Validation requires at least one supported screen prototype,
+`design/planning/screen-inventory.md`, exactly one supported
+`data-prototype-surface` and one `data-app-root` per screen, exactly one paired
+handoff, and a valid release transition. It rejects replayed, skipped, mislabeled,
+or falsely updated releases.
+
+## 4. Synchronize each buildable design release
 
 Open Claude Code in the product repository and run:
 
 ```text
-/finalize-build-docs <project name>
+/sync-build-docs <project name>
 ```
 
-The project-level command delegates to the canonical locked instructions at
-`.skills-source/commands/finalize-build-docs.md`. It starts from Claude Design's
-Design Reference and Design Handoff Plan, verifies them against every design file, scans the
-actual boilerplate, resolves `VERIFY IN REPO` assumptions, creates the trim audit,
-and writes reconciled canonical copies to the repository root with bidirectional
-section/phase links and Fidelity QA. The untouched files under `design/handoff/` remain the original Claude Design
-handoff. The repository-root `Product Specification.md` and
-`Implementation Plan.md` are the finalized engineering documents.
+The project-level command delegates to
+`.skills-source/commands/sync-build-docs.md`. On Batch 1 it creates the root
+`Product Specification.md` and `Implementation Plan.md`; later batches update
+those same files without resetting unrelated phase history. Only
+`readyForBuild` screens become unblocked. It writes a batch/revision sync report
+and runs `npm run design:ack` only after reconciliation succeeds.
 
 Be ready to confirm:
 
@@ -127,7 +131,19 @@ the boundary or paired-handoff checks, run
 `/adapt-design-export <project name>` and return the generated prompt to Claude
 Design before finalizing.
 
-## 5. Review and commit the handoff
+## 5. Finalize the complete MVP design
+
+When Claude Design sets `"status": "final"`, required MVP scope has no planned or
+in-design items, and the final release has been synchronized, run:
+
+```text
+/finalize-build-docs <project name>
+```
+
+Finalization performs the completeness gate. It is not required before Codex
+starts architecture or an earlier ready slice.
+
+## 6. Review and commit the handoff
 
 Verify that every prototype has a Product Specification section, every planned-but-unprototyped
 surface is marked `⚠ needs design`, and the Implementation Plan reuses retained architecture.
