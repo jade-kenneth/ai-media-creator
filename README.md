@@ -54,8 +54,9 @@ Before design work begins, open Claude Code in the product repository and run:
 
 This creates `design/CLAUDE_DESIGN_PROMPT.md`. Paste that file into Claude
 Design, complete the design, and copy the export into `design/prototypes/`,
-`design/system/`, and `design/planning/`, including
-`design/handoff/[PROJECT] Design Reference.md` and
+`design/system/`, and `design/planning/`, including `design/design-release.json`,
+`design/planning/screen-inventory.md`,
+`design/handoff/[PROJECT] Design Reference.md`, and
 `design/handoff/[PROJECT] Design Handoff Plan.md`.
 
 If you already have designed screens—whether they are still only in Claude
@@ -69,14 +70,24 @@ This creates `design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md` for the existing Claude
 Design project. If no export exists yet, Claude Design inventories and corrects
 the live project before its first export. It adds the required metadata and
 handoff boundaries without redesigning the screens. Paste it into that existing
-design, export the corrected files into `design/`, then run:
+design, export the corrected files into `design/` as the first buildable batch, then run:
 
 ```bash
 npm run sync-skills
 npm run design:validate
 ```
 
-Open Claude Code in the product repository and invoke:
+For every validated design batch, open Claude Code and run:
+
+```text
+/sync-build-docs <project name>
+```
+
+This creates or incrementally updates the same root build documents and unblocks
+only screens declared `readyForBuild`. Claude Design can continue later screens
+while Codex implements an already released slice.
+
+When the complete required MVP design is marked final, run:
 
 ```text
 /finalize-build-docs <project name>
