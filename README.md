@@ -56,7 +56,18 @@ This creates `design/CLAUDE_DESIGN_PROMPT.md`. Paste that file into Claude
 Design, complete the design, and copy the export into `design/prototypes/`,
 `design/system/`, and `design/planning/`, including
 `design/handoff/[PROJECT] Design Reference.md` and
-`design/handoff/[PROJECT] Design Handoff Plan.md`. Then run:
+`design/handoff/[PROJECT] Design Handoff Plan.md`.
+
+If you already have designed screens, keep them and run:
+
+```text
+/adapt-design-export <project name>
+```
+
+This creates `design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md` for the existing Claude
+Design project. It adds the current export metadata and handoff boundaries without
+redesigning the screens. Paste it into that existing design, re-export the updated
+files into `design/`, then run:
 
 ```bash
 npm run sync-skills
