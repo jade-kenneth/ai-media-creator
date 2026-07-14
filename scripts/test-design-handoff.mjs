@@ -6,90 +6,194 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'validate-design-export.mjs');
-const TEMP = fs.mkdtempSync(path.join(os.tmpdir(), 'design-handoff-'));
+const DIR = path.dirname(fileURLToPath(import.meta.url));
+const VALIDATOR = path.join(DIR, 'validate-design-export.mjs');
+const ACK = path.join(DIR, 'acknowledge-design-release.mjs');
+const TEMP = fs.mkdtempSync(path.join(os.tmpdir(), 'design-release-'));
 
-function run(expectSuccess) {
+function run(script, expectSuccess) {
   try {
-    const output = execFileSync(process.execPath, [SCRIPT, '--root', TEMP], {
+    const output = execFileSync(process.execPath, [script, '--root', TEMP], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    if (!expectSuccess) {
-      throw new Error('Expected design validation to fail, but it succeeded.');
-    }
+    if (!expectSuccess) throw new Error('Expected command to fail, but it succeeded.');
     return output;
   } catch (error) {
-    if (expectSuccess) throw error;
-    if (error.message === 'Expected design validation to fail, but it succeeded.') {
+    if (expectSuccess || error.message === 'Expected command to fail, but it succeeded.') {
       throw error;
     }
-    return `${error.stdout || ''}\n${error.stderr || ''}`;
+    return String(error.stdout || '') + '\n' + String(error.stderr || '');
   }
 }
 
+function write(relative, content) {
+  const file = path.join(TEMP, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content);
+}
+
+function manifest(overrides = {}) {
+  return {
+    schemaVersion: 1,
+    project: 'Sample',
+    batch: 1,
+    revision: 0,
+    previousBatch: 0,
+    releaseId: 'design-batch-001',
+    status: 'incremental',
+    readyForBuild: [
+      { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'added' },
+    ],
+    stillInDesign: ['Payment'],
+    planned: ['Support'],
+    removedOrSuperseded: [],
+    notes: 'First slice.',
+    ...overrides,
+  };
+}
+
 try {
-  assert.match(run(false), /No supported screen prototype contracts found/);
+  const empty = run(VALIDATOR, false);
+  assert.match(empty, /No supported screen prototype contracts/);
+  assert.match(empty, /design\/design-release\.json is missing/);
 
-  fs.mkdirSync(path.join(TEMP, 'design', 'prototypes'), { recursive: true });
-  fs.writeFileSync(path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'), '<main>Home</main>\n');
-  assert.match(run(false), /Prototype production-boundary validation failed/);
-  assert.match(run(false), /must declare exactly one data-prototype-surface/);
-  const metadataFailure = run(false);
-  assert.match(metadataFailure, /must contain exactly one data-app-root/);
-  assert.match(metadataFailure, /\/adapt-design-export <project name>/);
-  fs.writeFileSync(
-    path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
-    '<style>[data-app-root]{width:100%}</style><body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div><script>document.querySelector("[data-app-root]")</script></body>\n',
+  write(
+    'design/prototypes/Home.dc.html',
+    '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div></body>\n',
   );
-  const handoffFailure = run(false);
-  assert.match(handoffFailure, /must export exactly one/);
-  assert.match(handoffFailure, /\/adapt-design-export <project name>/);
-  fs.mkdirSync(path.join(TEMP, 'design', 'handoff'), { recursive: true });
-  fs.writeFileSync(
-    path.join(TEMP, 'design', 'handoff', 'Sample Design Reference.md'),
-    '# Design Reference\n',
-  );
-  fs.writeFileSync(
-    path.join(TEMP, 'design', 'handoff', 'Sample Design Handoff Plan.md'),
-    '# Design Handoff Plan\n',
-  );
-  const partial = run(true);
-  assert.match(partial, /prototypes \(1\)/);
-  assert.match(partial, /screen prototype contracts \(1\)/);
-  assert.match(partial, /design\/prototypes\/Home\.dc\.html \[mobile\]/);
-  assert.match(partial, /warning: design\/system\/ is missing or empty/);
-  assert.match(partial, /design handoff documents \(2\)/);
-  assert.match(partial, /design\/handoff\/Sample Design Reference\.md/);
-  assert.match(partial, /design\/handoff\/Sample Design Handoff Plan\.md/);
-  assert.match(partial, /\/finalize-build-docs <project name>/);
-  assert.match(partial, /Product Specification\.md and Implementation Plan\.md/);
+  write('design/planning/screen-inventory.md', '# Screen inventory\n');
+  write('design/handoff/Sample Design Reference.md', '# Reference\n');
+  write('design/handoff/Sample Design Handoff Plan.md', '# Plan\n');
+  write('design/design-release.json', JSON.stringify(manifest(), null, 2) + '\n');
 
-  fs.writeFileSync(
-    path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
-    '<body data-prototype-surface="mobile"><main data-app-root>One</main><main data-app-root>Two</main></body>\n',
+  const first = run(VALIDATOR, true);
+  assert.match(first, /design-batch-001 revision 0 \[incremental\]/);
+  assert.match(first, /last synchronized: none/);
+  assert.match(first, /\/sync-build-docs <project name>/);
+
+  assert.match(run(ACK, true), /Acknowledged design-batch-001 revision 0/);
+  const lock1 = JSON.parse(
+    fs.readFileSync(path.join(TEMP, 'design/design-sync.lock.json')),
   );
-  assert.match(run(false), /must contain exactly one data-app-root; found 2/);
-  fs.writeFileSync(
-    path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
-    '<style>[data-app-root]{width:100%}</style><body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div><script>document.querySelector("[data-app-root]")</script></body>\n',
+  assert.equal(lock1.lastSyncedBatch, 1);
+  assert.equal(lock1.lastSyncedRevision, 0);
+  assert.ok(lock1.prototypeHashes['prototypes/Home.dc.html']);
+
+  assert.match(
+    run(VALIDATOR, false),
+    /is not newer than synchronized batch 1 revision 0/,
   );
 
-  fs.writeFileSync(
-    path.join(TEMP, 'design', 'handoff', 'Duplicate Design Reference.md'),
-    '# Duplicate\n',
+  write(
+    'design/prototypes/Home.dc.html',
+    '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Updated home</main></div></body>\n',
   );
-  assert.match(run(false), /must export exactly one/);
-  fs.rmSync(path.join(TEMP, 'design', 'handoff', 'Duplicate Design Reference.md'));
+  write(
+    'design/prototypes/Booking.dc.html',
+    '<body data-prototype-surface="mobile"><main data-app-root>Booking</main></body>\n',
+  );
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 2,
+        previousBatch: 1,
+        releaseId: 'design-batch-002',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'updated' },
+          { screen: 'Booking', prototype: 'prototypes/Booking.dc.html', change: 'added' },
+        ],
+        stillInDesign: ['Payment'],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(run(VALIDATOR, true), /design-batch-002 revision 0/);
+  assert.match(run(ACK, true), /Acknowledged design-batch-002 revision 0/);
+  const lock2 = JSON.parse(
+    fs.readFileSync(path.join(TEMP, 'design/design-sync.lock.json')),
+  );
+  assert.equal(lock2.lastSyncedBatch, 2);
+  assert.ok(lock2.prototypeHashes['prototypes/Booking.dc.html']);
 
-  fs.mkdirSync(path.join(TEMP, 'design', 'system'), { recursive: true });
-  fs.mkdirSync(path.join(TEMP, 'design', 'planning'), { recursive: true });
-  fs.writeFileSync(path.join(TEMP, 'design', 'system', 'tokens.md'), '# Tokens\n');
-  fs.writeFileSync(path.join(TEMP, 'design', 'planning', 'flow.md'), '# Flow\n');
-  const complete = run(true);
-  assert.match(complete, /system \(1\)/);
-  assert.match(complete, /planning \(1\)/);
-  console.log('Design handoff tests passed.');
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 4,
+        previousBatch: 3,
+        releaseId: 'design-batch-004',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'unchanged' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(
+    run(VALIDATOR, false),
+    /expected batch 3 or a higher revision of batch 2/,
+  );
+
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 2,
+        revision: 1,
+        previousBatch: 1,
+        releaseId: 'design-batch-002',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'updated' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(
+    run(VALIDATOR, false),
+    /marked updated but its content did not change/,
+  );
+
+  write(
+    'design/prototypes/Home.dc.html',
+    '<body data-prototype-surface="mobile"><main data-app-root>Revision one</main></body>\n',
+  );
+  assert.match(run(VALIDATOR, true), /design-batch-002 revision 1/);
+
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 3,
+        previousBatch: 2,
+        releaseId: 'design-batch-003',
+        status: 'final',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'updated' },
+        ],
+        stillInDesign: ['Payment'],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(
+    run(VALIDATOR, false),
+    /final design release cannot contain stillInDesign/,
+  );
+
+  console.log('Incremental design release tests passed.');
 } finally {
   fs.rmSync(TEMP, { recursive: true, force: true });
 }
