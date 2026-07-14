@@ -6,6 +6,7 @@ import path from 'node:path';
 const rootIndex = process.argv.indexOf('--root');
 const ROOT = path.resolve(rootIndex === -1 ? process.cwd() : process.argv[rootIndex + 1] || '');
 const DESIGN = path.join(ROOT, 'design');
+const allowSynced = process.argv.includes('--allow-synced');
 const RELEASE_PATH = path.join(DESIGN, 'design-release.json');
 const LOCK_PATH = path.join(DESIGN, 'design-sync.lock.json');
 const supportedSurfaces = new Set(['web', 'mobile', 'tablet', 'desktop']);
@@ -261,8 +262,14 @@ if (release) {
     const lastRevision = lock.lastSyncedRevision;
     const isNextBatch = release.batch === lastBatch + 1;
     const isRevision = release.batch === lastBatch && release.revision > lastRevision;
+    const isSyncedFinal =
+      allowSynced &&
+      release.status === 'final' &&
+      release.batch === lastBatch &&
+      release.revision === lastRevision &&
+      release.releaseId === lock.releaseId;
 
-    if (!isNextBatch && !isRevision) {
+    if (!isNextBatch && !isRevision && !isSyncedFinal) {
       releaseErrors.push(
         'design release ' + release.batch + ' revision ' + release.revision +
           ' is not newer than synchronized batch ' + lastBatch + ' revision ' +
@@ -286,6 +293,14 @@ if (release) {
       const prototype = safeDesignPath(item?.prototype);
       if (!prototype || !currentHashes[prototype]) continue;
       const previousHash = priorHashes[prototype];
+      if (isSyncedFinal) {
+        if (!previousHash || previousHash !== currentHashes[prototype]) {
+          releaseErrors.push(
+            'design/' + prototype + ' changed after the final release was synchronized.',
+          );
+        }
+        continue;
+      }
       if (item.change === 'added' && previousHash) {
         releaseErrors.push(
           'design/' + prototype + ' is not new; mark it updated or unchanged.',
