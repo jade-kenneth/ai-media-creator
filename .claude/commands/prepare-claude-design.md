@@ -20,8 +20,14 @@ replace them. Stop this workflow and run
    `design/handoff/[PROJECT] Design Reference.md` and
    `design/handoff/[PROJECT] Design Handoff Plan.md`. Every screen prototype must
    also declare one supported `data-prototype-surface` and exactly one
-   `data-app-root`; preview/device shells remain outside that boundary.
-4. Never request or include passwords, connection strings, tokens, API keys,
+   `data-app-root`; preview/device shells remain outside that boundary. Claude
+   Design must never create or edit `design/design-sync.lock.json`.
+4. Require the first coherent vertical slice to export without waiting for the
+   whole app, with `design/design-release.json` and the batch-aware
+   `design/planning/screen-inventory.md`.
+5. Route every validated release to `/sync-build-docs <project name>` and reserve
+   `/finalize-build-docs` for final completeness.
+6. Never request or include passwords, connection strings, tokens, API keys,
    production data, or other secrets.
 
 Do not design the screens or generate the engineering Product Specification or Implementation Plan in

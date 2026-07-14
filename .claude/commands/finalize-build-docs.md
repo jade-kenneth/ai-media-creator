@@ -7,7 +7,10 @@ argument-hint: [project name]
 
 Project name: $ARGUMENTS
 
-1. Run `npm run design:validate` from the repository root and stop if it fails. If existing prototypes fail because their surface, production boundary, or paired handoff is missing or ambiguous, run `/adapt-design-export <project name>` and return the generated prompt to the existing Claude Design project.
+This is the final completeness gate. For Batch 1 or any partial release, stop and
+run `/sync-build-docs <project name>` instead.
+
+1. Run `npm run design:validate-final` from the repository root and stop if it fails. This mode accepts only an unchanged, already synchronized final release. Require `design/design-release.json` status `final` with no unfinished required MVP scope. If existing prototypes fail because their surface, production boundary, or paired handoff is missing or ambiguous, run `/adapt-design-export <project name>` and return the generated prompt to the existing Claude Design project.
 2. Read `.skills-source/commands/finalize-build-docs.md` in full. If the locked snapshot
    is missing, run `npm run sync-skills` first.
 3. Execute that canonical command exactly, using the project name above wherever
@@ -16,7 +19,8 @@ Project name: $ARGUMENTS
    replacement source documents. Treat only each prototype's `data-app-root` as
    production UI and translate mobile HTML to native Expo/React Native primitives;
    never ship preview shells or prototype HTML in a WebView.
-4. Never ask the user to paste a connection string, password, token, or credential.
+4. Preserve all previously synchronized phase history and engineering decisions. Run `npm run design:ack` only after the final reconciliation succeeds.
+5. Never ask the user to paste a connection string, password, token, or credential.
    Confirm only the environment-variable name, its configured/unconfigured status,
    and sanitized non-secret identifiers.
 
