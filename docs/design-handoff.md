@@ -22,6 +22,26 @@ design-authored `[PROJECT] Design Reference.md` and
 `[PROJECT] Design Handoff Plan.md`. This
 preparation command does not generate UI or engineering build documents itself.
 
+## 1A. Adapt screens that were already designed
+
+If usable screens already exist in Claude Design—even when nothing has been
+exported yet—do not restart the design or overwrite it with a new preparation
+prompt. Run:
+
+```text
+/adapt-design-export <project name>
+```
+
+The command writes `design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md`. If the design is
+still only in Claude Design, the prompt makes Claude Design inventory its live
+screens, states, flows, assets, and target platforms before correcting the export
+contract. If an older export exists, the command also inventories those files.
+Paste the prompt into the existing Claude Design project. Claude Design preserves
+the design, copy, flows, states, interactions, and assets while adding the
+supported surface, `data-app-root`, preview-shell, presentation-only, and paired
+handoff metadata. Export the adapted files into `design/`; the command does not
+edit prototype source or application code itself.
+
 ## 2. Import the export
 
 Copy the Claude Design output into these authority-separated folders:
@@ -102,7 +122,10 @@ Be ready to confirm:
 
 The command must stop for missing prototypes, missing or duplicate production
 boundaries, unexplained planned screens, an ambiguous app mapping, or a material
-stack conflict instead of inventing an answer.
+stack conflict instead of inventing an answer. For existing prototypes that fail
+the boundary or paired-handoff checks, run
+`/adapt-design-export <project name>` and return the generated prompt to Claude
+Design before finalizing.
 
 ## 5. Review and commit the handoff
 

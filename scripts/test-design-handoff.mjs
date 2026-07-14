@@ -35,12 +35,16 @@ try {
   fs.writeFileSync(path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'), '<main>Home</main>\n');
   assert.match(run(false), /Prototype production-boundary validation failed/);
   assert.match(run(false), /must declare exactly one data-prototype-surface/);
-  assert.match(run(false), /must contain exactly one data-app-root/);
+  const metadataFailure = run(false);
+  assert.match(metadataFailure, /must contain exactly one data-app-root/);
+  assert.match(metadataFailure, /\/adapt-design-export <project name>/);
   fs.writeFileSync(
     path.join(TEMP, 'design', 'prototypes', 'Home.dc.html'),
     '<style>[data-app-root]{width:100%}</style><body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div><script>document.querySelector("[data-app-root]")</script></body>\n',
   );
-  assert.match(run(false), /must export exactly one/);
+  const handoffFailure = run(false);
+  assert.match(handoffFailure, /must export exactly one/);
+  assert.match(handoffFailure, /\/adapt-design-export <project name>/);
   fs.mkdirSync(path.join(TEMP, 'design', 'handoff'), { recursive: true });
   fs.writeFileSync(
     path.join(TEMP, 'design', 'handoff', 'Sample Design Reference.md'),

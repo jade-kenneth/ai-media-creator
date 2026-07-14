@@ -7,6 +7,10 @@ argument-hint: [project name]
 
 Project name: $ARGUMENTS
 
+If usable screens already exist under `design/prototypes/`, do not overwrite or
+replace them. Stop this workflow and run
+`/adapt-design-export <project name>` instead.
+
 1. Read `.skills-source/commands/prepare-claude-design.md` in full. If the locked
    snapshot is missing, run `npm run sync-skills` first.
 2. Execute that canonical command exactly, using the project name above wherever

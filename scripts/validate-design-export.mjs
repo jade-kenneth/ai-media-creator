@@ -77,14 +77,17 @@ if (!screenContracts.length) {
 }
 if (metadataErrors.length) {
   throw new Error(
-    'Prototype production-boundary validation failed:\n- ' + metadataErrors.join('\n- '),
+    'Prototype production-boundary validation failed:\n- ' + metadataErrors.join('\n- ') +
+      '\nRun /adapt-design-export <project name> to prepare the compatibility pass ' +
+      'for the existing Claude Design project.',
   );
 }
 if (referenceDocs.length !== 1 || handoffPlans.length !== 1) {
   throw new Error(
     'Claude Design must export exactly one ' +
       'design/handoff/[PROJECT] Design Reference.md and one ' +
-      'design/handoff/[PROJECT] Design Handoff Plan.md before running /finalize-build-docs.',
+      'design/handoff/[PROJECT] Design Handoff Plan.md before running /finalize-build-docs. ' +
+      'When prototypes already exist, run /adapt-design-export <project name> first.',
   );
 }
 
