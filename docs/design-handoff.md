@@ -140,8 +140,9 @@ in-design items, and the final release has been synchronized, run:
 /finalize-build-docs <project name>
 ```
 
-Finalization performs the completeness gate. It is not required before Codex
-starts architecture or an earlier ready slice.
+Finalization runs `npm run design:validate-final` and performs the completeness
+gate against the unchanged synchronized final release. It is not required before
+Codex starts architecture or an earlier ready slice.
 
 ## 6. Review and commit the handoff
 
