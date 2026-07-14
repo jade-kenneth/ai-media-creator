@@ -24,20 +24,23 @@ preparation command does not generate UI or engineering build documents itself.
 
 ## 1A. Adapt screens that were already designed
 
-If usable Claude Design screens already exist, do not restart the design or
-overwrite them with a new preparation prompt. Run:
+If usable screens already exist in Claude Design—even when nothing has been
+exported yet—do not restart the design or overwrite it with a new preparation
+prompt. Run:
 
 ```text
 /adapt-design-export <project name>
 ```
 
-The command inventories the existing export and writes
-`design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md`. Paste its complete contents into the
-existing Claude Design project. Claude Design then preserves the design, copy,
-flows, states, interactions, and assets while adding the supported surface,
-`data-app-root`, preview-shell, presentation-only, and paired handoff metadata.
-Re-export the adapted files into `design/`; the command does not edit prototype
-source or application code itself.
+The command writes `design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md`. If the design is
+still only in Claude Design, the prompt makes Claude Design inventory its live
+screens, states, flows, assets, and target platforms before correcting the export
+contract. If an older export exists, the command also inventories those files.
+Paste the prompt into the existing Claude Design project. Claude Design preserves
+the design, copy, flows, states, interactions, and assets while adding the
+supported surface, `data-app-root`, preview-shell, presentation-only, and paired
+handoff metadata. Export the adapted files into `design/`; the command does not
+edit prototype source or application code itself.
 
 ## 2. Import the export
 
