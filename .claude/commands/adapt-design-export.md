@@ -7,8 +7,11 @@ argument-hint: [project name]
 
 Project name: $ARGUMENTS
 
-1. Confirm that usable screens already exist under `design/prototypes/`. If they
-   do not, stop and use `/prepare-claude-design <project name>` instead.
+1. Confirm that screens already exist either in the current Claude Design
+   project or under `design/prototypes/`. If they are still only in Claude
+   Design, continue and prepare the compatibility prompt before the first export.
+   If no design exists in either place, stop and use
+   `/prepare-claude-design <project name>` instead.
 2. Read `.skills-source/commands/adapt-design-export.md` in full. If the locked
    snapshot or command is missing, run `npm run sync-skills` first.
 3. Execute that canonical command exactly, using the project name above wherever
@@ -23,6 +26,7 @@ Project name: $ARGUMENTS
 6. Never request or include passwords, connection strings, tokens, API keys,
    production data, or other secrets.
 
-After Claude Design re-exports the adapted files, run `npm run design:validate`.
+After Claude Design exports the corrected files for the first time—or re-exports
+an older export—run `npm run design:validate`.
 Only after validation passes should `/finalize-build-docs <project name>` create
 the verified repository-root build documents.
