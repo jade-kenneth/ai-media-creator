@@ -11,9 +11,9 @@ const VALIDATOR = path.join(DIR, 'validate-design-export.mjs');
 const ACK = path.join(DIR, 'acknowledge-design-release.mjs');
 const TEMP = fs.mkdtempSync(path.join(os.tmpdir(), 'design-release-'));
 
-function run(script, expectSuccess) {
+function run(script, expectSuccess, extraArgs = []) {
   try {
-    const output = execFileSync(process.execPath, [script, '--root', TEMP], {
+    const output = execFileSync(process.execPath, [script, '--root', TEMP, ...extraArgs], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -118,6 +118,31 @@ try {
   );
   assert.equal(lock2.lastSyncedBatch, 2);
   assert.ok(lock2.prototypeHashes['prototypes/Booking.dc.html']);
+
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 2,
+        previousBatch: 1,
+        releaseId: 'design-batch-002',
+        status: 'final',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'unchanged' },
+          { screen: 'Booking', prototype: 'prototypes/Booking.dc.html', change: 'unchanged' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(run(VALIDATOR, false), /is not newer than synchronized batch 2 revision 0/);
+  assert.match(
+    run(VALIDATOR, true, ['--allow-synced']),
+    /design-batch-002 revision 0 \[final\]/,
+  );
 
   write(
     'design/design-release.json',
