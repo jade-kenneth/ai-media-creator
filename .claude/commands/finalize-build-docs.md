@@ -7,7 +7,7 @@ argument-hint: [project name]
 
 Project name: $ARGUMENTS
 
-1. Run `npm run design:validate` from the repository root and stop if it fails.
+1. Run `npm run design:validate` from the repository root and stop if it fails. If existing prototypes fail because their surface, production boundary, or paired handoff is missing or ambiguous, run `/adapt-design-export <project name>` and return the generated prompt to the existing Claude Design project.
 2. Read `.skills-source/commands/finalize-build-docs.md` in full. If the locked snapshot
    is missing, run `npm run sync-skills` first.
 3. Execute that canonical command exactly, using the project name above wherever
