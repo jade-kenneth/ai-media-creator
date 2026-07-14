@@ -23,10 +23,15 @@ Project name: $ARGUMENTS
    and assets while asking the existing Claude Design project to add one supported
    `data-prototype-surface`, exactly one `data-app-root`, and explicit
    preview/presentation-only boundaries per screen.
-6. Never request or include passwords, connection strings, tokens, API keys,
+6. Require `design/design-release.json`, batch-aware screen inventory, and an
+   early first buildable slice. Claude Design must never create or edit
+   `design/design-sync.lock.json`.
+7. Route each validated release to `/sync-build-docs <project name>` and reserve
+   `/finalize-build-docs` for final completeness.
+8. Never request or include passwords, connection strings, tokens, API keys,
    production data, or other secrets.
 
 After Claude Design exports the corrected files for the first time—or re-exports
 an older export—run `npm run design:validate`.
-Only after validation passes should `/finalize-build-docs <project name>` create
-the verified repository-root build documents.
+After validation, `/sync-build-docs <project name>` creates or updates the
+verified root documents. Finalize only after the required MVP design is complete.
