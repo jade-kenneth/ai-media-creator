@@ -87,7 +87,7 @@ This creates or incrementally updates the same root build documents and unblocks
 only screens declared `readyForBuild`. Claude Design can continue later screens
 while Codex implements an already released slice.
 
-When the complete required MVP design is marked final, run:
+When the complete required MVP design is marked final and synchronized, run:
 
 ```text
 /finalize-build-docs <project name>
