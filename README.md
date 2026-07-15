@@ -32,6 +32,31 @@ shared contracts or pure logic in `packages/`.
 
 Prerequisites: Node.js 20+ and npm.
 
+For a repository created from this template, initialize upstream tracking and
+product identity before feature work:
+
+```bash
+npm run boilerplate:setup
+npm run project:init
+```
+
+The interactive initializer asks for the display name, slug, package scope,
+mobile namespace, optional owned domain, and local database name. For automation:
+
+```bash
+npm run project:init -- \
+  --name "Dala" \
+  --namespace com.jadey \
+  --domain dala.app
+```
+
+Preview changes without writing by adding `--dry-run`. Existing custom values
+are protected; `--force` is required to replace them intentionally. Internal
+architecture names such as `app-web`, `app-mobile`, and `app-api` remain
+stable for cleaner boilerplate updates.
+
+Then install and run the workspace:
+
 ```bash
 npm install
 cp .env.example .env
@@ -40,8 +65,8 @@ npm run web
 npm run mobile
 ```
 
-Configure MongoDB, JWT, S3, email, and Expo push credentials in `.env` before
-using the related integrations. App-specific public environment variables are
+Configure MongoDB, JWT, S3, email, Expo/EAS, and deployment credentials before
+using those integrations. App-specific public environment variables are
 documented in each app's `.env.example`.
 
 ## Claude Design handoff
@@ -103,9 +128,9 @@ completeness checks, and the executor handoff.
 
 Before starting product work, follow the
 [customization checklist](docs/getting-started/customize.md) to initialize
-boilerplate tracking, rename workspace identifiers, replace starter
-presentation, configure environments, and verify that placeholder values do not
-leak into a deployment.
+boilerplate tracking and product identity, replace starter presentation,
+configure environments and third-party projects, and verify that placeholder
+values do not leak into a deployment.
 
 ## Useful commands
 
