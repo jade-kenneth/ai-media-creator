@@ -7,6 +7,7 @@ import readline from 'node:readline/promises';
 
 const PLACEHOLDERS = {
   rootPackage: '@app/boilerplate',
+  legacyRootPackage: '@app/source',
   mobileName: 'App Boilerplate',
   mobileSlug: 'app-mobile',
   mobileDescription:
@@ -182,7 +183,8 @@ function parseJson(text, relativePath) {
 }
 
 function assertReplaceable(relativePath, label, current, placeholder, target, force) {
-  if (current === placeholder || current === target || force) return;
+  const placeholders = Array.isArray(placeholder) ? placeholder : [placeholder];
+  if (placeholders.includes(current) || current === target || force) return;
   throw new Error(
     `${relativePath}: ${label} is already customized as ${JSON.stringify(current)}. ` +
       'Rerun with --force only if replacing it is intentional.',
@@ -222,14 +224,15 @@ function planChanges(root, identity, force) {
   const lockText = readText(root, lockPath, false);
   if (lockText !== null) {
     const lock = parseJson(lockText, lockPath);
-    setJsonValue(lockPath, 'name', lock, 'name', PLACEHOLDERS.rootPackage, identity.rootPackage, force);
+    const lockPlaceholders = [PLACEHOLDERS.rootPackage, PLACEHOLDERS.legacyRootPackage];
+    setJsonValue(lockPath, 'name', lock, 'name', lockPlaceholders, identity.rootPackage, force);
     if (lock.packages?.['']) {
       setJsonValue(
         lockPath,
         'packages[""].name',
         lock.packages[''],
         'name',
-        PLACEHOLDERS.rootPackage,
+        lockPlaceholders,
         identity.rootPackage,
         force,
       );
@@ -459,4 +462,3 @@ main().catch((error) => {
   console.error(`Project initialization failed:\n${error.message}`);
   process.exitCode = 1;
 });
-
