@@ -21,7 +21,7 @@ function createFixture() {
   write(
     root,
     'package-lock.json',
-    '{\n  "name": "@app/boilerplate",\n  "lockfileVersion": 3,\n  "packages": {\n    "": {\n      "name": "@app/boilerplate"\n    }\n  }\n}\n',
+    '{\n  "name": "@app/source",\n  "lockfileVersion": 3,\n  "packages": {\n    "": {\n      "name": "@app/source"\n    }\n  }\n}\n',
   );
   write(
     root,
@@ -204,4 +204,3 @@ try {
 } finally {
   for (const root of roots) fs.rmSync(root, { recursive: true, force: true });
 }
-
