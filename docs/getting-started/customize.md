@@ -17,19 +17,62 @@ revision used by the product. If you cloned the source repository instead of
 using GitHub's template action, rename its original remote and add the product
 remote before running setup.
 
-## 2. Rename the workspace
+## 2. Initialize product identity
 
-Replace the neutral placeholders with the product name and package scope:
+Run the guided initializer:
 
-- root `package.json` name
-- app names and display names
-- Expo bundle/package identifiers
-- page titles and metadata
-- email sender name and address
-- database name
-- deployment project names
+```bash
+npm run project:init
+```
 
-Keep reusable package names generic unless they truly belong to the product domain.
+It asks for:
+
+- product display name;
+- URL/package slug;
+- npm package scope;
+- reverse-domain mobile namespace;
+- optional owned web/email domain;
+- local database name.
+
+For automation or CI-assisted setup, pass the values directly:
+
+```bash
+npm run project:init -- \
+  --name "Dala" \
+  --slug dala \
+  --scope @dala \
+  --namespace com.jadey \
+  --domain dala.app \
+  --database dala-db
+```
+
+Use `--dry-run` to preview the exact files. The command is idempotent and
+accepts only boilerplate placeholders or values already matching the requested
+identity. If a target is already customized, it stops before writing anything.
+Use `--force` only when replacing that custom identity is intentional.
+
+The initializer updates:
+
+- root package name and package-lock workspace name;
+- README product heading;
+- Expo display name, slug, scheme, Android package, and iOS bundle identifier;
+- root/API local database defaults;
+- web application display name;
+- email sender name;
+- example admin, sender, and privacy emails when an owned domain is supplied.
+
+It deliberately preserves `apps/app-web`, `apps/app-mobile`,
+`apps/app-api`, their package names, and shared architecture paths. Stable
+internal names reduce conflicts when reviewing future boilerplate updates.
+
+It also leaves external-resource identifiers untouched because they cannot be
+safely inferred from a project name:
+
+- Expo owner and EAS project ID;
+- S3 bucket, CDN, and AWS credentials;
+- hosting and deployment project IDs;
+- production domains, secrets, and service tokens;
+- logos, icons, store assets, colors, and product copy.
 
 ## 3. Configure environments
 
@@ -39,29 +82,38 @@ Copy the root environment template and each app-specific template:
 cp .env.example .env
 ```
 
-Use local or test credentials during development. Never commit secrets, production tokens, private keys, or real bootstrap passwords.
+Use local or test credentials during development. Never commit secrets,
+production tokens, private keys, or real bootstrap passwords. Create the actual
+Expo/EAS, storage, email, database, and deployment resources before replacing
+their remaining placeholders.
 
 ## 4. Replace starter presentation
 
-Replace placeholder logos, icons, colors, copy, email templates, sample records, and screenshots. Product branding belongs in the owning application, not in shared packages.
+Replace placeholder logos, icons, colors, copy, email templates, sample records,
+and screenshots. Product branding belongs in the owning application, not in
+shared packages.
 
 ## 5. Define the product domain
 
-Add business modules inside the app that owns them. Move code to `packages/` only when it is genuinely shared, framework-independent where practical, and used by more than one app.
+Add business modules inside the app that owns them. Move code to `packages/`
+only when it is genuinely shared, framework-independent where practical, and
+used by more than one app.
 
 ## 6. Verify identifiers
 
 Search before the first product commit:
 
 ```bash
-git grep -nE 'App Boilerplate|@app/boilerplate|app-db|example\.com'
+git grep -nE 'App Boilerplate|@app/boilerplate|app-db|example\.com|your-eas-project-id|your-expo-username'
 ```
 
-Review every match. Some placeholders may remain intentionally in documentation or environment examples.
+Review every match. Some placeholders may remain intentionally in documentation
+or environment examples, but none should leak into a production configuration.
 
 ## 7. Validate the workspace
 
 ```bash
+npm run test:project-init
 npm install
 npm run lint
 npm run typecheck

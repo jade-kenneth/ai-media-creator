@@ -23,5 +23,9 @@ jobs:
         run: npm run boilerplate:contributions
       - name: Test synchronization automation
         run: npm run test:sync-automation
+      - name: Test project identity initialization
+        run: |
+          npm run test:project-init
+          npm run project:init -- --non-interactive --name "CI Product" --namespace com.example --domain ci.example.com --dry-run
       - name: Test Claude Design handoff
         run: npm run test:design-handoff

@@ -21,7 +21,9 @@
     "boilerplate:ack": "node scripts/boilerplate-sync.mjs acknowledge",
     "boilerplate:contributions": "node scripts/check-boilerplate-contributions.mjs",
     "test:sync-automation": "node scripts/test-sync-automation.mjs",
-    "postinstall": "node scripts/sync-skills.mjs hydrate || echo '⚠ locked skills hydration failed (offline?) — run npm run sync-skills before agent work'"
+    "postinstall": "node scripts/sync-skills.mjs hydrate || echo '⚠ locked skills hydration failed (offline?) — run npm run sync-skills before agent work'",
+    "project:init": "node scripts/project-init.mjs",
+    "test:project-init": "node scripts/test-project-init.mjs"
   },
   "private": true,
   "devDependencies": {
