@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@b7d4e3b69a3b765c747e12a9d2d05944d0db8bd1`
+Source revision: `jade-kenneth/skills-source@11bc1c706c3354b666ada0de31eaac4e877c33de`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -204,10 +204,10 @@ The repository uses npm workspaces for `apps/*` and `packages/*`. Run projects t
 
 ## Stable architecture paths
 
-- Preserve `apps/app-web`, `apps/app-api`, `apps/app-mobile`, `packages/shared-constants`, and their Nx project/package identifiers in every product created from the boilerplate.
+- Preserve `apps/app-web`, `apps/app-api`, `apps/app-mobile`, `packages/shared-constants`, and their Nx project/package identifiers for every surviving application surface in a product created from the boilerplate.
 - These are upstream integration identifiers, not customer-facing product names. Keeping them stable lets boilerplate changes apply to the same paths and avoids duplicate folders, missed patches, and unnecessary merge conflicts.
 - Put the product identity in display names, root package metadata, URL/app slugs, mobile bundle identifiers, database names, domains, environment configuration, branding, and product copy.
-- Do not add app-directory or Nx-project renames to generated build plans. A structural rename is allowed only as an explicit, separately reviewed migration that also defines how future upstream boilerplate changes will be mapped.
+- Do not add app-directory or Nx-project renames to generated build plans. A whole application may be removed only when the product mapping explicitly removes that surface, documents every responsibility that must move or be retired, and updates workspace, codegen, CI, deployment, and documentation references. Any other structural rename requires a separately reviewed migration that defines how future upstream boilerplate changes will be mapped.
 
 ## Ownership rules
 
