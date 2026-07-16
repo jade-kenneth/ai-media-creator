@@ -132,6 +132,26 @@ boilerplate tracking and product identity, replace starter presentation,
 configure environments and third-party projects, and verify that placeholder
 values do not leak into a deployment.
 
+## Continuous project learning
+
+After a product fix is verified, run:
+
+```text
+/capture-project-learning <short lesson name>
+```
+
+The command creates a reviewable JSON proposal under `skill-contributions/` and
+routes it to exact skill categories from the locked snapshot, such as `mobile-app`,
+`web-app`, or `api-app`. Run `npm run skills:contribution:validate -- --file <path>`
+before committing it.
+
+When the proposal reaches the product repository's `main` branch,
+`.github/workflows/submit-project-learning.yml` sends it to `skills-source` as a
+review issue. Configure a separate product-repository Actions secret named
+`SKILLS_SOURCE_CONTRIBUTION_TOKEN`; do not reuse `APP_BOILERPLATE_SYNC_TOKEN`.
+The token needs access to dispatch events to `jade-kenneth/skills-source`.
+Canonical skill changes still require a separate reviewed promotion PR.
+
 ## Useful commands
 
 ```bash

@@ -23,6 +23,10 @@ jobs:
         run: npm run boilerplate:contributions
       - name: Test synchronization automation
         run: npm run test:sync-automation
+      - name: Test categorized project learning
+        run: |
+          npm run sync-skills
+          npm run test:skill-contribution
       - name: Test project identity initialization
         run: |
           npm run test:project-init
