@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@5f42847aeb51d4f3a7af03931d2f22911dc4d0ce`
+Source revision: `jade-kenneth/skills-source@62b5303e3b3912c419f5507a4b0b3ee7a1150c5c`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -538,7 +538,7 @@ _Explains code with visual diagrams and analogies. Use when explaining how code 
 Full instructions: `.skills-source/skills/explain-code/SKILL.md`
 
 ### fix-and-enhance
-_Repository-agnostic coordinator for bug fixes and enhancements. Uses the project's generated workflow instructions, coordinates Notion-tracked work through the Notion MCP, and delegates implementation standards to the `web-app`, `mobile-app`, and `api-app` skills when their supported surfaces are affected. Use whenever a user asks to fix broken behavior, improve or polish an existing feature, add or change functionality, or implement a scoped feature._
+_Repository-agnostic coordinator for bug fixes and enhancements. Uses the project's generated workflow instructions, coordinates tracked work, delegates implementation standards to the matching app skills, and routes verified reusable lessons through `project-learning-contributor`. Use whenever a user asks to fix broken behavior, improve or polish an existing feature, add or change functionality, or implement a scoped feature._
 
 Full instructions: `.skills-source/skills/fix-and-enhance/SKILL.md`
 
@@ -556,6 +556,11 @@ Full instructions: `.skills-source/skills/mobile-native-ui-design/SKILL.md`
 _Scan a project read-only and generate a self-contained HTML learning guide at reference/project-learning-audit/index.html. Use when a user wants repository onboarding, a mental model, architecture and full-stack flow explanations, frontend/backend/database pattern analysis, optimization or accessibility risks, prioritized audit cards, diagrams, comprehension tests, a learning path, or an appended topic deep dive. Produces documentation only and never edits app source, runs builds or tests, deploys, or commits._
 
 Full instructions: `.skills-source/skills/project-learning-auditor/SKILL.md`
+
+### project-learning-contributor
+_Capture verified, reusable engineering lessons from a product repository and route them to the correct canonical skill in skills-source. Use after a bug fix, incident, integration discovery, performance improvement, security correction, or durable architecture lesson should benefit other projects; also use when promoting a reviewed project-learning issue into one or more skills. Produces review-gated proposals and never auto-merges canonical skill changes._
+
+Full instructions: `.skills-source/skills/project-learning-contributor/SKILL.md`
 
 ### prose-builder
 _Build or rebuild a Prose component by porting ProseReference to the current app's dependency set — for both web (Next.js/shadcn) and mobile (React Native/NativeWind) targets. Use this skill whenever the user asks to create, rebuild, port, or fix a Prose or typography display component. Trigger on requests like "build the Prose component", "rebuild Prose", "port ProseReference", "fix the Prose component", "create a prose component", or "add a Prose display component"._
