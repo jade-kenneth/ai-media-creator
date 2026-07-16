@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@ada662be8d24873cc320c46dee6018dc99a6815f`
+Source revision: `jade-kenneth/skills-source@68196f405abf07e84f7aa944e32ac639e70be245`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -332,7 +332,7 @@ For an enhancement:
 
 ### 3. Plan and implement the smallest coherent change
 
-Write or update `task.md` when the work requires multiple phases, affects several layers, or benefits from an explicit handoff checklist. Use the format below and keep its state aligned with reality.
+For full-project execution, generate or reconcile the root `TASK_<project-slug>.md` with `/generate-project-tasks <project name>` after the canonical Product Specification and Implementation Plan exist. For a small standalone change that is outside that project tracker, use a scoped `task.md`. Keep either task file aligned with reality.
 
 - Follow the nearest established structure, naming, data flow, hooks, modules, repositories, and error-handling patterns.
 - Keep the diff focused and avoid unrelated cleanup or broad refactors.
@@ -378,7 +378,9 @@ Do not claim a check passed unless it ran successfully. If a check cannot run, r
 
 ## Task file format
 
-Use `task.md` for repository-local implementation plans. Keep it actionable and tied to observable outcomes.
+`TASK_<project-slug>.md` is a derived detailed execution tracker: Product Specification owns product/UI behavior, Implementation Plan owns phase scope and order, and the task file owns atomic actions and evidence. Never let it become a competing specification or architecture plan. Preserve protected boilerplate primitives—including GraphQL clients and codegen, TanStack Query setup, authentication, standardized errors, repositories, common libraries, async-event infrastructure, S3, notifications, security, CI, and test foundations—and create `[BP] verify & reuse` tasks instead of replacement tasks.
+
+Use the following compact structure for a small scoped `task.md`; the full-project generator defines the richer project tracker format.
 
 ```md
 # <Task title>
