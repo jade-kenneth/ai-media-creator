@@ -1,0 +1,76 @@
+name: submit-project-learning
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - skill-contributions/**/*.json
+  workflow_dispatch:
+    inputs:
+      proposal_path:
+        description: Repository-relative path to one proposal JSON file
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Hydrate locked skills
+        run: npm run sync-skills
+      - name: Select and validate proposals
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_PATH: ${{ inputs.proposal_path }}
+          BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            printf '%s\n' "$REQUESTED_PATH" > "$RUNNER_TEMP/proposals.txt"
+          elif [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            git diff-tree --no-commit-id --name-only --diff-filter=AM -r "$GITHUB_SHA" -- \
+              'skill-contributions/**/*.json' > "$RUNNER_TEMP/proposals.txt"
+          else
+            git diff --name-only --diff-filter=AM "$BEFORE_SHA" "$GITHUB_SHA" -- \
+              'skill-contributions/**/*.json' > "$RUNNER_TEMP/proposals.txt"
+          fi
+          if [ ! -s "$RUNNER_TEMP/proposals.txt" ]; then
+            echo "No added or modified project-learning proposals found."
+            exit 0
+          fi
+          while IFS= read -r file; do
+            case "$file" in
+              skill-contributions/*.json) ;;
+              *) echo "::error::Proposal must be under skill-contributions/ and end in .json: $file"; exit 1 ;;
+            esac
+            test -f "$file"
+            npm run skills:contribution:validate -- --file "$file"
+          done < "$RUNNER_TEMP/proposals.txt"
+      - name: Dispatch review proposals to skills-source
+        env:
+          GH_TOKEN: ${{ secrets.SKILLS_SOURCE_CONTRIBUTION_TOKEN }}
+        run: |
+          if [ ! -s "$RUNNER_TEMP/proposals.txt" ]; then exit 0; fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::SKILLS_SOURCE_CONTRIBUTION_TOKEN is not configured."
+            exit 1
+          fi
+          while IFS= read -r file; do
+            jq -n \
+              --argjson proposal "$(cat "$file")" \
+              --arg source_repository "$GITHUB_REPOSITORY" \
+              --arg source_sha "$GITHUB_SHA" \
+              '{event_type:"project-learning-proposed",client_payload:{proposal:$proposal,source_repository:$source_repository,source_sha:$source_sha}}' \
+              > "$RUNNER_TEMP/dispatch.json"
+            gh api --method POST repos/jade-kenneth/skills-source/dispatches \
+              --input "$RUNNER_TEMP/dispatch.json"
+          done < "$RUNNER_TEMP/proposals.txt"
