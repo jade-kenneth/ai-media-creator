@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@a7fd4b75cc49f91822584085bfc1bb5c1ea1fcd7`
+Source revision: `jade-kenneth/skills-source@b7d4e3b69a3b765c747e12a9d2d05944d0db8bd1`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -201,6 +201,13 @@ GraphQL operations return typed domain payloads directly. Do not wrap successful
 ```
 
 The repository uses npm workspaces for `apps/*` and `packages/*`. Run projects through Nx and keep app-specific code inside the owning application.
+
+## Stable architecture paths
+
+- Preserve `apps/app-web`, `apps/app-api`, `apps/app-mobile`, `packages/shared-constants`, and their Nx project/package identifiers in every product created from the boilerplate.
+- These are upstream integration identifiers, not customer-facing product names. Keeping them stable lets boilerplate changes apply to the same paths and avoids duplicate folders, missed patches, and unnecessary merge conflicts.
+- Put the product identity in display names, root package metadata, URL/app slugs, mobile bundle identifiers, database names, domains, environment configuration, branding, and product copy.
+- Do not add app-directory or Nx-project renames to generated build plans. A structural rename is allowed only as an explicit, separately reviewed migration that also defines how future upstream boilerplate changes will be mapped.
 
 ## Ownership rules
 
