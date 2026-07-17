@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@cd852485a8305ffc1b3736219158b4af71635560`
+Source revision: `jade-kenneth/skills-source@d98721e3be1ca5691dfc60c1ccc91378621b36d2`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -320,7 +320,9 @@ Use an external tracker only when the user references one or the repository work
 
 ### 2. Scan the established pattern before writing
 
-Existing code is the executable form of these conventions. Before creating or modifying any artifact, scan how the same kind of artifact is already implemented and consumed in this repository; never write one from framework habit or memory. This scan is mandatory, not advisory.
+Existing code is the executable form of these conventions. Before creating or modifying any artifact, scan how the same kind of artifact is already implemented and consumed in this repository; never write one from framework habit or memory.
+
+This scan is non-negotiable. No implementation may begin before it is completed and recorded, no role or agent is exempt, and no deadline, phase pressure, or "obvious" change waives it. Work submitted without a recorded scan fails review automatically — even when the resulting code happens to look correct — and restarts from the scan.
 
 1. Name the kind of artifact the change needs: GraphQL query or mutation, API domain module, repository, REST endpoint, client operation, screen or page, form, table, hook, provider, validation schema, or test.
 2. Find at least two existing implementations of that kind by suffix or naming pattern (for example `*.resolver.ts`, `*.repository.ts`, `*-operations.ts`, `use-*.ts`, or the feature folders under the owning app).
@@ -328,6 +330,8 @@ Existing code is the executable form of these conventions. Before creating or mo
 4. Record the pattern being replicated: naming, file placement, validation, error shape, pagination, guards, test coverage, and how existing consumers call it across the codebase.
 5. Match the majority pattern. When exemplars disagree, follow the one these conventions endorse; when still ambiguous, follow the most recently reviewed implementation and record the choice.
 6. Deviate only after the scan proves no exemplar fits, keep the deviation minimal, and record why in the task notes and pull request.
+
+Record the scan in the active task file under a `Pattern scan` heading before the first line of implementation: the exemplar file paths consulted, the end-to-end trace followed, and the pattern decisions adopted. A change without this record is treated as unscanned. Reviewers verify the record exists and that the implementation matches it; either failure rejects the phase.
 
 ### 3. Diagnose or define the change
 
@@ -506,6 +510,13 @@ Use the following compact structure for a small scoped `task.md`; `.skills-sourc
 
 - <Explicit non-goals>
 
+## Pattern scan
+
+- Exemplars consulted: <file paths of the existing implementations of the same kind>
+- End-to-end trace: <layers followed through one exemplar>
+- Pattern decisions: <naming, placement, validation, error shape, pagination, guards, tests>
+- Deviations: <none, or the minimal deviation and why no exemplar fits>
+
 ## Phases
 
 ### Phase 1 — <Discovery or contract>
@@ -528,6 +539,7 @@ Use the following compact structure for a small scoped `task.md`; `.skills-sourc
 
 ## Verification
 
+- [ ] Pattern scan recorded before implementation and the code matches it
 - [ ] Lint passes for the affected project
 - [ ] Typecheck passes for the affected project
 - [ ] Relevant tests pass
