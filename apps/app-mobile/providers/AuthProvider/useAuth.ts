@@ -5,7 +5,7 @@ import { AUTH_STATE_CHANGE_EVENT } from '@/utils/constants';
 
 import { getSession } from './service';
 
-import type { LazySession } from './type';
+import type { LazySession } from './types';
 
 export interface UseAuthReturn {
   session: LazySession;

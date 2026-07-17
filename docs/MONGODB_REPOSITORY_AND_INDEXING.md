@@ -11,7 +11,7 @@ resolver -> feature service -> repository interface -> MongooseRepository -> Mon
 ```
 
 - `src/libs/repository.ts` defines filters, sorting, pagination, and CRUD shapes.
-- `src/libs/moongose-repository.ts` implements those shapes for MongoDB.
+- `src/libs/mongoose-repository.ts` implements those shapes for MongoDB.
 - each feature's `repositories/` directory defines its record schema, indexes,
   provider token, and repository module.
 - request-scoped batch loaders prevent repeated user/organization lookups.

@@ -1,6 +1,6 @@
 import { invariant } from 'es-toolkit';
 import { PropsWithChildren, useContext, useEffect } from 'react';
-import { Session__Authenticated } from './type';
+import { Session__Authenticated } from './types';
 import { AuthContext, useAuth } from './useAuth';
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const { session } = useAuth();

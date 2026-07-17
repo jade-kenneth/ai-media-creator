@@ -27,7 +27,11 @@ export type SeedDefaultAdminEnv = z.infer<typeof seedAdminEnvSchema>;
 
 export const seedSuperAdminEnvSchema = z.object({
   DEFAULT_SUPER_ADMIN_EMAIL: z.email().trim().default('superadmin@example.com'),
-  DEFAULT_SUPER_ADMIN_PASSWORD: z.string().trim().min(8).default('SuperAdmin123!'),
+  DEFAULT_SUPER_ADMIN_PASSWORD: z
+    .string()
+    .trim()
+    .min(8)
+    .default('SuperAdmin123!'),
 });
 export type SeedSuperAdminEnv = z.infer<typeof seedSuperAdminEnvSchema>;
 
@@ -70,9 +74,15 @@ async function bootstrap() {
     console.log(`  Override:  DEFAULT_ADMIN_EMAIL / DEFAULT_ADMIN_PASSWORD`);
 
     console.log(`\n--- Super Admin ---`);
-    console.log(`  ${superAdminResult.action}: ${superAdminConfig.DEFAULT_SUPER_ADMIN_EMAIL}`);
-    console.log(`  Password:  ${superAdminConfig.DEFAULT_SUPER_ADMIN_PASSWORD}`);
-    console.log(`  Override:  DEFAULT_SUPER_ADMIN_EMAIL / DEFAULT_SUPER_ADMIN_PASSWORD`);
+    console.log(
+      `  ${superAdminResult.action}: ${superAdminConfig.DEFAULT_SUPER_ADMIN_EMAIL}`,
+    );
+    console.log(
+      `  Password:  ${superAdminConfig.DEFAULT_SUPER_ADMIN_PASSWORD}`,
+    );
+    console.log(
+      `  Override:  DEFAULT_SUPER_ADMIN_EMAIL / DEFAULT_SUPER_ADMIN_PASSWORD`,
+    );
     console.log('');
   } catch (error) {
     const message =

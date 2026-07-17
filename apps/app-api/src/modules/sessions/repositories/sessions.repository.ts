@@ -1,5 +1,5 @@
 import { Connection } from 'mongoose';
-import { MongooseRepository } from 'src/libs/moongose-repository';
+import { MongooseRepository } from 'src/libs/mongoose-repository';
 import { Repository } from 'src/libs/repository';
 
 export interface SessionRecord {

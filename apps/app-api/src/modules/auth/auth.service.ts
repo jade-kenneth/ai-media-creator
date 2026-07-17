@@ -35,7 +35,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
-    private readonly sessionService: SessionsService,
+    private readonly sessionsService: SessionsService,
     private readonly organizationsService: OrganizationsService,
   ) {}
 
@@ -68,7 +68,7 @@ export class AuthService {
     const jti = crypto.randomUUID();
 
     try {
-      await this.sessionService.createSession({
+      await this.sessionsService.createSession({
         accountId: user.id,
         jti,
         dateTimeCreated: new Date(),
@@ -138,11 +138,11 @@ export class AuthService {
       throw new UnauthorizedException('Authentication required.');
     }
 
-    await this.sessionService.deleteSessionsByAccountId(user.id);
+    await this.sessionsService.deleteSessionsByAccountId(user.id);
 
     const jti = crypto.randomUUID();
 
-    await this.sessionService.createSession({
+    await this.sessionsService.createSession({
       accountId: user.id,
       jti,
       dateTimeCreated: new Date(),
@@ -183,7 +183,7 @@ export class AuthService {
   }
 
   async logout(currentUser: AuthenticatedUser): Promise<boolean> {
-    return this.sessionService.deleteSessionByJti(currentUser.jti);
+    return this.sessionsService.deleteSessionByJti(currentUser.jti);
   }
 
   private async createUserAccount(input: {

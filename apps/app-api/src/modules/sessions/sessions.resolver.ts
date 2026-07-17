@@ -6,14 +6,14 @@ import { type AuthenticatedUser } from '../auth/types/auth-context';
 import { SessionsService, ValidateSessionResult } from './sessions.service';
 
 @Resolver()
-export class SessionResolver {
-  constructor(private readonly sessionService: SessionsService) {}
+export class SessionsResolver {
+  constructor(private readonly sessionsService: SessionsService) {}
 
   @Query('validateSession')
   @UseGuards(GraphqlAuthGuard)
   validateSession(
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<ValidateSessionResult> {
-    return this.sessionService.validateSession(user.jti);
+    return this.sessionsService.validateSession(user.jti);
   }
 }

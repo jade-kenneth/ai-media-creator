@@ -52,7 +52,7 @@ const APP_API_SCHEMA =
 const projects = {
   'app-web': createConfig({
     schema: APP_API_SCHEMA,
-    documents: 'react-query/graphql/*.ts',
+    documents: 'react-query/**/graphql/*.ts',
     outputFile: 'react-query/generated__types.ts',
   }),
 };

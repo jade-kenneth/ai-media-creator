@@ -1,7 +1,4 @@
-import {
-  UserRole,
-  type User,
-} from 'src/graphql/generated/graphql';
+import { UserRole, type User } from 'src/graphql/generated/graphql';
 import type {
   UserRecord,
   UsersRepository,

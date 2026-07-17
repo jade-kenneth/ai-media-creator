@@ -6,7 +6,7 @@ import { Merge } from 'type-fest';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/utils';
 
-import { callIfFn } from '@/utils/callIfFn';
+import { callIfFn } from '@/utils/call-if-fn';
 import {
   ColumnControls,
   ColumnControlsContent,

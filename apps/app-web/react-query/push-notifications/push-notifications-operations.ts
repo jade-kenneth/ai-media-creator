@@ -13,7 +13,7 @@ import { defineMutation } from '@/react-query/utils';
 import {
   REGISTER_TEST_PUSH_TOKEN_MUTATION,
   SEND_TEST_PUSH_NOTIFICATION_MUTATION,
-} from '../graphql/push-notifications';
+} from './graphql/push-notifications';
 
 type RegisterTestPushTokenPlatform = 'ANDROID' | 'IOS' | 'WEB';
 

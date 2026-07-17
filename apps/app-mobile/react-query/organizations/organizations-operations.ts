@@ -7,7 +7,7 @@ import type { GraphqlRequestOptions } from '@/react-query/graphql-client';
 
 import { publicClient } from '../graphql-client';
 import { defineQuery } from '../utils';
-import { ORGANIZATIONS_QUERY } from '../graphql/organizations';
+import { ORGANIZATIONS_QUERY } from './graphql/organizations';
 
 export type OrganizationPickerRecord = OrganizationPickerRecordFragment;
 

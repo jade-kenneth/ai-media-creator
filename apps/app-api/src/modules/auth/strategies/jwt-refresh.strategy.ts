@@ -5,10 +5,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { SessionsService } from 'src/modules/sessions/sessions.service';
 import { UsersService } from 'src/modules/users/users.service';
 import { toAuthenticatedUser } from '../auth-user.mapper';
-import { JwtPayload, TokenType, type AuthenticatedUser } from '../types/auth-context';
+import {
+  JwtPayload,
+  TokenType,
+  type AuthenticatedUser,
+} from '../types/auth-context';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+export class JwtRefreshStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-refresh',
+) {
   constructor(
     configService: ConfigService,
     private readonly usersService: UsersService,

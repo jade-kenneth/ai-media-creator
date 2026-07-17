@@ -11,10 +11,7 @@ import { AccountDeletionRequestsRepositoryModule } from './repositories/account-
     OrganizationsModule,
     UsersModule,
   ],
-  providers: [
-    AccountDeletionRequestsService,
-    AccountDeletionRequestsResolver,
-  ],
+  providers: [AccountDeletionRequestsService, AccountDeletionRequestsResolver],
   exports: [AccountDeletionRequestsService],
 })
 export class AccountDeletionRequestsModule {}

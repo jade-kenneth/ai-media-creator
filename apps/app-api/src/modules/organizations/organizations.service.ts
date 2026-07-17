@@ -12,7 +12,7 @@ import { UsersService } from '../users/users.service';
 import type {
   OrganizationRecord,
   OrganizationsRepository,
-} from './repositories/organization.repository';
+} from './repositories/organizations.repository';
 
 @Injectable()
 export class OrganizationsService {
@@ -122,7 +122,10 @@ export class OrganizationsService {
     return organization;
   }
 
-  async update(id: string, input: UpdateOrganizationInput): Promise<Organization> {
+  async update(
+    id: string,
+    input: UpdateOrganizationInput,
+  ): Promise<Organization> {
     await this.findById(id);
 
     const updateData: Partial<OrganizationRecord> = { updatedAt: new Date() };
@@ -164,7 +167,9 @@ export class OrganizationsService {
     return this.organizationsRepository.find({ id });
   }
 
-  private async rollbackCreatedOrganization(organizationId: string): Promise<void> {
+  private async rollbackCreatedOrganization(
+    organizationId: string,
+  ): Promise<void> {
     try {
       await this.organizationsRepository.delete({ id: organizationId });
       return;

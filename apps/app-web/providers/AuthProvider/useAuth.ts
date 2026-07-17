@@ -2,7 +2,7 @@ import { createContext, useEffect, useRef, useState } from 'react';
 
 import { useGlobalStore } from '@/hooks/use-global-store';
 import { getSession } from './service';
-import { LazySession } from './type';
+import { LazySession } from './types';
 
 export interface UseAuthReturn {
   session: LazySession;

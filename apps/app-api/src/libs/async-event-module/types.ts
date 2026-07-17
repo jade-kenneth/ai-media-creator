@@ -1,6 +1,9 @@
 export type AsyncEventType = string;
 
-export interface AsyncEvent<TData = unknown, TType extends AsyncEventType = string> {
+export interface AsyncEvent<
+  TData = unknown,
+  TType extends AsyncEventType = string,
+> {
   type: TType;
   data: TData;
   id: string;

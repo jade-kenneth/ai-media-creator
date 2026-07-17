@@ -4,7 +4,7 @@ import type {
   MeQuery,
 } from '@/react-query/generated__types';
 import { client, type GraphqlRequestOptions } from '../graphql-client';
-import { LOGIN_MUTATION, ME_QUERY } from '../graphql/auth';
+import { LOGIN_MUTATION, ME_QUERY } from './graphql/auth';
 import { defineMutation, defineQuery } from '../utils';
 
 export const authQueryKeys = {

@@ -7,10 +7,10 @@ import {
   AUTH_ACCESS_TOKEN_STORAGE_KEY,
   AUTH_REFRESH_TOKEN_STORAGE_KEY,
   AUTH_ROLE,
-} from '@/utils/contants';
+} from '@/utils/constants';
 import { isNil } from 'es-toolkit/compat';
 import z from 'zod';
-import { Session__Authenticated } from './type';
+import { Session__Authenticated } from './types';
 
 type AuthId = keyof Omit<Session__Authenticated, 'status'>;
 

@@ -24,7 +24,7 @@ import {
   DEACTIVATE_ADMIN_ACCOUNT_MUTATION,
   REACTIVATE_ADMIN_ACCOUNT_MUTATION,
   UPDATE_ADMIN_ACCOUNT_MUTATION,
-} from '../graphql/admin-management';
+} from './graphql/admin-management';
 
 export type AdminAccountRecord = AdminAccountRecordFragment;
 

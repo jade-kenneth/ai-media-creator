@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { useControllableState } from '@/hooks/use-controllable-state';
-import { callIfFn } from '@/utils/callIfFn';
+import { callIfFn } from '@/utils/call-if-fn';
 import type { NumberRange } from '../useDataTable';
 
 interface NumberRangePickerProps {

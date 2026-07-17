@@ -37,13 +37,7 @@ export class RequestLoggingMiddleware implements NestMiddleware {
     response.setHeader(REQUEST_ID_HEADER, requestId);
 
     response.once('finish', () => {
-      if (
-        !shouldLogRequest(
-          request.method,
-          path,
-          this.observabilityConfig,
-        )
-      ) {
+      if (!shouldLogRequest(request.method, path, this.observabilityConfig)) {
         return;
       }
 

@@ -5,7 +5,7 @@ import { TOKENS } from 'src/types/tokens';
 import type { SchedulerLocksRepository } from './repositories/scheduler-locks.repository';
 
 @Injectable()
-export class SchedulerLockService {
+export class SchedulerLocksService {
   private readonly owner = `${hostname()}#${process.pid}`;
 
   constructor(

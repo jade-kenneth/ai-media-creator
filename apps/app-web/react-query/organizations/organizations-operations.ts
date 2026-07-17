@@ -28,7 +28,7 @@ import {
   DEACTIVATE_ORGANIZATION_MUTATION,
   REACTIVATE_ORGANIZATION_MUTATION,
   UPDATE_ORGANIZATION_MUTATION,
-} from '../graphql/organizations';
+} from './graphql/organizations';
 
 export type OrganizationRecord = OrganizationRecordFragment;
 

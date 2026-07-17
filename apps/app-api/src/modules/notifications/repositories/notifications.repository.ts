@@ -1,6 +1,6 @@
 import { Connection, Types } from 'mongoose';
 import type { Notification } from 'src/graphql/generated/graphql';
-import { MongooseRepository } from 'src/libs/moongose-repository';
+import { MongooseRepository } from 'src/libs/mongoose-repository';
 import { Repository } from 'src/libs/repository';
 
 export interface NotificationRecord extends Notification {

@@ -13,7 +13,7 @@ import {
   AUTH_STATE_CHANGE_EVENT,
 } from '@/utils/constants';
 
-import { Session__Authenticated } from './type';
+import { Session__Authenticated } from './types';
 
 type AuthId = keyof Omit<Session__Authenticated, 'status'>;
 

@@ -5,5 +5,8 @@ export function applyTenantFilter<T>(
   tenantId: string | null | undefined,
 ): RepositoryFilter<T> {
   if (!tenantId) return filter ?? {};
-  return { ...filter, organizationId: tenantId } as unknown as RepositoryFilter<T>;
+  return {
+    ...filter,
+    organizationId: tenantId,
+  } as unknown as RepositoryFilter<T>;
 }

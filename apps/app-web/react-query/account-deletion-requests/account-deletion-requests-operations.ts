@@ -28,7 +28,7 @@ import {
   ADMIN_ACCOUNT_DELETION_REQUESTS_QUERY,
   REVIEW_ACCOUNT_DELETION_REQUEST_MUTATION,
   SUBMIT_ACCOUNT_DELETION_REQUEST_MUTATION,
-} from '../graphql/account-deletion-requests';
+} from './graphql/account-deletion-requests';
 
 type AdminAccountDeletionRequestsCountQuery = {
   adminAccountDeletionRequests: { totalCount: number };
