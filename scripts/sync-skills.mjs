@@ -71,7 +71,22 @@ function atomicReplaceSnapshot(tempPath) {
   }
 }
 
+function pinnedSnapshotSha() {
+  try {
+    return fs
+      .readFileSync(path.join(SNAPSHOT_PATH, '.pinned-sha'), 'utf8')
+      .trim();
+  } catch {
+    return '';
+  }
+}
+
 function hydrate(lock) {
+  if (pinnedSnapshotSha() === lock.sha) {
+    console.log(`Skills snapshot already hydrated @ ${lock.sha.slice(0, 8)}`);
+    return;
+  }
+
   const tempPath = path.join(
     ROOT,
     `.skills-source.download-${process.pid}-${Date.now()}`,
@@ -119,9 +134,10 @@ function generateAgents(lock, outputPath = AGENTS_PATH) {
 
 function requestedSha() {
   const shaIndex = process.argv.indexOf('--sha');
-  const sha = shaIndex === -1 ? '' : process.argv[shaIndex + 1] || '';
-  if (sha && !SHA_PATTERN.test(sha)) {
-    throw new Error('--sha must be a full 40-character commit SHA.');
+  if (shaIndex === -1) return '';
+  const sha = process.argv[shaIndex + 1] || '';
+  if (!SHA_PATTERN.test(sha)) {
+    throw new Error('--sha must be followed by a full 40-character commit SHA.');
   }
   return sha;
 }
