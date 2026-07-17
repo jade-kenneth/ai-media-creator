@@ -21,6 +21,7 @@
     "test:design-handoff": "node scripts/test-design-handoff.mjs",
     "boilerplate:setup": "node scripts/boilerplate-sync.mjs setup",
     "boilerplate:check": "node scripts/boilerplate-sync.mjs check",
+    "boilerplate:port": "node scripts/boilerplate-sync.mjs port",
     "boilerplate:ack": "node scripts/boilerplate-sync.mjs acknowledge",
     "boilerplate:contributions": "node scripts/check-boilerplate-contributions.mjs",
     "test:sync-automation": "node scripts/test-sync-automation.mjs",
