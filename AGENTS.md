@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@1dd85ba473843dc81b58d635d58661d106f70843`
+Source revision: `jade-kenneth/skills-source@d98721e3be1ca5691dfc60c1ccc91378621b36d2`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -318,7 +318,22 @@ Ask a clarifying question only when missing information would materially change 
 
 Use an external tracker only when the user references one or the repository workflow requires it. Verify tracker content against the current code and require user authorization for external writes.
 
-### 2. Diagnose or define the change
+### 2. Scan the established pattern before writing
+
+Existing code is the executable form of these conventions. Before creating or modifying any artifact, scan how the same kind of artifact is already implemented and consumed in this repository; never write one from framework habit or memory.
+
+This scan is non-negotiable. No implementation may begin before it is completed and recorded, no role or agent is exempt, and no deadline, phase pressure, or "obvious" change waives it. Work submitted without a recorded scan fails review automatically — even when the resulting code happens to look correct — and restarts from the scan.
+
+1. Name the kind of artifact the change needs: GraphQL query or mutation, API domain module, repository, REST endpoint, client operation, screen or page, form, table, hook, provider, validation schema, or test.
+2. Find at least two existing implementations of that kind by suffix or naming pattern (for example `*.resolver.ts`, `*.repository.ts`, `*-operations.ts`, `use-*.ts`, or the feature folders under the owning app).
+3. Trace one exemplar end-to-end through every layer it touches before writing any code. For a new GraphQL query the trace is: SDL definition → generated types → resolver method → service method → repository call → client document in `react-query/<feature>/graphql/` → operation wrapper → consuming component with its loading, error, empty, and success states. Apply the equivalent full trace for other kinds.
+4. Record the pattern being replicated: naming, file placement, validation, error shape, pagination, guards, test coverage, and how existing consumers call it across the codebase.
+5. Match the majority pattern. When exemplars disagree, follow the one these conventions endorse; when still ambiguous, follow the most recently reviewed implementation and record the choice.
+6. Deviate only after the scan proves no exemplar fits, keep the deviation minimal, and record why in the task notes and pull request.
+
+Record the scan in the active task file under a `Pattern scan` heading before the first line of implementation: the exemplar file paths consulted, the end-to-end trace followed, and the pattern decisions adopted. A change without this record is treated as unscanned. Reviewers verify the record exists and that the implementation matches it; either failure rejects the phase.
+
+### 3. Diagnose or define the change
 
 For a bug fix:
 
@@ -333,7 +348,7 @@ For an enhancement:
 - Identify acceptance criteria, affected states, edge cases, and compatibility constraints.
 - Find the nearest comparable implementation before introducing a new pattern or abstraction.
 
-### 3. Plan and implement the smallest coherent change
+### 4. Plan and implement the smallest coherent change
 
 For full-project execution after the canonical Product Specification and Implementation Plan exist, generate or reconcile the root `TASK_<project-slug>.md`. In Claude Code, use `/generate-project-tasks <project name>`. In Codex or any agent without slash-command support, read `.skills-source/commands/generate-project-tasks.md` in full and execute it directly; if `.skills-source/` is missing, run `npm run sync-skills` first. For a small standalone change outside that project tracker, use a scoped `task.md`. Keep either task file aligned with reality.
 
@@ -402,7 +417,7 @@ npm run boilerplate:contribute -- --sha <full-40-character-sha> [--branch <name>
   revision versus ported updates pending acknowledgement. Resolve divergence by
   contributing it upstream or recording why it stays product-specific.
 
-### 4. Validate in proportion to risk
+### 5. Validate in proportion to risk
 
 Run the smallest relevant checks first:
 
@@ -427,7 +442,7 @@ Increase validation for authentication, authorization, sensitive data, persisten
 
 Do not claim a check passed unless it ran successfully. If a check cannot run, report the command, reason, and remaining risk.
 
-### 5. Close out accurately
+### 6. Close out accurately
 
 - Inspect the final diff and working tree for unintended or unrelated edits.
 - Update task checkboxes and notes to match the actual repository state.
@@ -495,6 +510,13 @@ Use the following compact structure for a small scoped `task.md`; `.skills-sourc
 
 - <Explicit non-goals>
 
+## Pattern scan
+
+- Exemplars consulted: <file paths of the existing implementations of the same kind>
+- End-to-end trace: <layers followed through one exemplar>
+- Pattern decisions: <naming, placement, validation, error shape, pagination, guards, tests>
+- Deviations: <none, or the minimal deviation and why no exemplar fits>
+
 ## Phases
 
 ### Phase 1 — <Discovery or contract>
@@ -517,6 +539,7 @@ Use the following compact structure for a small scoped `task.md`; `.skills-sourc
 
 ## Verification
 
+- [ ] Pattern scan recorded before implementation and the code matches it
 - [ ] Lint passes for the affected project
 - [ ] Typecheck passes for the affected project
 - [ ] Relevant tests pass
