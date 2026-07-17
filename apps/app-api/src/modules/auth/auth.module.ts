@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { OrganizationsModule } from '../organizations/organizations.module';
-import { SessionController } from '../sessions/session.controller';
+import { SessionsController } from '../sessions/sessions.controller';
 import { SessionsModule } from '../sessions/sessions.module';
 import { UsersModule } from '../users/users.module';
 import { AuthResolver } from './auth.resolver';
@@ -48,7 +48,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     SessionsModule,
   ],
 
-  controllers: [SessionController],
+  controllers: [SessionsController],
   providers: [
     AuthService,
     AuthResolver,

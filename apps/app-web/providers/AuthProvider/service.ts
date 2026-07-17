@@ -1,6 +1,6 @@
 import * as services from './service.core';
 import { store } from './store';
-import type { Session } from './type';
+import type { Session } from './types';
 
 export async function getSession(): Promise<Session> {
   const { accessToken, refreshToken, role } = await store.get();

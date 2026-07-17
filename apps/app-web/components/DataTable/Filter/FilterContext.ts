@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext } from '@/utils/createContext';
+import { createContext } from '@/utils/create-context';
 import { useControllableState } from '@/hooks/use-controllable-state';
 
 export interface UseFilterProps {

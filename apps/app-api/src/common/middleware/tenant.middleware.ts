@@ -26,7 +26,9 @@ export class TenantMiddleware implements NestMiddleware {
       return next();
     }
 
-    const organization = await this.organizationsService.findBySlug(decoded.tenantSlug);
+    const organization = await this.organizationsService.findBySlug(
+      decoded.tenantSlug,
+    );
 
     if (!organization || !organization.isActive) {
       throw new ForbiddenException('Tenant not found or inactive.');

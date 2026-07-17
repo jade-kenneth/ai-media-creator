@@ -14,7 +14,7 @@ import { type AuthenticatedUser } from '../auth/types/auth-context';
 import { SessionsService } from '../sessions/sessions.service';
 
 @Controller('session')
-export class SessionController {
+export class SessionsController {
   constructor(
     private readonly authService: AuthService,
     private readonly sessionsService: SessionsService,

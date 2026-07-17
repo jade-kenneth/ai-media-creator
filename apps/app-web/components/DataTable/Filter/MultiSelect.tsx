@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useControllableState } from '@/hooks/use-controllable-state';
-import { callIfFn } from '@/utils/callIfFn';
+import { callIfFn } from '@/utils/call-if-fn';
 import { cn } from '@/utils';
 
 import type { Option } from '../useDataTable';

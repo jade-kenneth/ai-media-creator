@@ -81,12 +81,7 @@ export class PushNotificationsService {
       })
       .collect();
 
-    return this.sendRecords(
-      records,
-      input.title,
-      input.body,
-      input.data ?? {},
-    );
+    return this.sendRecords(records, input.title, input.body, input.data ?? {});
   }
 
   async sendTestPush(input: SendTestPushInput): Promise<SendTestPushResult> {

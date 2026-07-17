@@ -1,10 +1,10 @@
-import { SchedulerLockService } from './scheduler-lock.service';
+import { SchedulerLocksService } from './scheduler-locks.service';
 import type { SchedulerLocksRepository } from './repositories/scheduler-locks.repository';
 
-describe('SchedulerLockService', () => {
+describe('SchedulerLocksService', () => {
   const now = new Date('2026-06-22T01:00:00.000Z');
   let locks: jest.Mocked<Pick<SchedulerLocksRepository, 'create' | 'delete'>>;
-  let service: SchedulerLockService;
+  let service: SchedulerLocksService;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -21,7 +21,7 @@ describe('SchedulerLockService', () => {
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
-    service = new SchedulerLockService(
+    service = new SchedulerLocksService(
       locks as unknown as SchedulerLocksRepository,
     );
   });

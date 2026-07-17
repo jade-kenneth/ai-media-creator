@@ -19,8 +19,7 @@ export class MailService {
     const sendSmtpEmail = new Brevo.SendSmtpEmail();
     sendSmtpEmail.sender = {
       name:
-        this.configService.get<string>('BREVO_SENDER_NAME') ??
-        'Application',
+        this.configService.get<string>('BREVO_SENDER_NAME') ?? 'Application',
       email: this.configService.getOrThrow<string>('BREVO_SENDER_EMAIL'),
     };
     sendSmtpEmail.to = [{ email: to }];

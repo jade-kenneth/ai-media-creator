@@ -1,6 +1,6 @@
 import { UserRole } from '@/react-query/generated__types';
 import { client } from '@/react-query/graphql-client';
-import { VALIDATE_SESSION_QUERY } from '@/react-query/graphql/auth';
+import { VALIDATE_SESSION_QUERY } from '@/react-query/auth/graphql/auth';
 import axios, { isAxiosError } from 'axios';
 import { store } from './store';
 

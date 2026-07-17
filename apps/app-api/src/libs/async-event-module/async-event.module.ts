@@ -63,10 +63,7 @@ export class AsyncEventModule {
         },
         {
           provide: AsyncEventTokens.KafkaConsumer,
-          useFactory: async (
-            kafka: Kafka,
-            config: AsyncEventModuleOptions,
-          ) => {
+          useFactory: async (kafka: Kafka, config: AsyncEventModuleOptions) => {
             const topic = `async-event-${config.context}`;
             const admin = kafka.admin();
 

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { TOKENS } from 'src/types/tokens';
-import { OrganizationsRepositoryFactory } from './organization.repository';
+import { OrganizationsRepositoryFactory } from './organizations.repository';
 
 @Module({
   providers: [

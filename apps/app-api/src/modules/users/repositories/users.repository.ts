@@ -1,13 +1,12 @@
 import { Connection, Types } from 'mongoose';
 import { UserRole, type User } from 'src/graphql/generated/graphql';
-import { MongooseRepository } from 'src/libs/moongose-repository';
+import { MongooseRepository } from 'src/libs/mongoose-repository';
 import { Repository } from 'src/libs/repository';
 
-export interface UserRecord
-  extends Omit<
-    User,
-    'organizationId' | 'firstName' | 'lastName' | 'position'
-  > {
+export interface UserRecord extends Omit<
+  User,
+  'organizationId' | 'firstName' | 'lastName' | 'position'
+> {
   passwordHash: string;
   organizationId?: string | null;
   firstName?: string | null;

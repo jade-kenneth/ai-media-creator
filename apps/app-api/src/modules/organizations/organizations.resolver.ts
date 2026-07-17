@@ -12,7 +12,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { GraphqlAuthGuard } from '../auth/guards/graphql-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { OrganizationsService } from './organizations.service';
-import type { OrganizationRecord } from './repositories/organization.repository';
+import type { OrganizationRecord } from './repositories/organizations.repository';
 
 @Resolver('Organization')
 export class OrganizationsResolver {

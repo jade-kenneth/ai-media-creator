@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@eba5b12dc734f961a300cb370026f8711a924c81`
+Source revision: `jade-kenneth/skills-source@1dd85ba473843dc81b58d635d58661d106f70843`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -72,7 +72,9 @@ not the rule set. If .skills-source/ is missing, run: npm run sync-skills
 - `camelCase`: variables, functions, hooks, methods, and object properties.
 - `UPPER_SNAKE_CASE`: constants that represent fixed sets and GraphQL enum values.
 - `kebab-case`: feature directories and general filenames.
+- `PascalCase` directories and filenames only for a component or provider folder that is exported as a unit under the exported component's name (for example `DataTable/DataTable.tsx`, `RichText/RichTextRoot.tsx`, `AuthProvider/AuthProvider.tsx`). Everything else, including route files, feature folders, hooks, and utilities, stays `kebab-case`.
 - Use framework suffixes consistently: `*.module.ts`, `*.resolver.ts`, `*.service.ts`, `*.controller.ts`, `*.repository.ts`, `*.validation.ts`, and `*.spec.ts`.
+- Reuse the domain folder's exact name in every file basename inside an API module, including the SDL schema file; never mix singular and plural forms of the same domain (`sessions/sessions.resolver.ts`, not `sessions/session.resolver.ts`).
 - Use `useX` for React hooks and `XProvider` for context providers.
 - Prefer descriptive domain names over generic names such as `data`, `item`, or `handler` when the meaning is not obvious.
 
@@ -243,7 +245,7 @@ Rules:
 - Keep resolvers and controllers thin; delegate business behavior to services.
 - Access MongoDB through the repository abstraction, never directly from a resolver or service.
 - Use exactly one repository factory per `.repository.ts` file.
-- Align names across the module, resolver, service, repository, tests, and GraphQL schema.
+- Align names across the module, resolver, service, repository, tests, and GraphQL schema: use the `<domain>` folder name verbatim in every basename, including the `.gql` file and exported class names (`SessionsResolver` in `sessions/sessions.resolver.ts`, never `SessionResolver` in `sessions/session.resolver.ts`).
 - Put reusable transport validation in a feature validation file or a shared validation pipe.
 - Keep tests beside the implementation as `*.spec.ts`.
 
@@ -253,6 +255,7 @@ Rules:
 - Keep route-only components close to their route.
 - Promote a component to shared app-level UI only after it is reused across features.
 - Keep platform-specific implementations separate even when admin and mobile expose the same capability.
+- Colocate client GraphQL documents with their owning feature's data-layer folder (`react-query/<feature>/graphql/`); do not keep a central cross-feature documents folder, and do not leave re-export shims behind when a document moves.
 - Import genuinely shared, product-neutral contracts from `@app/shared-constants`; keep app-specific and single-consumer values in the owning app.
 
 ## GraphQL placement

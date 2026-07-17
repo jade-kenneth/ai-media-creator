@@ -1,7 +1,7 @@
 import { chunk } from 'es-toolkit/compat';
 
 import { Accessor } from '@/types';
-import { callIfFn } from '@/utils/callIfFn';
+import { callIfFn } from '@/utils/call-if-fn';
 
 export interface UsePaginatedOptions {
   /**

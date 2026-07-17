@@ -41,7 +41,9 @@ export class AccountDeletionRequestsService {
   async submit(
     input: SubmitAccountDeletionRequestInput,
   ): Promise<AccountDeletionRequest> {
-    const organization = await this.organizationsService.findById(input.organizationId);
+    const organization = await this.organizationsService.findById(
+      input.organizationId,
+    );
 
     const now = new Date();
 

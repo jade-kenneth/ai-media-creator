@@ -1,13 +1,12 @@
 import { Connection, Types } from 'mongoose';
 import type { AccountDeletionRequest } from 'src/graphql/generated/graphql';
-import { MongooseRepository } from 'src/libs/moongose-repository';
+import { MongooseRepository } from 'src/libs/mongoose-repository';
 import { Repository } from 'src/libs/repository';
 
-export interface AccountDeletionRequestRecord
-  extends Omit<
-    AccountDeletionRequest,
-    '__typename' | 'reviewNote' | 'reviewedBy' | 'reviewedAt'
-  > {
+export interface AccountDeletionRequestRecord extends Omit<
+  AccountDeletionRequest,
+  '__typename' | 'reviewNote' | 'reviewedBy' | 'reviewedAt'
+> {
   reviewNote: string | null;
   reviewedBy: string | null;
   reviewedAt: Date | null;

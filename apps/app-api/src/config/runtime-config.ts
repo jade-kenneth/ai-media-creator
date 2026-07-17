@@ -5,15 +5,10 @@ const projectRoot = resolve(__dirname, '..', '..');
 const workspaceRoot = resolve(projectRoot, '..', '..');
 
 export function resolveEnvFilePaths(): string[] {
-  return [
-    resolve(projectRoot, '.env'),
-    resolve(workspaceRoot, '.env'),
-  ];
+  return [resolve(projectRoot, '.env'), resolve(workspaceRoot, '.env')];
 }
 
-export function createMongoConnectionOptions(
-  configService: ConfigService,
-) {
+export function createMongoConnectionOptions(configService: ConfigService) {
   const mongodbUri = configService.get<string>('MONGODB_URI');
 
   if (!mongodbUri) {

@@ -82,7 +82,8 @@ export class AdminManagementService {
     if (input.firstName != null) patch.firstName = input.firstName.trim();
     if (input.lastName != null) patch.lastName = input.lastName.trim();
     if (input.position != null) patch.position = input.position.trim();
-    if (input.organizationId != null) patch.organizationId = input.organizationId;
+    if (input.organizationId != null)
+      patch.organizationId = input.organizationId;
 
     if (input.password != null && input.password.trim().length > 0) {
       patch.passwordHash = await bcrypt.hash(
