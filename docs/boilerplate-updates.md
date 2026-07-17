@@ -116,17 +116,71 @@ to the GitHub Actions job summary.
 
 Product PRs run `npm run boilerplate:contributions`. The command compares the PR
 with its base branch and reports changes under reusable architecture paths such
-as API common/libs, GraphQL and React Query clients, providers, shared packages,
-and CI/scripts.
+as API common/libs and standard modules, GraphQL and React Query clients,
+providers, shared packages, and CI/scripts. The protected surface is declared in
+`boilerplate-sync.config.json`; the most specific matching pattern wins, so the
+enumerated standard API modules stay foundation even though
+`apps/app-api/src/modules/**` is product-owned by default.
 
-The report is advisory because path detection cannot decide business intent.
-Classify reported changes in the PR template:
+Path detection cannot decide business intent, so the PR author must classify
+every reported change, and in pull request CI the check **fails until a
+classification is declared**. Declare it with one of:
 
-- **Product-specific** stays only in the product repository.
-- **Reusable** is reimplemented or ported without product terminology to a new
+- a PR label: `foundation:reusable`, `foundation:product-specific`, or
+  `foundation:backported`;
+- a line in the PR description: `Foundation-Change: <classification>`.
+
+The classifications mean:
+
+- **product-specific** stays only in the product repository.
+- **reusable** is reimplemented or ported without product terminology to a new
   `app-boilerplate` branch, with a regression test.
-- **Urgent backport** is fixed in the product immediately and then ported upstream.
+- **backported** is fixed in the product immediately and then ported upstream.
 
-API product modules/scripts and web/mobile feature folders are treated as
-product-owned by default. Architecture, common utilities, integrations, and
-shared infrastructure remain possible reusable foundations.
+Outside pull request CI the command stays advisory. API product modules/scripts
+and web/mobile app/feature folders are treated as product-owned by default.
+Architecture, common utilities, integrations, and shared infrastructure remain
+possible reusable foundations.
+
+`.github/CODEOWNERS` mirrors the foundation surface, so foundation changes also
+request a review from the boilerplate maintainer. Keep CODEOWNERS and
+`boilerplate-sync.config.json` in sync when the surface changes.
+
+## Contribute reusable changes upstream
+
+Once a change is classified **reusable** or **backported**, port it to
+`app-boilerplate` from the product repository:
+
+```bash
+npm run boilerplate:contribute -- --dry-run --sha <full-40-character-sha>
+npm run boilerplate:contribute -- --sha <full-40-character-sha> [--branch <name>]
+```
+
+The command accepts only explicit full SHAs from the product's history, refuses
+merge commits, and refuses any commit that touches paths outside the foundation
+surface — split mixed commits first so the upstream contribution is
+foundation-only. It then creates a contribution branch in a temporary worktree
+based on the fetched `boilerplate/main` and applies the commits with
+`git cherry-pick -x`. Review the worktree, push the branch upstream (or to a
+fork), and open a pull request against `app-boilerplate`. The maintainer accepts
+or rejects the standard change there; nothing lands upstream without that PR
+review.
+
+## Detect foundation drift
+
+```bash
+npm run boilerplate:foundation-drift [-- --strict]
+```
+
+The command compares every foundation path against the reviewed upstream
+revision and classifies each difference:
+
+- **Pending acknowledgement** — the file matches a newer upstream revision (a
+  ported update); finish the review and run `npm run boilerplate:ack`.
+- **Diverged locally** — the file was changed or added in the product; classify
+  the divergence and contribute reusable parts upstream with
+  `npm run boilerplate:contribute`, or record why it stays product-specific.
+
+The scheduled `boilerplate-drift` workflow runs this weekly alongside the update
+check and writes the report to the job summary. With `--strict` the command
+exits non-zero when local divergence exists, for teams that want a hard gate.

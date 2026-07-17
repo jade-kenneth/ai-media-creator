@@ -23,6 +23,8 @@
     "boilerplate:check": "node scripts/boilerplate-sync.mjs check",
     "boilerplate:port": "node scripts/boilerplate-sync.mjs port",
     "boilerplate:ack": "node scripts/boilerplate-sync.mjs acknowledge",
+    "boilerplate:contribute": "node scripts/boilerplate-sync.mjs contribute",
+    "boilerplate:foundation-drift": "node scripts/boilerplate-sync.mjs foundation-drift",
     "boilerplate:contributions": "node scripts/check-boilerplate-contributions.mjs",
     "test:sync-automation": "node scripts/test-sync-automation.mjs",
     "postinstall": "node scripts/sync-skills.mjs hydrate || echo '⚠ locked skills hydration failed (offline?) — run npm run sync-skills before agent work'",

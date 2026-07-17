@@ -1,0 +1,41 @@
+# Foundation surface of the boilerplate architecture. Changes to these paths
+# require an explicit review by the boilerplate maintainer, both in
+# app-boilerplate itself and in products scaffolded from it. Keep this file in
+# sync with foundationPaths in boilerplate-sync.config.json.
+
+/.github/ @jade-kenneth
+/boilerplate-sync.config.json @jade-kenneth
+/boilerplate.lock.json @jade-kenneth
+/skills-source.lock.json @jade-kenneth
+/docs/boilerplate-updates.md @jade-kenneth
+/scripts/ @jade-kenneth
+/packages/ @jade-kenneth
+
+/apps/app-api/src/common/ @jade-kenneth
+/apps/app-api/src/config/ @jade-kenneth
+/apps/app-api/src/libs/ @jade-kenneth
+/apps/app-api/src/modules/account-deletion-requests/ @jade-kenneth
+/apps/app-api/src/modules/admin-management/ @jade-kenneth
+/apps/app-api/src/modules/auth/ @jade-kenneth
+/apps/app-api/src/modules/mail/ @jade-kenneth
+/apps/app-api/src/modules/notifications/ @jade-kenneth
+/apps/app-api/src/modules/organizations/ @jade-kenneth
+/apps/app-api/src/modules/push-notifications/ @jade-kenneth
+/apps/app-api/src/modules/push-tokens/ @jade-kenneth
+/apps/app-api/src/modules/s3/ @jade-kenneth
+/apps/app-api/src/modules/scheduler-locks/ @jade-kenneth
+/apps/app-api/src/modules/sessions/ @jade-kenneth
+/apps/app-api/src/modules/users/ @jade-kenneth
+
+/apps/app-web/components/ @jade-kenneth
+/apps/app-web/lib/ @jade-kenneth
+/apps/app-web/providers/ @jade-kenneth
+/apps/app-web/react-query/ @jade-kenneth
+/apps/app-web/codegen.ts @jade-kenneth
+/apps/app-web/proxy.ts @jade-kenneth
+
+/apps/app-mobile/components/ @jade-kenneth
+/apps/app-mobile/providers/ @jade-kenneth
+/apps/app-mobile/react-query/ @jade-kenneth
+/apps/app-mobile/theme/ @jade-kenneth
+/apps/app-mobile/codegen.ts @jade-kenneth
