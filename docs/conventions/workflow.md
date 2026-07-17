@@ -52,12 +52,17 @@ explicit SHA belongs to the configured `skills-source/main`. Use
 ```bash
 npm run boilerplate:setup
 npm run boilerplate:check
+npm run boilerplate:port -- --dry-run --sha <full-app-boilerplate-sha>
+npm run boilerplate:port -- --sha <full-app-boilerplate-sha>
 npm run boilerplate:contributions
 npm run boilerplate:ack -- --sha <full-app-boilerplate-sha>
 ```
 
-These commands discover and record updates; they do not merge code. Review and
-port applicable boilerplate commits on a dedicated product branch.
+`boilerplate:check` discovers updates, `boilerplate:port` applies explicit reviewed
+commits on a clean non-default product branch, and `boilerplate:ack` records the
+final review boundary. Porting and acknowledgement remain separate. Never resolve
+port conflicts automatically or select a merge commit by guessing its mainline
+parent.
 
 Do not add general workflow prose here. Change the canonical `skills-source`
 workflow and regenerate `AGENTS.md` instead.
