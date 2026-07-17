@@ -162,12 +162,22 @@ function testSkillsBranchMembership() {
     app,
     /is not part of/,
   );
+  expectFailure(
+    ['node', 'scripts/sync-skills.mjs', 'update', '--sha'],
+    app,
+    /--sha must be followed by a full 40-character commit SHA/,
+  );
   run(['node', 'scripts/sync-skills.mjs', 'update', '--sha', mainSha], app);
   run(['node', 'scripts/sync-skills.mjs', 'check'], app);
-  run(
+
+  const repeatHydrate = run(['node', 'scripts/sync-skills.mjs', 'hydrate'], app);
+  assert.match(repeatHydrate, /already hydrated/);
+
+  const crossShaUpdate = run(
     ['node', 'scripts/sync-skills.mjs', 'update', '--sha', unmergedSha, '--allow-unmerged'],
     app,
   );
+  assert.match(crossShaUpdate, /Hydrated skills-source @/);
   run(['node', 'scripts/sync-skills.mjs', 'check'], app);
 }
 
