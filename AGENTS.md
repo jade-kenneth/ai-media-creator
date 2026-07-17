@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@cabe9d060faae8a121d12c31149fe55a656358da`
+Source revision: `jade-kenneth/skills-source@1569c6b1326be4366131f84074caf8723b41eb73`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -375,6 +375,39 @@ Do not claim a check passed unless it ran successfully. If a check cannot run, r
 - Update an authorized tracker only when the user or repository workflow requires it; do not mark incomplete or unvalidated work complete.
 - Update documentation or standards only when the change creates a durable rule, public contract, configuration requirement, or reusable workflow.
 - Summarize what changed, what was validated, and any limitation, assumption, migration, or follow-up that remains.
+
+## Port reviewed boilerplate updates into a product
+
+Product repositories keep discovery, code application, and final review as three
+separate decisions:
+
+1. `npm run boilerplate:check` fetches the configured `app-boilerplate` branch
+   and lists unreviewed commits after `boilerplate.lock.json.reviewedThroughSha`.
+   It discovers candidates; it does not copy code or advance the lock.
+2. After inspecting the commit diffs, create a dedicated product branch and run
+   `npm run boilerplate:port -- --sha <full-40-character-sha>` with one `--sha`
+   for every explicitly selected commit. Use `--dry-run` first when useful. The
+   command validates membership in the unreviewed range, orders selections by
+   upstream history, rejects merge commits, and applies each commit with
+   `git cherry-pick -x` so provenance is retained.
+3. Resolve any semantic conflicts manually and run affected product checks. The
+   port command must preserve Git's conflict state and direct the user to
+   `git cherry-pick --continue` or `git cherry-pick --abort`; agents must not
+   resolve conflicts automatically.
+4. Run `npm run boilerplate:ack -- --sha <full-40-character-sha>` only after every
+   commit through that revision was deliberately applied or declined. Acknowledging
+   records the final review boundary; it never copies code.
+
+Never port directly on `main`, `master`, the configured default branch, or a
+detached HEAD. Start with a clean worktree and no unfinished cherry-pick. Never
+select a merge commit or guess its mainline parent; inspect it and explicitly
+select the applicable constituent commits instead. Do not reapply a commit already
+recorded in `appliedUpdates`, already present by ancestry, or already referenced by
+a cherry-pick provenance footer.
+
+The port command records each successfully applied upstream SHA in
+`boilerplate.lock.json.appliedUpdates`, but leaves `reviewedThroughSha` unchanged.
+It does not resolve conflicts, acknowledge updates, or commit the lock file.
 
 ## Task file format
 
