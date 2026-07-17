@@ -171,7 +171,11 @@ git add boilerplate.lock.json
 git commit -m "chore: record boilerplate starting revision"
 ```
 
-Use `npm run boilerplate:check` to report later template updates and
+Use `npm run boilerplate:check` to report later template updates, then apply
+explicit reviewed commits on a clean product branch with
+`npm run boilerplate:port -- --sha <full-app-boilerplate-sha>`. Run
+`npm run boilerplate:ack -- --sha <full-reviewed-through-sha>` only after every
+commit through that revision was applied or deliberately declined. Use
 `npm run boilerplate:contributions` to detect product changes that may be worth
 porting back as reusable architecture. See
 [`docs/boilerplate-updates.md`](docs/boilerplate-updates.md) for the reviewed
