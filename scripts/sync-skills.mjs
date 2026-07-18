@@ -184,8 +184,43 @@ function verifyShaOnConfiguredRef(lock, sha) {
   }
 }
 
+function checkCommandWrappers() {
+  const wrappersDir = path.join(ROOT, '.claude', 'commands');
+  if (!fs.existsSync(wrappersDir)) return;
+
+  const referencePattern = /\.skills-source\/commands\/[A-Za-z0-9._-]+\.md/g;
+  const problems = [];
+  for (const entry of fs.readdirSync(wrappersDir).sort()) {
+    if (!entry.endsWith('.md')) continue;
+    const wrapperPath = path.join(wrappersDir, entry);
+    const references =
+      fs.readFileSync(wrapperPath, 'utf8').match(referencePattern) || [];
+    if (references.length === 0) {
+      problems.push(
+        `.claude/commands/${entry} does not delegate to a canonical .skills-source/commands/ file.`,
+      );
+      continue;
+    }
+    for (const reference of new Set(references)) {
+      if (!fs.existsSync(path.join(ROOT, reference))) {
+        problems.push(
+          `.claude/commands/${entry} references ${reference}, which is missing from the locked snapshot.`,
+        );
+      }
+    }
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      `Command wrappers are out of sync with the locked snapshot:\n- ${problems.join('\n- ')}`,
+    );
+  }
+  console.log('Command wrappers resolve against the locked snapshot');
+}
+
 function check(lock) {
   hydrate(lock);
+  checkCommandWrappers();
   const checkPath = path.join(
     os.tmpdir(),
     `app-boilerplate-AGENTS-${process.pid}.md`,
