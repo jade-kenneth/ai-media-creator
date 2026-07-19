@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@8274dfe72d7b4bee9f64a58b877244f91fd28951`
+Source revision: `jade-kenneth/skills-source@a464a324417f6e34a330002b03d5d6015b3a366d`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -547,9 +547,12 @@ reconciliation must compare the affected task's current acceptance criteria,
 canonical references, repository evidence, and blockers. Do not preserve `[x]`
 just because a task was previously complete or its phase name is unchanged.
 Preserve `[x]` only when the acceptance criteria are unchanged and still
-validated. Reopen an affected completed task as `[~]` when its implementation is
-being extended or is already underway; use `[ ]` for changed or newly required
-work that has not started. Add new atomic tasks for new plan items, resolve
+validated. Reopen an affected completed task as `[~]` only when implementation
+of its updated acceptance criteria has actually started; an older implementation
+alone is historical evidence, not in-progress evidence. Use `[ ]` for changed or
+newly required work that has not started. Classify requirement changes and
+blocker transitions separately because both may affect the same task. Add new
+atomic tasks for new plan items, resolve
 blockers superseded by the updated documents, and retain evidence/history with a
 dated reason for every reopen, split, supersession, or unblock. Never mark
 changed requirements complete without updated validation. Each reconciliation
