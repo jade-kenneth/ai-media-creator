@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@1896ac75ba4a107fd9220dd16a2aca623af0b2f5`
+Source revision: `jade-kenneth/skills-source@96113f45c69672aebf3e996b367292a8fe37e2b3`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
