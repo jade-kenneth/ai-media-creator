@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@96113f45c69672aebf3e996b367292a8fe37e2b3`
+Source revision: `jade-kenneth/skills-source@8274dfe72d7b4bee9f64a58b877244f91fd28951`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -541,6 +541,22 @@ It does not resolve conflicts, acknowledge updates, or commit the lock file.
 ## Task file format
 
 `TASK_<project-slug>.md` is a derived detailed execution tracker: Product Specification owns product/UI behavior, Implementation Plan owns phase scope and order, and the task file owns atomic actions and evidence. Never let it become a competing specification or architecture plan. Preserve protected boilerplate primitives—including GraphQL clients and codegen, TanStack Query setup, authentication, standardized errors, repositories, common libraries, async-event infrastructure, S3, notifications, security, CI, and test foundations—and create `[BP] verify & reuse` tasks instead of replacement tasks.
+
+When Product Specification.md or Implementation Plan.md changes, task
+reconciliation must compare the affected task's current acceptance criteria,
+canonical references, repository evidence, and blockers. Do not preserve `[x]`
+just because a task was previously complete or its phase name is unchanged.
+Preserve `[x]` only when the acceptance criteria are unchanged and still
+validated. Reopen an affected completed task as `[~]` when its implementation is
+being extended or is already underway; use `[ ]` for changed or newly required
+work that has not started. Add new atomic tasks for new plan items, resolve
+blockers superseded by the updated documents, and retain evidence/history with a
+dated reason for every reopen, split, supersession, or unblock. Never mark
+changed requirements complete without updated validation. Each reconciliation
+must include a report of preserved, reopened, added, revised, blocked,
+unblocked, superseded, and removed tasks; it must not claim that scope or
+checkboxes were unchanged without an acceptance-criteria and repository
+comparison.
 
 Use the following compact structure for a small scoped `task.md`; `.skills-source/commands/generate-project-tasks.md` defines the richer full-project tracker format and must be read directly by agents that cannot invoke the wrapper command.
 
