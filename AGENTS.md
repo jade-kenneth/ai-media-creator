@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@e3db2d8f262bdcb1c9568a020737372a21ccba0b`
+Source revision: `jade-kenneth/skills-source@b689a0ab8c26c1e4c030332241a739ea1c5d16ef`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -387,6 +387,16 @@ it contract-first in dependency order or mark the task blocked. Do not preserve 
 mock/local implementation to make the screen appear complete. Review must trace
 every data-backed action end-to-end and reject hard-coded or duplicated production
 state even when visual fidelity passes.
+
+Fidelity QA itself does not stall on a missing dependency: when the backend data
+or integration a QA row needs does not exist yet, the reviewer may run QA against
+a temporary marked stand-in (`QA-BYPASS(Phase N)` comment or `qa-fixtures/` path)
+so every visual and interaction row is exercised immediately. Stand-ins are
+forbidden when the real dependency exists — bypassing a built integration is an
+automatic row failure. Rows verified through a stand-in are recorded as
+`🔁 re-verify (Phase N)` rather than passed, the screen stays `[~]`, and once the
+blocking phase lands the executor removes the stand-in (zero marker hits) and
+re-runs exactly those rows against the real path before the screen can be `[x]`.
 
 ### 4. Diagnose or define the change
 
