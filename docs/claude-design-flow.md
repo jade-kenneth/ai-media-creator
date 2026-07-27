@@ -56,13 +56,18 @@ flowchart TD
   QA -->|matches| DONE["Phase [x] · status synced to Notion"]
 
   DONE -.->|more screens designed| CD
-  CD ==>|status: final| FINAL["/finalize-build-docs<br/>design:validate-final"]
+  ACK ==>|"release was status: final"| FINAL["/finalize-build-docs<br/>design:validate-final"]
   FINAL --> DOCS
 ```
 
 Dotted lines are occasional paths. The loop at the bottom is the normal state of the
 project — design a slice, build a slice, repeat. You do not wait for the whole app to be
 designed before anyone writes code.
+
+Note that the final release is not a separate lane. It is exported, validated, and
+synchronized exactly like every other batch; `/finalize-build-docs` runs *after* that,
+which is why the arrow into it comes from acknowledgement rather than straight from
+Claude Design.
 
 ## Ownership boundaries
 
