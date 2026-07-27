@@ -7,6 +7,11 @@ const rootIndex = process.argv.indexOf('--root');
 const ROOT = path.resolve(rootIndex === -1 ? process.cwd() : process.argv[rootIndex + 1] || '');
 const DESIGN = path.join(ROOT, 'design');
 const allowSynced = process.argv.includes('--allow-synced');
+// The committed steady state of a product repository is release == lock: /sync-build-docs
+// acknowledges the release it just reconciled, and both files are committed together. The
+// ordinary transition rules reject that state by design, so a gate that runs on every pull
+// request needs to accept it explicitly instead of demanding a pending transition.
+const acceptAcknowledged = process.argv.includes('--accept-acknowledged');
 const RELEASE_PATH = path.join(DESIGN, 'design-release.json');
 const LOCK_PATH = path.join(DESIGN, 'design-sync.lock.json');
 const supportedSurfaces = new Set(['web', 'mobile', 'tablet', 'desktop']);
@@ -271,14 +276,17 @@ if (release) {
     const lastRevision = lock.lastSyncedRevision;
     const isNextBatch = release.batch === lastBatch + 1;
     const isRevision = release.batch === lastBatch && release.revision > lastRevision;
-    const isSyncedFinal =
-      allowSynced &&
-      release.status === 'final' &&
+    const matchesLock =
       release.batch === lastBatch &&
       release.revision === lastRevision &&
       release.releaseId === lock.releaseId;
+    const isSyncedFinal = allowSynced && release.status === 'final' && matchesLock;
+    const isAcknowledged = acceptAcknowledged && matchesLock;
+    // Either way the release is the one already in the lock, so the change markers no
+    // longer describe a pending transition; only the hashes still have to hold.
+    const isSettledState = isSyncedFinal || isAcknowledged;
 
-    if (!isNextBatch && !isRevision && !isSyncedFinal) {
+    if (!isNextBatch && !isRevision && !isSettledState) {
       releaseErrors.push(
         'design release ' + release.batch + ' revision ' + release.revision +
           ' is not newer than synchronized batch ' + lastBatch + ' revision ' +
@@ -302,10 +310,11 @@ if (release) {
       const prototype = safeDesignPath(item?.prototype);
       if (!prototype || !currentHashes[prototype]) continue;
       const previousHash = priorHashes[prototype];
-      if (isSyncedFinal) {
+      if (isSettledState) {
         if (!previousHash || previousHash !== currentHashes[prototype]) {
           releaseErrors.push(
-            'design/' + prototype + ' changed after the final release was synchronized.',
+            'design/' + prototype + ' changed after ' + release.releaseId +
+              ' was synchronized; release the change as a new batch or revision.',
           );
         }
         continue;
@@ -355,11 +364,23 @@ if (release) {
       const knownScreen = priorScreens[prototype];
 
       if (!fs.existsSync(absolute)) {
-        if (knownScreen && removedScreens.has(knownScreen)) continue;
+        if (knownScreen) {
+          if (removedScreens.has(knownScreen)) continue;
+          releaseErrors.push(
+            'design/' + prototype + ' was synchronized previously but is now missing; ' +
+              'list "' + knownScreen + '" in removedOrSuperseded.',
+          );
+          continue;
+        }
+        // Locks written before prototype-to-screen names were recorded cannot say which
+        // screen this file belonged to, so a correctly declared retirement would other-
+        // wise be unprovable and the prototype could never be retired at all. Accept a
+        // declared retirement in that case. Acknowledgement backfills the mapping, so
+        // this allowance only applies until the next successful sync.
+        if (removedScreens.size) continue;
         releaseErrors.push(
-          'design/' + prototype + ' was synchronized previously but is now missing; list ' +
-            (knownScreen ? '"' + knownScreen + '"' : 'its screen') +
-            ' in removedOrSuperseded.',
+          'design/' + prototype + ' was synchronized previously but is now missing; ' +
+            'list its screen in removedOrSuperseded.',
         );
         continue;
       }

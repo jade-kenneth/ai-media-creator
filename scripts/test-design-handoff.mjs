@@ -87,6 +87,28 @@ try {
     /is not newer than synchronized batch 1 revision 0/,
   );
 
+  // That rejected state is exactly what a product repository has committed between
+  // releases, so the pull-request gate has to accept it or it fails on every PR.
+  assert.match(
+    run(VALIDATOR, true, ['--accept-acknowledged']),
+    /design-batch-001 revision 0 \[incremental\]/,
+  );
+
+  // Accepting the settled state must not become a way to smuggle in a changed prototype.
+  write(
+    'design/prototypes/Home.dc.html',
+    '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Sneaky</main></div></body>\n',
+  );
+  assert.match(
+    run(VALIDATOR, false, ['--accept-acknowledged']),
+    /changed after design-batch-001 was synchronized/,
+  );
+  write(
+    'design/prototypes/Home.dc.html',
+    '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div></body>\n',
+  );
+  assert.match(run(VALIDATOR, true, ['--accept-acknowledged']), /design-batch-001 revision 0/);
+
   write(
     'design/prototypes/Home.dc.html',
     '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Updated home</main></div></body>\n',
@@ -331,6 +353,62 @@ try {
     ) + '\n',
   );
   assert.match(run(VALIDATOR, true), /design-batch-005 revision 0/);
+  assert.match(run(ACK, true), /Acknowledged design-batch-005 revision 0/);
+
+  // A lock written before prototype-to-screen names existed must still be able to retire
+  // a prototype, otherwise the screen is stuck under contract forever.
+  const legacyLock = JSON.parse(
+    fs.readFileSync(path.join(TEMP, 'design/design-sync.lock.json')),
+  );
+  delete legacyLock.prototypeScreens;
+  write('design/design-sync.lock.json', JSON.stringify(legacyLock, null, 2) + '\n');
+  fs.rmSync(path.join(TEMP, 'design/prototypes/logo--brand.html'));
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 6,
+        previousBatch: 5,
+        releaseId: 'design-batch-006',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'unchanged' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(
+    run(VALIDATOR, false),
+    /logo--brand\.html was synchronized previously but is now missing; list its screen/,
+  );
+
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 6,
+        previousBatch: 5,
+        releaseId: 'design-batch-006',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'unchanged' },
+        ],
+        stillInDesign: [],
+        planned: [],
+        removedOrSuperseded: ['Brand logo'],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(run(VALIDATOR, true), /design-batch-006 revision 0/);
+  assert.match(run(ACK, true), /Acknowledged design-batch-006 revision 0/);
+  const lock6 = JSON.parse(
+    fs.readFileSync(path.join(TEMP, 'design/design-sync.lock.json')),
+  );
+  assert.ok(!('prototypes/logo--brand.html' in lock6.prototypeHashes));
 
   console.log('Incremental design release tests passed.');
 } finally {

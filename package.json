@@ -17,6 +17,7 @@
     "test:skill-contribution": "node scripts/test-skill-contribution.mjs",
     "design:validate": "node scripts/validate-design-export.mjs",
     "design:validate-final": "node scripts/validate-design-export.mjs --allow-synced",
+    "design:validate-ci": "node scripts/validate-design-export.mjs --accept-acknowledged",
     "design:ack": "node scripts/acknowledge-design-release.mjs",
     "test:design-handoff": "node scripts/test-design-handoff.mjs",
     "boilerplate:setup": "node scripts/boilerplate-sync.mjs setup",

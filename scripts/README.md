@@ -62,7 +62,8 @@ finalized (see `docs/design-handoff.md`).
 | --- | --- | --- |
 | `design:validate` | `validate-design-export.mjs` | Validates the imported design export against the handoff contract. Run before `/sync-build-docs`, and before `/finalize-build-docs`. |
 | `design:validate-final` | `validate-design-export.mjs --allow-synced` | Same validation, plus it additionally accepts a final release already acknowledged into build docs. It does not reject an unsynchronized final release; `/finalize-build-docs` reconciles that case itself. |
-| `design:ack` | `acknowledge-design-release.mjs` | Records that a design release was reviewed and synced into the build documents. |
+| `design:validate-ci` | `validate-design-export.mjs --accept-acknowledged` | Same validation, plus it accepts the acknowledged steady state where the release already matches the lock. Used by the `design-gate` workflow, because a committed repository between releases is in exactly that state and plain `design:validate` rejects it by design. Prototype hashes are still enforced, so a changed prototype fails here too. |
+| `design:ack` | `acknowledge-design-release.mjs` | Records that a design release was reviewed and synced into the build documents. Prunes prototypes that the release retired. |
 | `test:design-handoff` | `test-design-handoff.mjs` | Regression tests for the design release flow. |
 
 ## Conventions for this directory

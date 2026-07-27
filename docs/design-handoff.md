@@ -108,8 +108,12 @@ release retires that screen in `removedOrSuperseded`. Logo contracts
 (`logo--*.html`) may appear in `readyForBuild` and are exempt from the
 `data-app-root` requirement, since they are not screens.
 
-The `design-gate` workflow runs `npm run design:validate` on every pull request,
-and no-ops in repositories that have no `design/design-release.json` yet.
+The `design-gate` workflow runs `npm run design:validate-ci` on every pull request,
+and no-ops in repositories that have no `design/design-release.json` yet. That mode
+also accepts the acknowledged steady state, because between releases a committed
+repository has `design-release.json` matching `design-sync.lock.json`, which the
+ordinary transition rules reject on purpose. Prototype hashes are still enforced in
+that mode, so a prototype edited after synchronization fails the gate.
 
 ## 4. Synchronize each buildable design release
 

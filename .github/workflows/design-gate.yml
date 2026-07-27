@@ -26,4 +26,8 @@ jobs:
             echo "manifest from the first Claude Design export."
             exit 0
           fi
-          npm run design:validate
+          # Accepts the acknowledged steady state as well as a pending transition. A
+          # committed repository normally has release == lock, which the ordinary
+          # transition rules reject on purpose, so plain design:validate would fail
+          # every pull request once the first release has been synchronized.
+          npm run design:validate-ci

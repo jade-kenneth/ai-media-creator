@@ -43,15 +43,12 @@ for (const item of release.readyForBuild) {
   prototypeScreens[prototype] = item.screen;
 }
 
-// Drop screens this release retired, so the validator stops demanding a file that is
-// deliberately gone. Validation has already confirmed each removal was declared.
-const removed = new Set(
-  (Array.isArray(release.removedOrSuperseded) ? release.removedOrSuperseded : []).filter(
-    (value) => typeof value === 'string',
-  ),
-);
-for (const [prototype, screen] of Object.entries(prototypeScreens)) {
-  if (!removed.has(screen)) continue;
+// Drop prototypes that are no longer on disk, so the validator stops demanding a file
+// that is deliberately gone. Validation ran first and already confirmed every deletion
+// was declared in removedOrSuperseded, so a missing file here is an accepted retirement.
+// Keying on the file rather than the screen name also retires prototypes recorded by an
+// older acknowledgement script, which stored no screen names to match against.
+for (const prototype of Object.keys(prototypeHashes)) {
   if (fs.existsSync(path.join(DESIGN, prototype))) continue;
   delete prototypeHashes[prototype];
   delete prototypeScreens[prototype];
