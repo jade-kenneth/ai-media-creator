@@ -231,10 +231,16 @@ project regenerates — it is not patched locally.
 /finalize-build-docs <project name>   # runs design:validate-final
 ```
 
-Run only when Claude Design sets `"status": "final"`, required MVP scope has no
-`stillInDesign` or `planned` entries, and that final release has already been
-synchronized. It is **not** a prerequisite for starting — Codex builds earlier ready
-slices long before finalization.
+Run only when Claude Design sets `"status": "final"` and required MVP scope has no
+`stillInDesign` or `planned` entries. It is **not** a prerequisite for starting — Codex
+builds earlier ready slices long before finalization.
+
+Note what `--allow-synced` does and does not do: it *additionally* accepts a final
+release that was already acknowledged into the lock. It does not reject an
+unsynchronized final release — a brand-new final batch still passes the transition
+check. The command itself is responsible for reading `design/design-sync.lock.json`,
+reconciling the release when it is newer than the lock, and running `npm run design:ack`
+only after that succeeds.
 
 Afterwards: verify every prototype has a Product Specification section, every planned but
 unprototyped surface is marked `⚠ needs design`, and commit the untouched export

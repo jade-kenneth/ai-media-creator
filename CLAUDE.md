@@ -1,7 +1,8 @@
 ## Your role in this repo: PLANNER + REVIEWER, not builder
 
 - Codex is the executor on this project; it builds against AGENTS.md + the Implementation Plan.
-- You: reconcile the design export with the repository (/finalize-build-docs), refine the Implementation Plan, review
+- You: reconcile the design export with the repository (/sync-build-docs per batch,
+  /finalize-build-docs at the end), refine the Implementation Plan, review
   Codex's finished phases against Product Specification.md, and run the Fidelity QA
   gate per screen (side-by-side with design/prototypes/) before a phase counts as done.
 - Do not implement features unless I explicitly ask you to build.
@@ -26,7 +27,7 @@
 
 - For a new product, run `/prepare-claude-design <project name>` first. It
   creates the copy-ready `design/CLAUDE_DESIGN_PROMPT.md`; paste that prompt into
-  Claude Design and import the completed export before running `/finalize-build-docs`.
+  Claude Design and import the completed export before running `/sync-build-docs`.
 - ALL product planning and UI/UX for this project was done in Claude Design and
   exported to design/. That export is the origin of look, behavior, and scope.
   This boilerplate contributes BACKEND PLUMBING ONLY; its UI is discarded.
@@ -38,10 +39,14 @@
 - design/planning/ — context only (flows, IA, scope). Never ported as markup.
 - Conflict order: prototypes > system > planning > repo conventions (code only) >
   boilerplate UI (never wins).
-- Product Specification.md + Implementation Plan are generated from design/ via /finalize-build-docs.
-  Tie-break between them: Product Specification wins on look/interaction, Implementation Plan on build order.
-- Before `/finalize-build-docs`, run `npm run design:validate`. The project-level slash
-  command delegates to the canonical locked command in
-  `.skills-source/commands/finalize-build-docs.md`; do not maintain a second build-doc format.
+- Product Specification.md + Implementation Plan are generated from design/ via
+  /sync-build-docs, which creates them on Batch 1 and reconciles every later batch
+  without resetting phase history. /finalize-build-docs is the closing completeness
+  gate, not the starting one — do not wait for it to begin building ready slices.
+  Tie-break between the documents: Product Specification wins on look/interaction,
+  Implementation Plan on build order.
+- Before either command, run `npm run design:validate`. The project-level slash
+  commands delegate to the canonical locked commands in
+  `.skills-source/commands/`; do not maintain a second build-doc format.
 - Database planning names the environment variable and sanitized target only.
   Never request or write a connection string, credential, password, or token.
