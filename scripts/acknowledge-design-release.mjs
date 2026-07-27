@@ -28,6 +28,11 @@ const prototypeHashes = {
     ? previous.prototypeHashes
     : {}),
 };
+const prototypeScreens = {
+  ...(previous.prototypeScreens && typeof previous.prototypeScreens === 'object'
+    ? previous.prototypeScreens
+    : {}),
+};
 
 for (const item of release.readyForBuild) {
   const prototype = item.prototype.replaceAll('\\', '/').replace(/^design\//, '');
@@ -35,6 +40,21 @@ for (const item of release.readyForBuild) {
     .createHash('sha256')
     .update(fs.readFileSync(path.join(DESIGN, prototype)))
     .digest('hex');
+  prototypeScreens[prototype] = item.screen;
+}
+
+// Drop screens this release retired, so the validator stops demanding a file that is
+// deliberately gone. Validation has already confirmed each removal was declared.
+const removed = new Set(
+  (Array.isArray(release.removedOrSuperseded) ? release.removedOrSuperseded : []).filter(
+    (value) => typeof value === 'string',
+  ),
+);
+for (const [prototype, screen] of Object.entries(prototypeScreens)) {
+  if (!removed.has(screen)) continue;
+  if (fs.existsSync(path.join(DESIGN, prototype))) continue;
+  delete prototypeHashes[prototype];
+  delete prototypeScreens[prototype];
 }
 
 const lock = {
@@ -45,6 +65,9 @@ const lock = {
   releaseId: release.releaseId,
   prototypeHashes: Object.fromEntries(
     Object.entries(prototypeHashes).sort(([a], [b]) => a.localeCompare(b)),
+  ),
+  prototypeScreens: Object.fromEntries(
+    Object.entries(prototypeScreens).sort(([a], [b]) => a.localeCompare(b)),
   ),
 };
 

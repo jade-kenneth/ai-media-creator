@@ -57,12 +57,14 @@ try {
   const empty = run(VALIDATOR, false);
   assert.match(empty, /No supported screen prototype contracts/);
   assert.match(empty, /design\/design-release\.json is missing/);
+  assert.match(empty, /design\/system\/ must contain the normative design system export/);
 
   write(
     'design/prototypes/Home.dc.html',
     '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Home</main></div></body>\n',
   );
   write('design/planning/screen-inventory.md', '# Screen inventory\n');
+  write('design/system/tokens.md', '# Tokens\n');
   write('design/handoff/Sample Design Reference.md', '# Reference\n');
   write('design/handoff/Sample Design Handoff Plan.md', '# Plan\n');
   write('design/design-release.json', JSON.stringify(manifest(), null, 2) + '\n');
@@ -217,6 +219,118 @@ try {
     run(VALIDATOR, false),
     /final design release cannot contain stillInDesign/,
   );
+
+  // Home is still on disk as the unacknowledged revision-1 content while the lock holds
+  // the batch-2 content. A release that says nothing about Home must not hide that.
+  write(
+    'design/prototypes/Booking.dc.html',
+    '<body data-prototype-surface="mobile"><main data-app-root>Booking two</main></body>\n',
+  );
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 3,
+        previousBatch: 2,
+        releaseId: 'design-batch-003',
+        readyForBuild: [
+          { screen: 'Booking', prototype: 'prototypes/Booking.dc.html', change: 'updated' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(
+    run(VALIDATOR, false),
+    /Home\.dc\.html changed since it was synchronized but is not listed in readyForBuild/,
+  );
+
+  // Restoring the synchronized content clears it; an undeclared prototype is fine as
+  // long as it still matches what the repository accepted.
+  write(
+    'design/prototypes/Home.dc.html',
+    '<body data-prototype-surface="mobile"><div data-preview-shell><main data-app-root>Updated home</main></div></body>\n',
+  );
+  assert.match(run(VALIDATOR, true), /design-batch-003 revision 0/);
+  assert.match(run(ACK, true), /Acknowledged design-batch-003 revision 0/);
+  const lock3 = JSON.parse(
+    fs.readFileSync(path.join(TEMP, 'design/design-sync.lock.json')),
+  );
+  assert.equal(lock3.prototypeScreens['prototypes/Booking.dc.html'], 'Booking');
+
+  // Deleting a synchronized prototype is only legitimate when the release retires it.
+  fs.rmSync(path.join(TEMP, 'design/prototypes/Booking.dc.html'));
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 4,
+        previousBatch: 3,
+        releaseId: 'design-batch-004',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'unchanged' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(
+    run(VALIDATOR, false),
+    /Booking\.dc\.html was synchronized previously but is now missing; list "Booking" in removedOrSuperseded/,
+  );
+
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 4,
+        previousBatch: 3,
+        releaseId: 'design-batch-004',
+        readyForBuild: [
+          { screen: 'Home', prototype: 'prototypes/Home.dc.html', change: 'unchanged' },
+        ],
+        stillInDesign: [],
+        planned: [],
+        removedOrSuperseded: ['Booking'],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(run(VALIDATOR, true), /design-batch-004 revision 0/);
+  assert.match(run(ACK, true), /Acknowledged design-batch-004 revision 0/);
+  const lock4 = JSON.parse(
+    fs.readFileSync(path.join(TEMP, 'design/design-sync.lock.json')),
+  );
+  assert.ok(!('prototypes/Booking.dc.html' in lock4.prototypeHashes));
+  assert.ok(!('prototypes/Booking.dc.html' in lock4.prototypeScreens));
+
+  // A logo contract has no data-app-root by design; it must still be releasable.
+  write('design/prototypes/logo--brand.html', '<svg role="img"><title>Brand</title></svg>\n');
+  write(
+    'design/design-release.json',
+    JSON.stringify(
+      manifest({
+        batch: 5,
+        previousBatch: 4,
+        releaseId: 'design-batch-005',
+        readyForBuild: [
+          { screen: 'Brand logo', prototype: 'prototypes/logo--brand.html', change: 'added' },
+        ],
+        stillInDesign: [],
+        planned: [],
+      }),
+      null,
+      2,
+    ) + '\n',
+  );
+  assert.match(run(VALIDATOR, true), /design-batch-005 revision 0/);
 
   console.log('Incremental design release tests passed.');
 } finally {

@@ -51,6 +51,10 @@ function safeDesignPath(value) {
   return normalized;
 }
 
+function isLogoContract(file) {
+  return /(^|\/)logo--[^/]+\.html$/i.test(file);
+}
+
 const groups = {
   prototypes: filesUnder(path.join(DESIGN, 'prototypes')),
   system: filesUnder(path.join(DESIGN, 'system')),
@@ -68,9 +72,7 @@ const prototypeContracts = groups.prototypes.filter(
     /(^|\/)logo--[^/]+\.html$/i.test(file) ||
     /\.dc\.html$/i.test(file),
 );
-const screenContracts = prototypeContracts.filter(
-  (file) => !/(^|\/)logo--[^/]+\.html$/i.test(file),
-);
+const screenContracts = prototypeContracts.filter((file) => !isLogoContract(file));
 const metadataErrors = [];
 const releaseErrors = [];
 const screenMetadata = new Map();
@@ -115,6 +117,12 @@ if (!screenContracts.length) {
 if (!groups.planning.includes('planning/screen-inventory.md')) {
   releaseErrors.push(
     'design/planning/screen-inventory.md is required for incremental release status.',
+  );
+}
+if (!groups.system.length) {
+  releaseErrors.push(
+    'design/system/ must contain the normative design system export ' +
+      '(tokens, typography, color, motion, voice); it is empty or missing.',
   );
 }
 if (referenceDocs.length !== 1 || handoffPlans.length !== 1) {
@@ -195,9 +203,10 @@ if (release) {
       releaseErrors.push('readyForBuild prototype "design/' + prototype + '" does not exist.');
       continue;
     }
-    if (!screenMetadata.has(prototype)) {
+    if (!isLogoContract(prototype) && !screenMetadata.has(prototype)) {
       releaseErrors.push(
-        'readyForBuild prototype "design/' + prototype + '" has invalid screen metadata.',
+        'readyForBuild prototype "design/' + prototype + '" has invalid screen metadata; ' +
+          'it needs exactly one supported data-prototype-surface and one data-app-root.',
       );
     }
     currentHashes[prototype] = sha256(path.join(DESIGN, prototype));
@@ -323,6 +332,42 @@ if (release) {
       }
       if (item.change === 'unchanged' && previousHash !== currentHashes[prototype]) {
         releaseErrors.push('design/' + prototype + ' changed; mark it updated.');
+      }
+    }
+
+    // A prototype the repository already synchronized stays under contract even when
+    // this release says nothing about it. Without this pass an implemented screen can
+    // be redesigned and shipped silently, because every check above only walks
+    // readyForBuild. The lock already holds the evidence; this is what reads it.
+    const priorScreens =
+      lock.prototypeScreens && typeof lock.prototypeScreens === 'object'
+        ? lock.prototypeScreens
+        : {};
+    const removedScreens = new Set(
+      (Array.isArray(release.removedOrSuperseded) ? release.removedOrSuperseded : []).filter(
+        (value) => typeof value === 'string',
+      ),
+    );
+
+    for (const [prototype, previousHash] of Object.entries(priorHashes)) {
+      if (currentHashes[prototype]) continue;
+      const absolute = path.join(DESIGN, prototype);
+      const knownScreen = priorScreens[prototype];
+
+      if (!fs.existsSync(absolute)) {
+        if (knownScreen && removedScreens.has(knownScreen)) continue;
+        releaseErrors.push(
+          'design/' + prototype + ' was synchronized previously but is now missing; list ' +
+            (knownScreen ? '"' + knownScreen + '"' : 'its screen') +
+            ' in removedOrSuperseded.',
+        );
+        continue;
+      }
+      if (sha256(absolute) !== previousHash) {
+        releaseErrors.push(
+          'design/' + prototype + ' changed since it was synchronized but is not listed in ' +
+            'readyForBuild; declare it with change "updated".',
+        );
       }
     }
   }

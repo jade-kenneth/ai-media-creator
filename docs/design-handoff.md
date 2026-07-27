@@ -94,11 +94,22 @@ same scope increment `revision`. The repository-owned
 `design/design-sync.lock.json` records the last successfully reconciled release
 and prototype hashes. Claude Design must never create or edit that lock.
 
-Validation requires at least one supported screen prototype,
-`design/planning/screen-inventory.md`, exactly one supported
+Validation requires at least one supported screen prototype, a non-empty
+`design/system/`, `design/planning/screen-inventory.md`, exactly one supported
 `data-prototype-surface` and one `data-app-root` per screen, exactly one paired
 handoff, and a valid release transition. It rejects replayed, skipped, mislabeled,
 or falsely updated releases.
+
+Validation also holds every prototype the repository has already synchronized to
+its recorded hash, whether or not the current release mentions it. Changing an
+already-built screen without declaring it fails with `changed since it was
+synchronized but is not listed in readyForBuild`; deleting one fails unless the
+release retires that screen in `removedOrSuperseded`. Logo contracts
+(`logo--*.html`) may appear in `readyForBuild` and are exempt from the
+`data-app-root` requirement, since they are not screens.
+
+The `design-gate` workflow runs `npm run design:validate` on every pull request,
+and no-ops in repositories that have no `design/design-release.json` yet.
 
 ## 4. Synchronize each buildable design release
 

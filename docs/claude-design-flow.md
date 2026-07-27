@@ -172,12 +172,16 @@ flowchart TD
   Q5 -->|no| X
   Q5 -->|yes| Q6{"Valid transition vs<br/>design-sync.lock.json?"}
   Q6 -->|"replayed · skipped · changed<br/>but not marked updated"| X3["STOP — mark it updated<br/>or fix the batch"]
-  Q6 -->|yes| OK["PASS"]
+  Q6 -->|yes| Q7{"Every previously synced prototype<br/>still matches its recorded hash,<br/>or is declared in this release?"}
+  Q7 -->|"changed silently · deleted<br/>without being retired"| X4["STOP — declare it updated,<br/>or list it in removedOrSuperseded"]
+  Q7 -->|yes| OK["PASS"]
 ```
 
-The last check is the subtle one: the repository stores a hash of every accepted
+The last two checks are the subtle ones. The repository stores a hash of every accepted
 prototype. Edit one and re-export it under the old batch/revision and the gate says
-`design/<file> changed; mark it updated.`
+`design/<file> changed; mark it updated.` And a prototype the current release says
+*nothing* about is still held to its recorded hash — an already-built screen cannot be
+quietly redesigned by omitting it from `readyForBuild`.
 
 *On site: the inspector keeps a photocopy of every drawing they approved.*
 
@@ -278,7 +282,7 @@ interaction, Implementation Plan wins on build order and approach.**
 | `data-preview-shell` | Device frame or canvas for viewing only. Never shipped. |
 | `data-prototype-surface` | `web`, `mobile`, `tablet`, or `desktop`. Exactly one per screen. |
 | `design-release.json` | Claude Design's delivery note: batch, revision, status, screen buckets. |
-| `design-sync.lock.json` | The repository's receipt: last reconciled release + prototype hashes. |
+| `design-sync.lock.json` | The repository's receipt: last reconciled release, prototype hashes, and the screen each prototype belongs to. |
 | batch / revision | Batch = new ready scope. Revision = correction to released scope. |
 | `readyForBuild` | The only screens a sync unblocks for implementation. |
 | `*.dc.html` | A Design Component export. Supported — don't rename it. |
