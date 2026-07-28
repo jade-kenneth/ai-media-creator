@@ -60,8 +60,8 @@ finalized (see `docs/design-handoff.md`).
 
 | npm script | File | Purpose |
 | --- | --- | --- |
-| `design:validate` | `validate-design-export.mjs` | Validates the imported design export against the handoff contract. Run before `/finalize-build-docs`. |
-| `design:validate-final` | `validate-design-export.mjs --allow-synced` | Same validation, but accepts an export already acknowledged into build docs. |
+| `design:validate` | `validate-design-export.mjs` | Validates the imported design export against the handoff contract. Run before `/sync-build-docs`, and before `/finalize-build-docs`. |
+| `design:validate-final` | `validate-design-export.mjs --allow-synced` | Same validation, plus it additionally accepts a final release already acknowledged into build docs. It does not reject an unsynchronized final release; `/finalize-build-docs` reconciles that case itself. |
 | `design:ack` | `acknowledge-design-release.mjs` | Records that a design release was reviewed and synced into the build documents. |
 | `test:design-handoff` | `test-design-handoff.mjs` | Regression tests for the design release flow. |
 
