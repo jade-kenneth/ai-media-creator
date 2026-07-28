@@ -28,6 +28,11 @@ const prototypeHashes = {
     ? previous.prototypeHashes
     : {}),
 };
+const prototypeScreens = {
+  ...(previous.prototypeScreens && typeof previous.prototypeScreens === 'object'
+    ? previous.prototypeScreens
+    : {}),
+};
 
 for (const item of release.readyForBuild) {
   const prototype = item.prototype.replaceAll('\\', '/').replace(/^design\//, '');
@@ -35,6 +40,18 @@ for (const item of release.readyForBuild) {
     .createHash('sha256')
     .update(fs.readFileSync(path.join(DESIGN, prototype)))
     .digest('hex');
+  prototypeScreens[prototype] = item.screen;
+}
+
+// Drop prototypes that are no longer on disk, so the validator stops demanding a file
+// that is deliberately gone. Validation ran first and already confirmed every deletion
+// was declared in removedOrSuperseded, so a missing file here is an accepted retirement.
+// Keying on the file rather than the screen name also retires prototypes recorded by an
+// older acknowledgement script, which stored no screen names to match against.
+for (const prototype of Object.keys(prototypeHashes)) {
+  if (fs.existsSync(path.join(DESIGN, prototype))) continue;
+  delete prototypeHashes[prototype];
+  delete prototypeScreens[prototype];
 }
 
 const lock = {
@@ -45,6 +62,9 @@ const lock = {
   releaseId: release.releaseId,
   prototypeHashes: Object.fromEntries(
     Object.entries(prototypeHashes).sort(([a], [b]) => a.localeCompare(b)),
+  ),
+  prototypeScreens: Object.fromEntries(
+    Object.entries(prototypeScreens).sort(([a], [b]) => a.localeCompare(b)),
   ),
 };
 

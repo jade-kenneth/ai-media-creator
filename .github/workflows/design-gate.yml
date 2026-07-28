@@ -1,0 +1,33 @@
+name: design-gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate the design release
+        run: |
+          if [ ! -f design/design-release.json ]; then
+            echo "No design/design-release.json in this repository; nothing to validate."
+            echo "Product repositories created from this boilerplate get their release"
+            echo "manifest from the first Claude Design export."
+            exit 0
+          fi
+          # Accepts the acknowledged steady state as well as a pending transition. A
+          # committed repository normally has release == lock, which the ordinary
+          # transition rules reject on purpose, so plain design:validate would fail
+          # every pull request once the first release has been synchronized.
+          npm run design:validate-ci
