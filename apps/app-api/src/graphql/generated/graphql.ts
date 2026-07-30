@@ -39,6 +39,11 @@ export enum PushPlatform {
     WEB = "WEB"
 }
 
+export enum StorePlatform {
+    APPLE = "APPLE",
+    GOOGLE = "GOOGLE"
+}
+
 export interface AccountDeletionRequestStatusFilterInput {
     equal?: Nullable<AccountDeletionRequestStatus>;
     in?: Nullable<AccountDeletionRequestStatus[]>;
@@ -208,6 +213,13 @@ export interface UnregisterPushTokenInput {
     platform: PushPlatform;
 }
 
+export interface VerifyStorePurchaseInput {
+    store: StorePlatform;
+    productId: string;
+    transactionId?: Nullable<string>;
+    purchaseToken: string;
+}
+
 export interface Node {
     id: string;
 }
@@ -286,6 +298,7 @@ export interface IMutation {
     sendTestPushNotification(input: SendTestPushNotificationInput): SendTestPushNotificationResult | Promise<SendTestPushNotificationResult>;
     registerPushToken(input: RegisterPushTokenInput): boolean | Promise<boolean>;
     unregisterPushToken(input: UnregisterPushTokenInput): boolean | Promise<boolean>;
+    verifyStorePurchase(input: VerifyStorePurchaseInput): StorePurchaseResult | Promise<StorePurchaseResult>;
 }
 
 export interface AdminAccount extends Node {
@@ -395,6 +408,12 @@ export interface ValidateSessionResult {
     __typename?: 'ValidateSessionResult';
     ok: boolean;
     status: number;
+}
+
+export interface StorePurchaseResult {
+    __typename?: 'StorePurchaseResult';
+    productId: string;
+    status: string;
 }
 
 export type DateTime = any;
