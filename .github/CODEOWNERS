@@ -13,6 +13,7 @@
 
 /apps/app-api/src/common/ @jade-kenneth
 /apps/app-api/src/config/ @jade-kenneth
+/apps/app-api/src/graphql/schemas/store-purchases.gql @jade-kenneth
 /apps/app-api/src/libs/ @jade-kenneth
 /apps/app-api/src/modules/account-deletion-requests/ @jade-kenneth
 /apps/app-api/src/modules/admin-management/ @jade-kenneth
@@ -25,6 +26,7 @@
 /apps/app-api/src/modules/s3/ @jade-kenneth
 /apps/app-api/src/modules/scheduler-locks/ @jade-kenneth
 /apps/app-api/src/modules/sessions/ @jade-kenneth
+/apps/app-api/src/modules/store-purchases/ @jade-kenneth
 /apps/app-api/src/modules/users/ @jade-kenneth
 
 /apps/app-web/components/ @jade-kenneth
