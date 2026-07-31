@@ -11,20 +11,30 @@ import type {
   MeQuery,
   RegisterUserMutation,
   RegisterUserMutationVariables,
+  RequestPasswordResetMutation,
+  RequestPasswordResetMutationVariables,
+  ResetPasswordMutation,
+  ResetPasswordMutationVariables,
+  VerifyResetCodeMutation,
+  VerifyResetCodeMutationVariables,
 } from '@/react-query/generated__types';
 
-import { client, GraphqlRequestOptions } from '../graphql-client';
+import { client, GraphqlRequestOptions, publicClient } from '../graphql-client';
 import { defineMutation, defineQuery } from '../utils';
 import {
   LOGIN_MUTATION,
   LOGOUT_MUTATION,
   ME_QUERY,
   REGISTER_USER_MUTATION,
+  REQUEST_PASSWORD_RESET_MUTATION,
+  RESET_PASSWORD_MUTATION,
+  VERIFY_RESET_CODE_MUTATION,
 } from './graphql/auth';
 
 export const authQueryKeys = {
   me: ['auth', 'me'] as const,
   registerUser: ['auth', 'register-user'] as const,
+  passwordReset: ['auth', 'password-reset'] as const,
 };
 
 function toError(name: string, message: string) {
@@ -59,10 +69,11 @@ export function registerUserRequest(
   variables: RegisterUserMutationVariables,
   options?: GraphqlRequestOptions,
 ) {
-  return client.request<
-    RegisterUserMutation,
-    RegisterUserMutationVariables
-  >(REGISTER_USER_MUTATION, variables, options);
+  return client.request<RegisterUserMutation, RegisterUserMutationVariables>(
+    REGISTER_USER_MUTATION,
+    variables,
+    options,
+  );
 }
 
 export function getCurrentUser() {
@@ -172,4 +183,55 @@ export const useLogoutMutation = defineMutation<LogoutMutation>({
     }
   },
   mutationKey: [...authQueryKeys.me, 'logout'],
+});
+
+export const useRequestPasswordResetMutation = defineMutation<
+  RequestPasswordResetMutation,
+  RequestPasswordResetMutationVariables
+>({
+  mutationKey: [...authQueryKeys.passwordReset, 'request'],
+  suppressGlobalErrorToast: true,
+  mutationFn: async (variables) => {
+    if (!variables) throw new Error('Email is required.');
+    const result = await publicClient.request<
+      RequestPasswordResetMutation,
+      RequestPasswordResetMutationVariables
+    >(REQUEST_PASSWORD_RESET_MUTATION, variables);
+    if (!result.ok) throw toError(result.error.name, result.error.message);
+    return result.data;
+  },
+});
+
+export const useVerifyResetCodeMutation = defineMutation<
+  VerifyResetCodeMutation,
+  VerifyResetCodeMutationVariables
+>({
+  mutationKey: [...authQueryKeys.passwordReset, 'verify'],
+  suppressGlobalErrorToast: true,
+  mutationFn: async (variables) => {
+    if (!variables) throw new Error('Code is required.');
+    const result = await publicClient.request<
+      VerifyResetCodeMutation,
+      VerifyResetCodeMutationVariables
+    >(VERIFY_RESET_CODE_MUTATION, variables);
+    if (!result.ok) throw toError(result.error.name, result.error.message);
+    return result.data;
+  },
+});
+
+export const useResetPasswordMutation = defineMutation<
+  ResetPasswordMutation,
+  ResetPasswordMutationVariables
+>({
+  mutationKey: [...authQueryKeys.passwordReset, 'reset'],
+  suppressGlobalErrorToast: true,
+  mutationFn: async (variables) => {
+    if (!variables) throw new Error('Password reset input is required.');
+    const result = await publicClient.request<
+      ResetPasswordMutation,
+      ResetPasswordMutationVariables
+    >(RESET_PASSWORD_MUTATION, variables);
+    if (!result.ok) throw toError(result.error.name, result.error.message);
+    return result.data;
+  },
 });

@@ -149,6 +149,18 @@ export type RegisterUserInput = {
   password: Scalars['String']['input'];
 };
 
+export enum ResetCodeStatus {
+  Expired = 'EXPIRED',
+  Invalid = 'INVALID',
+  Valid = 'VALID'
+}
+
+export type ResetPasswordInput = {
+  code: Scalars['String']['input'];
+  email: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+};
+
 export type ReviewAccountDeletionRequestInput = {
   requestId: Scalars['ID']['input'];
   reviewNote?: InputMaybe<Scalars['String']['input']>;
@@ -164,6 +176,11 @@ export type SendTestPushNotificationInput = {
 export enum SortDirection {
   Asc = 'ASC',
   Desc = 'DESC'
+}
+
+export enum StorePlatform {
+  Apple = 'APPLE',
+  Google = 'GOOGLE'
 }
 
 export type StringFilterInput = {
@@ -216,6 +233,13 @@ export enum UserRole {
   User = 'USER'
 }
 
+export type VerifyStorePurchaseInput = {
+  productId: Scalars['String']['input'];
+  purchaseToken: Scalars['String']['input'];
+  store: StorePlatform;
+  transactionId?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AuthUserFragment = { id: string, email: string, role: UserRole, organizationId?: string | null, isActive: boolean, firstName?: string | null, lastName?: string | null, position?: string | null, createdAt: string, updatedAt: string };
 
 export type LoginMutationVariables = Exact<{
@@ -246,6 +270,28 @@ export type ValidateSessionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ValidateSessionQuery = { validateSession: { ok: boolean, status: number } };
+
+export type RequestPasswordResetMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+}>;
+
+
+export type RequestPasswordResetMutation = { requestPasswordReset: { accepted: boolean, message: string } };
+
+export type VerifyResetCodeMutationVariables = Exact<{
+  email: Scalars['String']['input'];
+  code: Scalars['String']['input'];
+}>;
+
+
+export type VerifyResetCodeMutation = { verifyResetCode: { status: ResetCodeStatus } };
+
+export type ResetPasswordMutationVariables = Exact<{
+  input: ResetPasswordInput;
+}>;
+
+
+export type ResetPasswordMutation = { resetPassword: boolean };
 
 export type NotificationRecordFragment = { id: string, userId: string, title: string, message: string, type: NotificationType, isRead: boolean, relatedEntityId?: string | null, createdAt: string };
 

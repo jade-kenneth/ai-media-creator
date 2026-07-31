@@ -399,6 +399,20 @@ export class MongooseRepository<TSchema extends object> implements Repository<
     }
   }
 
+  async updateOne(
+    filter: Types.ObjectId | RepositoryFilter<TSchema>,
+    data: UpdateQuery<TSchema> | UpdateWithAggregationPipeline,
+  ): Promise<boolean> {
+    const result = await this.model.updateOne(
+      filter instanceof Types.ObjectId
+        ? filter
+        : serializeRepositoryFilter(filter),
+      data,
+    );
+
+    return result.matchedCount === 1;
+  }
+
   async delete(
     param: Types.ObjectId | RepositoryFilter<TSchema>,
   ): Promise<void> {

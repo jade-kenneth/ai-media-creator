@@ -66,3 +66,26 @@ export const VALIDATE_SESSION_QUERY = gql`
     }
   }
 `;
+
+export const REQUEST_PASSWORD_RESET_MUTATION = gql`
+  mutation RequestPasswordReset($email: String!) {
+    requestPasswordReset(email: $email) {
+      accepted
+      message
+    }
+  }
+`;
+
+export const VERIFY_RESET_CODE_MUTATION = gql`
+  mutation VerifyResetCode($email: String!, $code: String!) {
+    verifyResetCode(email: $email, code: $code) {
+      status
+    }
+  }
+`;
+
+export const RESET_PASSWORD_MUTATION = gql`
+  mutation ResetPassword($input: ResetPasswordInput!) {
+    resetPassword(input: $input)
+  }
+`;

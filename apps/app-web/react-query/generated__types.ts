@@ -162,6 +162,18 @@ export type RegisterUserInput = {
   password: Scalars['String']['input'];
 };
 
+export enum ResetCodeStatus {
+  Expired = 'EXPIRED',
+  Invalid = 'INVALID',
+  Valid = 'VALID',
+}
+
+export type ResetPasswordInput = {
+  code: Scalars['String']['input'];
+  email: Scalars['String']['input'];
+  newPassword: Scalars['String']['input'];
+};
+
 export type ReviewAccountDeletionRequestInput = {
   requestId: Scalars['ID']['input'];
   reviewNote?: InputMaybe<Scalars['String']['input']>;
@@ -177,6 +189,11 @@ export type SendTestPushNotificationInput = {
 export enum SortDirection {
   Asc = 'ASC',
   Desc = 'DESC',
+}
+
+export enum StorePlatform {
+  Apple = 'APPLE',
+  Google = 'GOOGLE',
 }
 
 export type StringFilterInput = {
@@ -228,6 +245,13 @@ export enum UserRole {
   SuperAdmin = 'SUPER_ADMIN',
   User = 'USER',
 }
+
+export type VerifyStorePurchaseInput = {
+  productId: Scalars['String']['input'];
+  purchaseToken: Scalars['String']['input'];
+  store: StorePlatform;
+  transactionId?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type AccountDeletionRequestRecordFragment = {
   id: string;

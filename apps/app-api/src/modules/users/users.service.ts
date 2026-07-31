@@ -149,6 +149,25 @@ export class UsersService {
     return this.usersRepository.find({ id });
   }
 
+  async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
+    const updated = await this.updateRecordById(id, { passwordHash });
+
+    if (!updated) {
+      throw new NotFoundError('User not found.');
+    }
+  }
+
+  async updatePasswordHashIfCurrent(
+    id: string,
+    currentPasswordHash: string,
+    passwordHash: string,
+  ): Promise<boolean> {
+    return this.usersRepository.updateOne(
+      { id, passwordHash: currentPasswordHash },
+      { passwordHash, updatedAt: new Date() },
+    );
+  }
+
   async createAdminUser(
     email: string,
     password: string,
@@ -235,7 +254,7 @@ export class UsersService {
   }
 }
 
-function normalizeEmail(email: string): string {
+export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 

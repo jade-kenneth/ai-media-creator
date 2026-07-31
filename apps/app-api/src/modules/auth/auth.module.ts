@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
+import { MailModule } from '../mail/mail.module';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { SessionsController } from '../sessions/sessions.controller';
 import { SessionsModule } from '../sessions/sessions.module';
@@ -13,6 +14,7 @@ import { GraphqlAuthGuard } from './guards/graphql-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { RolesGuard } from './guards/roles.guard';
+import { AuthSecurityRepositoryModule } from './repositories/auth-security.repository.module';
 
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -43,6 +45,8 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         };
       },
     }),
+    AuthSecurityRepositoryModule,
+    MailModule,
     OrganizationsModule,
     UsersModule,
     SessionsModule,

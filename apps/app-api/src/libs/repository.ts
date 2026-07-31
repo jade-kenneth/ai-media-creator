@@ -103,6 +103,7 @@ export interface Repository<
     options?: RepositoryQueryOptions<TEntity>,
   ): RepositoryList<TEntity>;
   update(filter: TFilter, data: TUpdateInput): Promise<void>;
+  updateOne(filter: TFilter, data: TUpdateInput): Promise<boolean>;
   delete(filter?: TFilter): Promise<void>;
   exists(filter?: TFilter): Promise<boolean>;
   count(filter?: TFilter): Promise<number>;
