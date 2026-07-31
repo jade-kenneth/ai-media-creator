@@ -1,10 +1,13 @@
 import { UseGuards } from '@nestjs/common';
-import { Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   AuthPayload,
   LoginInput,
+  PasswordResetCodeResult,
+  PasswordResetRequestResult,
   RegisterUserInput,
+  ResetPasswordInput,
   UpdateMyProfileInput,
   User,
 } from '../../graphql/generated/graphql';
@@ -32,6 +35,31 @@ export class AuthResolver {
     @ServiceValidatedArgs('input') input: LoginInput,
   ): Promise<AuthPayload> {
     return this.authService.login(input);
+  }
+
+  @Mutation('requestPasswordReset')
+  @Public()
+  async requestPasswordReset(
+    @Args('email') email: string,
+  ): Promise<PasswordResetRequestResult> {
+    return this.authService.requestPasswordReset(email);
+  }
+
+  @Mutation('verifyResetCode')
+  @Public()
+  async verifyResetCode(
+    @Args('email') email: string,
+    @Args('code') code: string,
+  ): Promise<PasswordResetCodeResult> {
+    return this.authService.verifyResetCode(email, code);
+  }
+
+  @Mutation('resetPassword')
+  @Public()
+  async resetPassword(
+    @ServiceValidatedArgs('input') input: ResetPasswordInput,
+  ): Promise<boolean> {
+    return this.authService.resetPassword(input);
   }
 
   @Mutation('updateMyProfile')

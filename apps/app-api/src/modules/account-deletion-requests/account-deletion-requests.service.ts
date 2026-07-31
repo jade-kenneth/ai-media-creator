@@ -17,6 +17,7 @@ import {
   type ReviewAccountDeletionRequestInput,
   type SubmitAccountDeletionRequestInput,
 } from '../../graphql/generated/graphql';
+import { AuthService } from '../auth/auth.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { UsersService } from '../users/users.service';
 import type {
@@ -34,6 +35,7 @@ export class AccountDeletionRequestsService {
   constructor(
     @Inject(TOKENS.ACCOUNT_DELETION_REQUESTS_REPOSITORY)
     private readonly accountDeletionRequestsRepository: AccountDeletionRequestsRepository,
+    private readonly authService: AuthService,
     private readonly organizationsService: OrganizationsService,
     private readonly usersService: UsersService,
   ) {}
@@ -121,6 +123,7 @@ export class AccountDeletionRequestsService {
       const user = await this.usersService.findByEmail(request.email);
 
       if (user) {
+        await this.authService.deleteSecurityForEmail(user.email);
         await this.usersService.deleteById(user.id);
       }
     }

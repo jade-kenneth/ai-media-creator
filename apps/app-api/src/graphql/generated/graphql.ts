@@ -1,4 +1,3 @@
-
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -18,6 +17,12 @@ export enum UserRole {
     USER = "USER",
     ADMIN = "ADMIN",
     SUPER_ADMIN = "SUPER_ADMIN"
+}
+
+export enum ResetCodeStatus {
+    VALID = "VALID",
+    INVALID = "INVALID",
+    EXPIRED = "EXPIRED"
 }
 
 export enum SortDirection {
@@ -109,6 +114,12 @@ export interface UpdateMyProfileInput {
     firstName?: Nullable<string>;
     lastName?: Nullable<string>;
     position?: Nullable<string>;
+}
+
+export interface ResetPasswordInput {
+    email: string;
+    code: string;
+    newPassword: string;
 }
 
 export interface CursorPaginationInput {
@@ -288,6 +299,9 @@ export interface IMutation {
     updateMyProfile(input: UpdateMyProfileInput): User | Promise<User>;
     login(input: LoginInput): AuthPayload | Promise<AuthPayload>;
     logout(): boolean | Promise<boolean>;
+    requestPasswordReset(email: string): PasswordResetRequestResult | Promise<PasswordResetRequestResult>;
+    verifyResetCode(email: string, code: string): PasswordResetCodeResult | Promise<PasswordResetCodeResult>;
+    resetPassword(input: ResetPasswordInput): boolean | Promise<boolean>;
     _noop(): Nullable<boolean> | Promise<Nullable<boolean>>;
     markNotificationAsRead(id: string): Notification | Promise<Notification>;
     markAllNotificationsAsRead(): MarkAllNotificationsAsReadResult | Promise<MarkAllNotificationsAsReadResult>;
@@ -335,6 +349,17 @@ export interface AuthPayload {
     tokenType: string;
     expiresIn: number;
     user: User;
+}
+
+export interface PasswordResetRequestResult {
+    __typename?: 'PasswordResetRequestResult';
+    accepted: boolean;
+    message: string;
+}
+
+export interface PasswordResetCodeResult {
+    __typename?: 'PasswordResetCodeResult';
+    status: ResetCodeStatus;
 }
 
 export interface CursorPageInfo {

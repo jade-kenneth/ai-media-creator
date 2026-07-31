@@ -4,6 +4,12 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+enum ResetCodeStatus {
+  VALID
+  INVALID
+  EXPIRED
+}
+
 type User implements Node {
   id: ID!
   email: String!
@@ -23,6 +29,15 @@ type AuthPayload {
   tokenType: String!
   expiresIn: Int!
   user: User!
+}
+
+type PasswordResetRequestResult {
+  accepted: Boolean!
+  message: String!
+}
+
+type PasswordResetCodeResult {
+  status: ResetCodeStatus!
 }
 
 input LoginInput {
@@ -46,6 +61,12 @@ input UpdateMyProfileInput {
   position: String
 }
 
+input ResetPasswordInput {
+  email: String!
+  code: String!
+  newPassword: String!
+}
+
 extend type Query {
   me: User!
 }
@@ -55,4 +76,7 @@ extend type Mutation {
   updateMyProfile(input: UpdateMyProfileInput!): User!
   login(input: LoginInput!): AuthPayload!
   logout: Boolean!
+  requestPasswordReset(email: String!): PasswordResetRequestResult!
+  verifyResetCode(email: String!, code: String!): PasswordResetCodeResult!
+  resetPassword(input: ResetPasswordInput!): Boolean!
 }
