@@ -88,6 +88,84 @@ describe('AuthService password reset security', () => {
   });
 });
 
+describe('AuthService tenant login with security state', () => {
+  it('persists a soft block after the fifth failed login attempt', async () => {
+    const passwordHash = await bcrypt.hash('correct-password', 4);
+    const fixture = createService({
+      security: securityRecord({
+        failureWindowStartedAt: new Date(),
+        loginFailures: 4,
+      }),
+      userRecord: userRecord({ passwordHash }),
+    });
+
+    await expect(
+      fixture.service.login({
+        email: 'user@example.com',
+        password: 'wrong-password',
+      }),
+    ).rejects.toThrow();
+    expect(fixture.authSecurityRepository.update).toHaveBeenCalledWith(
+      { id: 'security-1' },
+      expect.objectContaining({
+        blockedUntil: expect.any(Date),
+        loginFailures: 5,
+      }),
+    );
+
+    await expect(
+      fixture.service.login({
+        email: 'user@example.com',
+        password: 'correct-password',
+      }),
+    ).rejects.toThrow('Too many attempts. Please wait a moment and try again.');
+    expect(fixture.usersService.findRecordByEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears prior failures and keeps the selected organization in both tokens', async () => {
+    const passwordHash = await bcrypt.hash('correct-password', 4);
+    const fixture = createService({
+      security: securityRecord({
+        failureWindowStartedAt: new Date(),
+        loginFailures: 2,
+      }),
+      userRecord: userRecord({ passwordHash }),
+    });
+
+    await expect(
+      fixture.service.login({
+        email: ' USER@example.com ',
+        organizationSlug: 'example-organization',
+        password: 'correct-password',
+      }),
+    ).resolves.toMatchObject({
+      user: { id: 'user-1', organizationId: 'organization-1' },
+    });
+
+    expect(fixture.organizationsService.findBySlug).toHaveBeenCalledWith(
+      'example-organization',
+    );
+    expect(fixture.authSecurityRepository.update).toHaveBeenCalledWith(
+      { id: 'security-1' },
+      expect.objectContaining({
+        blockedUntil: null,
+        failureWindowStartedAt: null,
+        loginFailures: 0,
+      }),
+    );
+    expect(fixture.jwtService.signAsync).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ tenantSlug: 'example-organization' }),
+      expect.any(Object),
+    );
+    expect(fixture.jwtService.signAsync).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ tenantSlug: 'example-organization' }),
+      expect.any(Object),
+    );
+  });
+});
+
 function createService(options?: {
   security?: AuthSecurityRecord;
   userRecord?: ReturnType<typeof userRecord>;

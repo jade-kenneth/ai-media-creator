@@ -43,6 +43,9 @@ import { TokenType } from './types/auth-context';
 
 const PASSWORD_SALT_ROUNDS = 10;
 const TOKEN_TYPE = 'Bearer';
+const FAILURE_WINDOW_MS = 10 * 60 * 1000;
+const LOGIN_FAILURE_LIMIT = 5;
+const SOFT_BLOCK_MS = 60 * 1000;
 const RESET_COOLDOWN_MS = 30 * 1000;
 const RESET_TTL_MS = 15 * 60 * 1000;
 
@@ -105,20 +108,27 @@ export class AuthService {
   }
 
   async login(input: LoginInput): Promise<AuthPayload> {
-    const userRecord = await this.usersService.findRecordByEmail(input.email);
+    const email = normalizeEmail(input.email);
+    const security = await this.findSecurity(email);
+    const now = new Date();
 
-    if (!userRecord) {
+    if (security?.blockedUntil && security.blockedUntil > now) {
+      throw new InvalidCredentialsError(
+        'Too many attempts. Please wait a moment and try again.',
+      );
+    }
+
+    const userRecord = await this.usersService.findRecordByEmail(email);
+    const isPasswordValid = userRecord
+      ? await bcrypt.compare(input.password, userRecord.passwordHash)
+      : false;
+
+    if (!userRecord || !isPasswordValid) {
+      await this.recordLoginFailure(email, security, now);
       throw new InvalidCredentialsError();
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      input.password,
-      userRecord.passwordHash,
-    );
-
-    if (!isPasswordValid) {
-      throw new InvalidCredentialsError();
-    }
+    await this.clearLoginFailures(email, security);
 
     if (!userRecord.isActive) {
       throw new UnauthorizedException('User account is inactive.');
@@ -420,6 +430,43 @@ export class AuthService {
     }
 
     return this.authSecurityRepository.find({ email });
+  }
+
+  private async recordLoginFailure(
+    email: string,
+    security: AuthSecurityRecord | null,
+    now: Date,
+  ): Promise<void> {
+    const withinWindow =
+      security?.failureWindowStartedAt &&
+      now.getTime() - security.failureWindowStartedAt.getTime() <
+        FAILURE_WINDOW_MS;
+    const loginFailures = withinWindow ? security.loginFailures + 1 : 1;
+    const failureWindowStartedAt = withinWindow
+      ? security.failureWindowStartedAt
+      : now;
+
+    await this.saveSecurity(email, security, {
+      loginFailures,
+      failureWindowStartedAt,
+      blockedUntil:
+        loginFailures >= LOGIN_FAILURE_LIMIT
+          ? new Date(now.getTime() + SOFT_BLOCK_MS)
+          : null,
+    });
+  }
+
+  private async clearLoginFailures(
+    email: string,
+    security: AuthSecurityRecord | null,
+  ): Promise<void> {
+    if (!security) return;
+
+    await this.saveSecurity(email, security, {
+      loginFailures: 0,
+      failureWindowStartedAt: null,
+      blockedUntil: null,
+    });
   }
 
   private async saveSecurity(
