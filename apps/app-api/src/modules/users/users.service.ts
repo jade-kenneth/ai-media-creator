@@ -157,6 +157,17 @@ export class UsersService {
     }
   }
 
+  async updatePasswordHashIfCurrent(
+    id: string,
+    currentPasswordHash: string,
+    passwordHash: string,
+  ): Promise<boolean> {
+    return this.usersRepository.updateOne(
+      { id, passwordHash: currentPasswordHash },
+      { passwordHash, updatedAt: new Date() },
+    );
+  }
+
   async createAdminUser(
     email: string,
     password: string,

@@ -8,7 +8,6 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { Types } from 'mongoose';
 import type { StringValue } from 'ms';
 import { randomInt } from 'node:crypto';
 import {
@@ -48,6 +47,7 @@ const LOGIN_FAILURE_LIMIT = 5;
 const SOFT_BLOCK_MS = 60 * 1000;
 const RESET_COOLDOWN_MS = 30 * 1000;
 const RESET_TTL_MS = 15 * 60 * 1000;
+const RESET_CODE_FAILURE_LIMIT = 5;
 
 @Injectable()
 export class AuthService {
@@ -109,6 +109,12 @@ export class AuthService {
 
   async login(input: LoginInput): Promise<AuthPayload> {
     const email = normalizeEmail(input.email);
+    const userRecord = await this.usersService.findRecordByEmail(email);
+
+    if (!userRecord) {
+      throw new InvalidCredentialsError();
+    }
+
     const security = await this.findSecurity(email);
     const now = new Date();
 
@@ -118,13 +124,13 @@ export class AuthService {
       );
     }
 
-    const userRecord = await this.usersService.findRecordByEmail(email);
-    const isPasswordValid = userRecord
-      ? await bcrypt.compare(input.password, userRecord.passwordHash)
-      : false;
+    const isPasswordValid = await bcrypt.compare(
+      input.password,
+      userRecord.passwordHash,
+    );
 
-    if (!userRecord || !isPasswordValid) {
-      await this.recordLoginFailure(email, security, now);
+    if (!isPasswordValid) {
+      await this.recordLoginFailure(email, now);
       throw new InvalidCredentialsError();
     }
 
@@ -192,45 +198,62 @@ export class AuthService {
       accepted: true,
       message: `If an account exists for ${email}, we've sent it a 6-digit code.`,
     };
-    const security = await this.findSecurity(email);
-    const now = new Date();
-
-    if (
-      security?.lastResetSentAt &&
-      now.getTime() - security.lastResetSentAt.getTime() < RESET_COOLDOWN_MS
-    ) {
-      return neutralResult;
-    }
-
     const user = await this.usersService.findRecordByEmail(email);
 
     if (!user) {
       return neutralResult;
     }
 
-    const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
-    const resetCodeHash = await bcrypt.hash(code, PASSWORD_SALT_ROUNDS);
-    const productName =
-      this.configService.getOrThrow<string>('BREVO_SENDER_NAME');
-    const resetEmail = renderPasswordResetEmail({ code, productName });
+    const now = new Date();
+    const reservationId = crypto.randomUUID();
+    const reserved = await this.authSecurityRepository.reserveResetRequest({
+      email,
+      now,
+      eligibleBefore: new Date(now.getTime() - RESET_COOLDOWN_MS),
+      reservationId,
+    });
+
+    if (!reserved) {
+      return neutralResult;
+    }
 
     try {
+      const code = randomInt(0, 1_000_000).toString().padStart(6, '0');
+      const resetCodeHash = await bcrypt.hash(code, PASSWORD_SALT_ROUNDS);
+      const productName =
+        this.configService.getOrThrow<string>('BREVO_SENDER_NAME');
+      const resetEmail = renderPasswordResetEmail({ code, productName });
+
       await this.mailService.sendEmail(
         email,
         resetEmail.subject,
         resetEmail.html,
       );
-      await this.saveSecurity(email, security, {
+
+      const stored = await this.authSecurityRepository.storeResetCode({
+        email,
+        reservationId,
         resetCodeHash,
         resetCodeExpiresAt: new Date(now.getTime() + RESET_TTL_MS),
-        resetCodeUsedAt: null,
-        lastResetSentAt: now,
+        now,
       });
+
+      if (!stored) {
+        throw new Error('Password reset reservation was lost.');
+      }
     } catch (error) {
       this.logger.error(
         'Password reset email could not be delivered.',
         error instanceof Error ? error.stack : undefined,
       );
+      await this.authSecurityRepository
+        .releaseResetRequest(reservationId, email)
+        .catch((releaseError: unknown) => {
+          this.logger.error(
+            'Password reset reservation could not be released.',
+            releaseError instanceof Error ? releaseError.stack : undefined,
+          );
+        });
     }
 
     return neutralResult;
@@ -245,20 +268,29 @@ export class AuthService {
     if (
       !security?.resetCodeHash ||
       !security.resetCodeExpiresAt ||
-      security.resetCodeUsedAt
+      security.resetCodeUsedAt ||
+      security.resetCodeClaimId ||
+      security.resetRequestReservationId
     ) {
       return { status: ResetCodeStatus.INVALID };
     }
 
-    if (security.resetCodeExpiresAt <= new Date()) {
-      return { status: ResetCodeStatus.EXPIRED };
+    const matches = await bcrypt.compare(code, security.resetCodeHash);
+
+    if (!matches) {
+      await this.authSecurityRepository.recordInvalidResetCodeAttempt({
+        id: security.id,
+        resetCodeHash: security.resetCodeHash,
+        limit: RESET_CODE_FAILURE_LIMIT,
+        now: new Date(),
+      });
+
+      return { status: ResetCodeStatus.INVALID };
     }
 
-    return {
-      status: (await bcrypt.compare(code, security.resetCodeHash))
-        ? ResetCodeStatus.VALID
-        : ResetCodeStatus.INVALID,
-    };
+    return security.resetCodeExpiresAt <= new Date()
+      ? { status: ResetCodeStatus.EXPIRED }
+      : { status: ResetCodeStatus.VALID };
   }
 
   async resetPassword(input: ResetPasswordInput): Promise<boolean> {
@@ -296,12 +328,67 @@ export class AuthService {
       input.newPassword,
       PASSWORD_SALT_ROUNDS,
     );
-    await this.usersService.updatePasswordHash(user.id, passwordHash);
-    await this.authSecurityRepository.update(
-      { id: security.id },
-      { resetCodeUsedAt: new Date(), updatedAt: new Date() },
-    );
-    await this.sessionsService.deleteSessionsByAccountId(user.id);
+    const claimId = crypto.randomUUID();
+    const claimed = await this.authSecurityRepository.claimResetCode({
+      id: security.id,
+      resetCodeHash: security.resetCodeHash ?? '',
+      claimId,
+      failureLimit: RESET_CODE_FAILURE_LIMIT,
+      now: new Date(),
+    });
+
+    if (!claimed) {
+      throw invalidResetCodeError();
+    }
+
+    let passwordUpdated: boolean;
+
+    try {
+      passwordUpdated = await this.usersService.updatePasswordHashIfCurrent(
+        user.id,
+        user.passwordHash,
+        passwordHash,
+      );
+    } catch (error) {
+      await this.rollbackPasswordReset({
+        userId: user.id,
+        email,
+        priorPasswordHash: user.passwordHash,
+        passwordHash,
+        securityId: security.id,
+        claimId,
+      });
+      throw error;
+    }
+
+    if (!passwordUpdated) {
+      await this.releaseResetCodeClaim(security.id, claimId);
+      throw invalidResetCodeError();
+    }
+
+    try {
+      await this.sessionsService.deleteSessionsByAccountId(user.id);
+      const finalized =
+        await this.authSecurityRepository.finalizeResetCodeClaim(
+          security.id,
+          claimId,
+          new Date(),
+        );
+
+      if (!finalized) {
+        throw new Error('Password reset claim could not be finalized.');
+      }
+    } catch (error) {
+      await this.rollbackPasswordReset({
+        userId: user.id,
+        email,
+        priorPasswordHash: user.passwordHash,
+        passwordHash,
+        securityId: security.id,
+        claimId,
+      });
+      throw error;
+    }
 
     return true;
   }
@@ -432,27 +519,13 @@ export class AuthService {
     return this.authSecurityRepository.find({ email });
   }
 
-  private async recordLoginFailure(
-    email: string,
-    security: AuthSecurityRecord | null,
-    now: Date,
-  ): Promise<void> {
-    const withinWindow =
-      security?.failureWindowStartedAt &&
-      now.getTime() - security.failureWindowStartedAt.getTime() <
-        FAILURE_WINDOW_MS;
-    const loginFailures = withinWindow ? security.loginFailures + 1 : 1;
-    const failureWindowStartedAt = withinWindow
-      ? security.failureWindowStartedAt
-      : now;
-
-    await this.saveSecurity(email, security, {
-      loginFailures,
-      failureWindowStartedAt,
-      blockedUntil:
-        loginFailures >= LOGIN_FAILURE_LIMIT
-          ? new Date(now.getTime() + SOFT_BLOCK_MS)
-          : null,
+  private async recordLoginFailure(email: string, now: Date): Promise<void> {
+    await this.authSecurityRepository.recordLoginFailure({
+      email,
+      now,
+      windowStartsAfter: new Date(now.getTime() - FAILURE_WINDOW_MS),
+      limit: LOGIN_FAILURE_LIMIT,
+      blockedUntil: new Date(now.getTime() + SOFT_BLOCK_MS),
     });
   }
 
@@ -462,43 +535,79 @@ export class AuthService {
   ): Promise<void> {
     if (!security) return;
 
-    await this.saveSecurity(email, security, {
-      loginFailures: 0,
-      failureWindowStartedAt: null,
-      blockedUntil: null,
-    });
+    await this.authSecurityRepository.update(
+      { id: security.id },
+      {
+        loginFailures: 0,
+        failureWindowStartedAt: null,
+        blockedUntil: null,
+        updatedAt: new Date(),
+      },
+    );
   }
 
-  private async saveSecurity(
-    email: string,
-    security: AuthSecurityRecord | null,
-    patch: Partial<AuthSecurityRecord>,
+  private async releaseResetCodeClaim(
+    securityId: string,
+    claimId: string,
   ): Promise<void> {
-    const now = new Date();
+    await this.authSecurityRepository
+      .releaseResetCodeClaim(securityId, claimId)
+      .catch((releaseError: unknown) => {
+        this.logger.error(
+          'Password reset claim could not be released.',
+          releaseError instanceof Error ? releaseError.stack : undefined,
+        );
+      });
+  }
 
-    if (security) {
-      await this.authSecurityRepository.update(
-        { id: security.id },
-        { ...patch, updatedAt: now },
-      );
+  private async rollbackPasswordReset(input: {
+    userId: string;
+    email: string;
+    priorPasswordHash: string;
+    passwordHash: string;
+    securityId: string;
+    claimId: string;
+  }): Promise<void> {
+    const restored = await this.usersService
+      .updatePasswordHashIfCurrent(
+        input.userId,
+        input.passwordHash,
+        input.priorPasswordHash,
+      )
+      .catch((rollbackError: unknown) => {
+        this.logger.error(
+          'Password reset password rollback failed.',
+          rollbackError instanceof Error ? rollbackError.stack : undefined,
+        );
+        return false;
+      });
+    const priorPasswordStillActive = restored
+      ? true
+      : await this.usersService
+          .findRecordByEmail(input.email)
+          .then(
+            (currentUser) =>
+              currentUser?.id === input.userId &&
+              currentUser.passwordHash === input.priorPasswordHash,
+          )
+          .catch(() => false);
+
+    if (priorPasswordStillActive) {
+      await this.releaseResetCodeClaim(input.securityId, input.claimId);
       return;
     }
 
-    await this.authSecurityRepository.create({
-      id: new Types.ObjectId().toHexString(),
-      email,
-      loginFailures: 0,
-      failureWindowStartedAt: null,
-      blockedUntil: null,
-      resetCodeHash: null,
-      resetCodeExpiresAt: null,
-      resetCodeUsedAt: null,
-      lastResetSentAt: null,
-      createdAt: now,
-      updatedAt: now,
-      ...patch,
-    });
+    this.logger.error(
+      'Password reset claim remains locked because password rollback was not confirmed.',
+    );
   }
+}
+
+function invalidResetCodeError(): ValidationError {
+  return new ValidationError(
+    "That code doesn't match. Check your email and try again.",
+    { field: 'input.code' },
+  );
 }
 
 function parseJwtExpiration(value: string): number | StringValue {
