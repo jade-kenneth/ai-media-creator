@@ -190,6 +190,10 @@ npm run codegen --workspace=app-mobile
 
 ## Engineering conventions
 
+New to this repository? [How app-boilerplate works](docs/how-app-boilerplate-works.md)
+is a beginner-oriented map of the whole system — architecture, request flow, auth,
+multi-tenancy, the skills/design pipelines, and CI gates — with diagrams throughout.
+
 - [Project structure](docs/conventions/project-structure.md)
 - [Code style](docs/conventions/code-style.md)
 - [Development workflow](docs/conventions/workflow.md)
