@@ -197,6 +197,8 @@ multi-tenancy, the skills/design pipelines, and CI gates — with diagrams throu
 - [Project structure](docs/conventions/project-structure.md)
 - [Code style](docs/conventions/code-style.md)
 - [Development workflow](docs/conventions/workflow.md)
+- [Third-party integrations](docs/THIRD_PARTY_INTEGRATIONS.md) — Cloudflare
+  Turnstile, Google sign-in, and Xendit payments; all optional and off by default
 
 Agent instructions are generated from the locked `skills-source` revision. Use
 `npm run sync-skills` to hydrate the locked revision, `npm run update-skills` to

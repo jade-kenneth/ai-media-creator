@@ -36,11 +36,13 @@ import type { GraphqlContext } from './modules/auth/types/auth-context';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { MailModule } from './modules/mail/mail.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { PushNotificationsModule } from './modules/push-notifications/push-notifications.module';
 import { PushTokensModule } from './modules/push-tokens/push-tokens.module';
 import { S3Module } from './modules/s3/s3.module';
 import { SchedulerLocksModule } from './modules/scheduler-locks/scheduler-locks.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
+import { TurnstileModule } from './modules/turnstile/turnstile.module';
 import { UsersModule } from './modules/users/users.module';
 import { HealthResolver } from './resolver/health.resolver';
 import { NodeResolver } from './resolver/node.resolver';
@@ -100,11 +102,13 @@ import { NodeResolver } from './resolver/node.resolver';
     OrganizationsModule,
     MailModule,
     NotificationsModule,
+    PaymentsModule,
     PushNotificationsModule,
     PushTokensModule,
     S3Module,
     SchedulerLocksModule,
     SessionsModule,
+    TurnstileModule,
     UsersModule,
   ],
 

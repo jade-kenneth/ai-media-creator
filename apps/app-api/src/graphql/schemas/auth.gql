@@ -19,6 +19,7 @@ type User implements Node {
   firstName: String
   lastName: String
   position: String
+  googleLinked: Boolean!
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -67,6 +68,14 @@ input ResetPasswordInput {
   newPassword: String!
 }
 
+"""
+A Google-issued OIDC ID token. The API verifies its signature, issuer, and
+audience; a raw profile or subject identifier is never accepted as proof.
+"""
+input GoogleAuthInput {
+  idToken: String!
+}
+
 extend type Query {
   me: User!
 }
@@ -75,6 +84,9 @@ extend type Mutation {
   registerUser(input: RegisterUserInput!): AuthPayload!
   updateMyProfile(input: UpdateMyProfileInput!): User!
   login(input: LoginInput!): AuthPayload!
+  loginWithGoogle(input: GoogleAuthInput!): AuthPayload!
+  linkGoogleAccount(input: GoogleAuthInput!): User!
+  unlinkGoogleAccount: User!
   logout: Boolean!
   requestPasswordReset(email: String!): PasswordResetRequestResult!
   verifyResetCode(email: String!, code: String!): PasswordResetCodeResult!

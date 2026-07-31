@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -36,6 +37,19 @@ export enum NotificationType {
     WARNING = "WARNING",
     ERROR = "ERROR",
     SYSTEM = "SYSTEM"
+}
+
+export enum PaymentStatus {
+    PENDING = "PENDING",
+    REQUIRES_ACTION = "REQUIRES_ACTION",
+    SUCCEEDED = "SUCCEEDED",
+    FAILED = "FAILED",
+    EXPIRED = "EXPIRED"
+}
+
+export enum PaymentChannel {
+    GCASH = "GCASH",
+    PAYMAYA = "PAYMAYA"
 }
 
 export enum PushPlatform {
@@ -122,6 +136,10 @@ export interface ResetPasswordInput {
     newPassword: string;
 }
 
+export interface GoogleAuthInput {
+    idToken: string;
+}
+
 export interface CursorPaginationInput {
     first?: Nullable<number>;
     after?: Nullable<Cursor>;
@@ -195,6 +213,12 @@ export interface UpdateOrganizationInput {
     address?: Nullable<string>;
     features?: Nullable<string[]>;
     isActive?: Nullable<boolean>;
+}
+
+export interface CreatePaymentInput {
+    channel: PaymentChannel;
+    amount: number;
+    description?: Nullable<string>;
 }
 
 export interface SendTestPushNotificationInput {
@@ -284,6 +308,8 @@ export interface IQuery {
     myNotifications(filter?: Nullable<NotificationsFilterInput>, sort?: Nullable<NotificationSortInput>, first?: Nullable<number>, after?: Nullable<Cursor>): NotificationConnection | Promise<NotificationConnection>;
     organizations(filter?: Nullable<OrganizationFilterInput>): Organization[] | Promise<Organization[]>;
     organization(id: string): Nullable<Organization> | Promise<Nullable<Organization>>;
+    payment(id: string): Payment | Promise<Payment>;
+    myPayments(): Payment[] | Promise<Payment[]>;
     validateSession(): ValidateSessionResult | Promise<ValidateSessionResult>;
 }
 
@@ -298,6 +324,9 @@ export interface IMutation {
     registerUser(input: RegisterUserInput): AuthPayload | Promise<AuthPayload>;
     updateMyProfile(input: UpdateMyProfileInput): User | Promise<User>;
     login(input: LoginInput): AuthPayload | Promise<AuthPayload>;
+    loginWithGoogle(input: GoogleAuthInput): AuthPayload | Promise<AuthPayload>;
+    linkGoogleAccount(input: GoogleAuthInput): User | Promise<User>;
+    unlinkGoogleAccount(): User | Promise<User>;
     logout(): boolean | Promise<boolean>;
     requestPasswordReset(email: string): PasswordResetRequestResult | Promise<PasswordResetRequestResult>;
     verifyResetCode(email: string, code: string): PasswordResetCodeResult | Promise<PasswordResetCodeResult>;
@@ -309,6 +338,7 @@ export interface IMutation {
     updateOrganization(id: string, input: UpdateOrganizationInput): Organization | Promise<Organization>;
     deactivateOrganization(id: string): Organization | Promise<Organization>;
     reactivateOrganization(id: string): Organization | Promise<Organization>;
+    createPayment(input: CreatePaymentInput): Payment | Promise<Payment>;
     sendTestPushNotification(input: SendTestPushNotificationInput): SendTestPushNotificationResult | Promise<SendTestPushNotificationResult>;
     registerPushToken(input: RegisterPushTokenInput): boolean | Promise<boolean>;
     unregisterPushToken(input: UnregisterPushTokenInput): boolean | Promise<boolean>;
@@ -338,6 +368,7 @@ export interface User extends Node {
     firstName?: Nullable<string>;
     lastName?: Nullable<string>;
     position?: Nullable<string>;
+    googleLinked: boolean;
     createdAt: DateTime;
     updatedAt: DateTime;
 }
@@ -420,6 +451,20 @@ export interface Organization extends Node {
     address?: Nullable<string>;
     features: string[];
     isActive: boolean;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface Payment extends Node {
+    __typename?: 'Payment';
+    id: string;
+    referenceId: string;
+    status: PaymentStatus;
+    channel: PaymentChannel;
+    amount: number;
+    currency: string;
+    description?: Nullable<string>;
+    redirectUrl?: Nullable<string>;
     createdAt: DateTime;
     updatedAt: DateTime;
 }

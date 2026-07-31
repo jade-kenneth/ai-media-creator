@@ -61,6 +61,7 @@
     "enterPassword": "Ilagay ang iyong password",
     "signingIn": "Nagla-log in...",
     "signIn": "Mag-login",
+    "orContinueWith": "o magpatuloy gamit ang",
     "authorizedOnly": "Para lamang sa mga awtorisadong administrator",
     "invalidCredentials": "Mali ang email o password.",
     "validEmail": "Maglagay ng wastong email address.",

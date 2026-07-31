@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, router, useLocalSearchParams } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,8 +12,12 @@ import { KeyboardAvoidingContainer } from '@/components/ui/keyboard-avoiding-con
 import { PasswordInput } from '@/components/ui/password-input';
 import { useThemeColors } from '@/hooks/use-theme-colors';
 import { useTenant } from '@/providers/TenantProvider';
-import { useLoginMutation } from '@/react-query/auth/auth-operations';
+import {
+  useLoginMutation,
+  useLoginWithGoogleMutation,
+} from '@/react-query/auth/auth-operations';
 import { explainGraphqlErrorMessage } from '@/react-query/graphql-error';
+import { useGoogleSignIn } from './use-google-sign-in';
 
 const loginSchema = z.object({
   email: z.email('Enter a valid email address.'),
@@ -26,6 +31,8 @@ export function LoginScreen() {
   const { tenant } = useTenant();
   const { reason } = useLocalSearchParams<{ reason?: string }>();
   const loginMutation = useLoginMutation();
+  const googleLoginMutation = useLoginWithGoogleMutation();
+  const [googleError, setGoogleError] = useState<string | null>(null);
   const {
     control,
     handleSubmit,
@@ -33,6 +40,30 @@ export function LoginScreen() {
   } = useForm<LoginFormValues>({
     defaultValues: { email: '', password: '' },
     resolver: zodResolver(loginSchema),
+  });
+
+  const handleGoogleIdToken = useCallback(
+    async (idToken: string) => {
+      setGoogleError(null);
+
+      try {
+        await googleLoginMutation.mutateAsync({ input: { idToken } });
+        router.replace('/(main)/(tabs)');
+      } catch (error) {
+        setGoogleError(
+          explainGraphqlErrorMessage(
+            error instanceof Error ? error : null,
+            'Unable to sign in with Google. Try again.',
+          ),
+        );
+      }
+    },
+    [googleLoginMutation],
+  );
+
+  const googleSignIn = useGoogleSignIn({
+    onIdToken: handleGoogleIdToken,
+    onError: () => setGoogleError('Google sign-in was cancelled or failed.'),
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -148,6 +179,30 @@ export function LoginScreen() {
               loading={loginMutation.isPending}
               onPress={onSubmit}
             />
+
+            {googleSignIn.isAvailable ? (
+              <>
+                <Button
+                  label="Continue with Google"
+                  loading={googleLoginMutation.isPending}
+                  onPress={() => {
+                    setGoogleError(null);
+                    void googleSignIn.promptAsync?.();
+                  }}
+                  variant="secondary"
+                />
+                {googleError ? (
+                  <Text
+                    accessibilityRole="alert"
+                    className="text-sm"
+                    selectable
+                    style={{ color: colors.error }}
+                  >
+                    {googleError}
+                  </Text>
+                ) : null}
+              </>
+            ) : null}
           </View>
 
           <View className="gap-3">

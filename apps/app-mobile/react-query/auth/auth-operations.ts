@@ -5,8 +5,12 @@ import {
 import { notifyAuthChange, store } from '@/providers/AuthProvider/store';
 import { queryClient } from '@/providers/query-provider';
 import type {
+  LinkGoogleAccountMutation,
+  LinkGoogleAccountMutationVariables,
   LoginMutation,
   LoginMutationVariables,
+  LoginWithGoogleMutation,
+  LoginWithGoogleMutationVariables,
   LogoutMutation,
   MeQuery,
   RegisterUserMutation,
@@ -15,6 +19,7 @@ import type {
   RequestPasswordResetMutationVariables,
   ResetPasswordMutation,
   ResetPasswordMutationVariables,
+  UnlinkGoogleAccountMutation,
   VerifyResetCodeMutation,
   VerifyResetCodeMutationVariables,
 } from '@/react-query/generated__types';
@@ -22,12 +27,15 @@ import type {
 import { client, GraphqlRequestOptions, publicClient } from '../graphql-client';
 import { defineMutation, defineQuery } from '../utils';
 import {
+  LINK_GOOGLE_ACCOUNT_MUTATION,
   LOGIN_MUTATION,
+  LOGIN_WITH_GOOGLE_MUTATION,
   LOGOUT_MUTATION,
   ME_QUERY,
   REGISTER_USER_MUTATION,
   REQUEST_PASSWORD_RESET_MUTATION,
   RESET_PASSWORD_MUTATION,
+  UNLINK_GOOGLE_ACCOUNT_MUTATION,
   VERIFY_RESET_CODE_MUTATION,
 } from './graphql/auth';
 
@@ -46,6 +54,29 @@ function toError(name: string, message: string) {
 function registerPushAfterAuth(accessToken: string, role: string) {
   const sessionKey = `${role}:${accessToken.slice(0, 16)}`;
   void registerPushNotificationsForSession(sessionKey);
+}
+
+/** The part of any auth payload the session layer needs. */
+type PersistableAuthPayload = {
+  accessToken: string;
+  refreshToken: string;
+  user: MeQuery['me'];
+};
+
+/** Everything that has to happen once any sign-in returns an auth payload. */
+async function persistAuthSession(payload: PersistableAuthPayload) {
+  await store.set({
+    accessToken: payload.accessToken,
+    refreshToken: payload.refreshToken,
+    role: payload.user.role,
+  });
+  notifyAuthChange();
+
+  queryClient.setQueryData(meQueryKey, {
+    me: payload.user,
+  } satisfies MeQuery);
+
+  registerPushAfterAuth(payload.accessToken, payload.user.role);
 }
 
 const meQueryKey = [...authQueryKeys.me, 'current'] as const;
@@ -108,24 +139,94 @@ export const useLoginMutation = defineMutation<
       throw toError(res.error.name, res.error.message);
     }
 
-    await store.set({
-      accessToken: res.data.login.accessToken,
-      refreshToken: res.data.login.refreshToken,
-      role: res.data.login.user.role,
-    });
-    notifyAuthChange();
-
-    queryClient.setQueryData(meQueryKey, {
-      me: res.data.login.user,
-    } satisfies MeQuery);
-
-    registerPushAfterAuth(res.data.login.accessToken, res.data.login.user.role);
+    await persistAuthSession(res.data.login);
 
     return res.data;
   },
   mutationKey: [...authQueryKeys.me, 'login'],
   suppressGlobalErrorToast: true,
 });
+
+/*
+ *------------------------------------------------------------------
+ * GOOGLE SIGN-IN
+ *------------------------------------------------------------------
+ */
+
+export const useLoginWithGoogleMutation = defineMutation<
+  LoginWithGoogleMutation,
+  LoginWithGoogleMutationVariables
+>({
+  mutationFn: async (variables?: LoginWithGoogleMutationVariables) => {
+    if (!variables) {
+      return Promise.reject(new Error('A Google ID token is required.'));
+    }
+
+    const res = await publicClient.request<
+      LoginWithGoogleMutation,
+      LoginWithGoogleMutationVariables
+    >(LOGIN_WITH_GOOGLE_MUTATION, variables);
+
+    if (!res.ok) {
+      throw toError(res.error.name, res.error.message);
+    }
+
+    await persistAuthSession(res.data.loginWithGoogle);
+
+    return res.data;
+  },
+  mutationKey: [...authQueryKeys.me, 'login-with-google'],
+  suppressGlobalErrorToast: true,
+});
+
+export const useLinkGoogleAccountMutation = defineMutation<
+  LinkGoogleAccountMutation,
+  LinkGoogleAccountMutationVariables
+>({
+  mutationFn: async (variables?: LinkGoogleAccountMutationVariables) => {
+    if (!variables) {
+      return Promise.reject(new Error('A Google ID token is required.'));
+    }
+
+    const res = await client.request<
+      LinkGoogleAccountMutation,
+      LinkGoogleAccountMutationVariables
+    >(LINK_GOOGLE_ACCOUNT_MUTATION, variables);
+
+    if (!res.ok) {
+      throw toError(res.error.name, res.error.message);
+    }
+
+    queryClient.setQueryData(meQueryKey, {
+      me: res.data.linkGoogleAccount,
+    } satisfies MeQuery);
+
+    return res.data;
+  },
+  mutationKey: [...authQueryKeys.me, 'link-google-account'],
+  suppressGlobalErrorToast: true,
+});
+
+export const useUnlinkGoogleAccountMutation =
+  defineMutation<UnlinkGoogleAccountMutation>({
+    mutationFn: async () => {
+      const res = await client.request<UnlinkGoogleAccountMutation>(
+        UNLINK_GOOGLE_ACCOUNT_MUTATION,
+      );
+
+      if (!res.ok) {
+        throw toError(res.error.name, res.error.message);
+      }
+
+      queryClient.setQueryData(meQueryKey, {
+        me: res.data.unlinkGoogleAccount,
+      } satisfies MeQuery);
+
+      return res.data;
+    },
+    mutationKey: [...authQueryKeys.me, 'unlink-google-account'],
+    suppressGlobalErrorToast: true,
+  });
 
 export const useRegisterUserMutation = defineMutation<
   RegisterUserMutation,
@@ -142,21 +243,7 @@ export const useRegisterUserMutation = defineMutation<
       throw toError(res.error.name, res.error.message);
     }
 
-    await store.set({
-      accessToken: res.data.registerUser.accessToken,
-      refreshToken: res.data.registerUser.refreshToken,
-      role: res.data.registerUser.user.role,
-    });
-    notifyAuthChange();
-
-    queryClient.setQueryData(meQueryKey, {
-      me: res.data.registerUser.user,
-    } satisfies MeQuery);
-
-    registerPushAfterAuth(
-      res.data.registerUser.accessToken,
-      res.data.registerUser.user.role,
-    );
+    await persistAuthSession(res.data.registerUser);
 
     return res.data;
   },

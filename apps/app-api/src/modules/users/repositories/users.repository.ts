@@ -5,13 +5,15 @@ import { Repository } from 'src/libs/repository';
 
 export interface UserRecord extends Omit<
   User,
-  'organizationId' | 'firstName' | 'lastName' | 'position'
+  'organizationId' | 'firstName' | 'lastName' | 'position' | 'googleLinked'
 > {
   passwordHash: string;
   organizationId?: string | null;
   firstName?: string | null;
   lastName?: string | null;
   position?: string | null;
+  /** Google's stable subject identifier, set once an account is linked. */
+  googleSub?: string | null;
 }
 
 export type UsersRepository = Repository<UserRecord>;
@@ -35,12 +37,23 @@ export async function UsersRepositoryFactory(
       firstName: String,
       lastName: String,
       position: String,
+      googleSub: String,
       createdAt: Date,
       updatedAt: Date,
     },
     [
       [{ email: 1 }, { unique: true }],
       [{ organizationId: 1, role: 1, isActive: 1 }],
+      // Partial rather than sparse: an unlinked account stores an explicit
+      // null, and a sparse unique index would treat every one of those nulls
+      // as the same value and reject the second unlinked account.
+      [
+        { googleSub: 1 },
+        {
+          unique: true,
+          partialFilterExpression: { googleSub: { $type: 'string' } },
+        },
+      ],
     ],
   );
 }

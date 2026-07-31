@@ -1,23 +1,33 @@
 import {
+  Body,
   Controller,
   HttpCode,
   HttpStatus,
-  NotImplementedException,
   Post,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { ZodValidationPipe } from 'src/common/validation/zod-validation.pipe';
 import { AuthService } from '../auth/auth.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
+import { GoogleAuthService } from '../auth/google-auth.service';
 import { JwtRefreshGuard } from '../auth/guards/jwt-refresh.guard';
 import { type AuthenticatedUser } from '../auth/types/auth-context';
 import { SessionsService } from '../sessions/sessions.service';
+import { TurnstileProtected } from '../turnstile/turnstile.decorator';
+import { TurnstileGuard } from '../turnstile/turnstile.guard';
+import {
+  googleAuthBodySchema,
+  type GoogleAuthBody,
+} from './sessions.validation';
 
 @Controller('session')
 export class SessionsController {
   constructor(
     private readonly authService: AuthService,
     private readonly sessionsService: SessionsService,
+    private readonly googleAuthService: GoogleAuthService,
   ) {}
 
   @Post('refresh')
@@ -41,10 +51,13 @@ export class SessionsController {
   }
 
   @Post('authenticate/google')
-  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
-  authenticateWithGoogle() {
-    throw new NotImplementedException(
-      'Google authentication is not implemented.',
-    );
+  @Public()
+  @UseGuards(TurnstileGuard)
+  @TurnstileProtected('login')
+  @HttpCode(HttpStatus.OK)
+  async authenticateWithGoogle(
+    @Body(new ZodValidationPipe(googleAuthBodySchema)) body: GoogleAuthBody,
+  ) {
+    return this.googleAuthService.loginWithGoogle(body.idToken);
   }
 }

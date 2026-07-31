@@ -4,10 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, LoaderCircle, ShieldCheck } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import {
+  TurnstileWidget,
+  turnstileSiteKey,
+  type TurnstileWidgetHandle,
+} from '@/components/core/turnstile-widget';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -21,7 +26,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSession } from '@/providers/AuthProvider';
 import { store } from '@/providers/AuthProvider/store';
-import { useLoginMutation } from '@/react-query/auth/auth-operations';
+import {
+  useLoginMutation,
+  useLoginWithGoogleMutation,
+} from '@/react-query/auth/auth-operations';
 import { UserRole } from '@/react-query/generated__types';
 import {
   type AuthRedirectReason,
@@ -32,10 +40,18 @@ import {
   redirectToPath,
 } from '@/react-query/session';
 import { cn } from '@/utils';
+import { GoogleSignInButton, googleClientId } from './google-sign-in-button';
 
 type LoginFormValues = {
   email: string;
   password: string;
+};
+
+/** The part of an AuthPayload the login screen acts on. */
+type AuthPayloadFragment = {
+  accessToken: string;
+  refreshToken: string;
+  user: { role: UserRole; isActive: boolean };
 };
 
 const ALLOWED_ROLES = [UserRole.Admin, UserRole.SuperAdmin];
@@ -57,6 +73,8 @@ export function LoginFormCard() {
   const [invalidCredentialsError, setInvalidCredentialsError] = useState<
     string | null
   >(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
   const destination = getPostLoginRedirectPath(searchParams);
 
   const form = useForm<LoginFormValues>({
@@ -64,24 +82,24 @@ export function LoginFormCard() {
     defaultValues: { email: '', password: '' },
   });
 
-  const loginMutation = useLoginMutation({
-    onSuccess: async (data) => {
-      const isAllowedRole = ALLOWED_ROLES.includes(data.login.user.role);
+  const handleAuthSuccess = useCallback(
+    async (payload: AuthPayloadFragment) => {
+      const isAllowedRole = ALLOWED_ROLES.includes(payload.user.role);
 
-      if (!isAllowedRole || !data.login.user.isActive) {
+      if (!isAllowedRole || !payload.user.isActive) {
         await store.clearSession();
         redirectToLogin('unauthorized');
         return;
       }
 
       await store.set({
-        accessToken: data.login.accessToken,
-        refreshToken: data.login.refreshToken,
-        role: data.login.user.role,
+        accessToken: payload.accessToken,
+        refreshToken: payload.refreshToken,
+        role: payload.user.role,
       });
 
       if (
-        data.login.user.role === UserRole.SuperAdmin &&
+        payload.user.role === UserRole.SuperAdmin &&
         destination === DEFAULT_AUTHENTICATED_REDIRECT_PATH
       ) {
         redirectToPath('/super-admin/dashboard');
@@ -90,11 +108,30 @@ export function LoginFormCard() {
 
       redirectAfterLogin(destination);
     },
-    onError: (error) => {
+    [destination],
+  );
+
+  // A Turnstile token is single use, so a failed attempt has to start a fresh
+  // challenge before the next one can succeed.
+  const handleAuthError = useCallback(
+    (error: Error) => {
+      turnstileRef.current?.reset();
+
       if (error.name === 'InvalidCredentialsError') {
         setInvalidCredentialsError(t('invalidCredentials'));
       }
     },
+    [t],
+  );
+
+  const loginMutation = useLoginMutation({
+    onSuccess: (data) => handleAuthSuccess(data.login),
+    onError: handleAuthError,
+  });
+
+  const googleLoginMutation = useLoginWithGoogleMutation({
+    onSuccess: (data) => handleAuthSuccess(data.loginWithGoogle),
+    onError: handleAuthError,
   });
 
   useEffect(() => {
@@ -107,7 +144,12 @@ export function LoginFormCard() {
     formState: { errors },
     register,
   } = form;
-  const isSubmitting = loginMutation.isPending || session.status === 'loading';
+  const isSubmitting =
+    loginMutation.isPending ||
+    googleLoginMutation.isPending ||
+    session.status === 'loading';
+  // Only block on the challenge when one is actually configured.
+  const isAwaitingTurnstile = Boolean(turnstileSiteKey) && !turnstileToken;
 
   function handleSubmit(values: LoginFormValues) {
     setInvalidCredentialsError(null);
@@ -116,7 +158,13 @@ export function LoginFormCard() {
         email: values.email.trim(),
         password: values.password,
       },
+      turnstileToken,
     });
+  }
+
+  function handleGoogleCredential(idToken: string) {
+    setInvalidCredentialsError(null);
+    googleLoginMutation.mutate({ input: { idToken }, turnstileToken });
   }
 
   return (
@@ -195,7 +243,18 @@ export function LoginFormCard() {
             ) : null}
           </div>
 
-          <Button type="submit" size="lg" disabled={isSubmitting}>
+          <TurnstileWidget
+            ref={turnstileRef}
+            action="login"
+            className="flex justify-center"
+            onTokenChange={setTurnstileToken}
+          />
+
+          <Button
+            type="submit"
+            size="lg"
+            disabled={isSubmitting || isAwaitingTurnstile}
+          >
             {isSubmitting ? (
               <>
                 <LoaderCircle
@@ -212,6 +271,24 @@ export function LoginFormCard() {
             )}
           </Button>
         </form>
+
+        {googleClientId ? (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <span className="h-px flex-1 bg-border" />
+              <span className="text-xs uppercase text-muted-foreground">
+                {t('orContinueWith')}
+              </span>
+              <span className="h-px flex-1 bg-border" />
+            </div>
+            <div className="flex justify-center">
+              <GoogleSignInButton
+                disabled={isSubmitting || isAwaitingTurnstile}
+                onCredential={handleGoogleCredential}
+              />
+            </div>
+          </div>
+        ) : null}
       </CardContent>
       <CardFooter className="text-sm text-muted-foreground">
         <ShieldCheck aria-hidden="true" className="mr-2" />

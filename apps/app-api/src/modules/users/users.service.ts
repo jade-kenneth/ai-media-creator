@@ -78,6 +78,29 @@ export class UsersService {
     return this.findRecord({ email: normalizeEmail(email) });
   }
 
+  async findRecordByGoogleSub(googleSub: string): Promise<UserRecord | null> {
+    return this.findRecord({ googleSub });
+  }
+
+  /**
+   * Claims a Google subject for an account, but only while that account has no
+   * link yet. Returns false when another link already exists so the caller can
+   * report a conflict instead of silently rebinding the account.
+   */
+  async linkGoogleSub(id: string, googleSub: string): Promise<boolean> {
+    return this.usersRepository.updateOne(
+      { id, googleSub: null },
+      { googleSub, updatedAt: new Date() },
+    );
+  }
+
+  async unlinkGoogleSub(id: string): Promise<boolean> {
+    return this.usersRepository.updateOne(
+      { id },
+      { googleSub: null, updatedAt: new Date() },
+    );
+  }
+
   async existsByEmail(email: string): Promise<boolean> {
     return this.usersRepository.exists({ email: normalizeEmail(email) });
   }
@@ -272,6 +295,7 @@ function toUser(user: UserRecord): User {
     firstName: user.firstName ?? null,
     lastName: user.lastName ?? null,
     position: user.position ?? null,
+    googleLinked: Boolean(user.googleSub),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

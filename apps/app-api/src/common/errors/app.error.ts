@@ -76,3 +76,21 @@ export class InvalidCredentialsError extends AppError {
     super(message, 'INVALID_CREDENTIALS', 401, details);
   }
 }
+
+export class TurnstileVerificationError extends AppError {
+  constructor(
+    message = 'Turnstile verification failed.',
+    details?: AppErrorDetails,
+  ) {
+    super(message, 'TURNSTILE_VERIFICATION_FAILED', 403, details);
+  }
+}
+
+export class ExternalServiceError extends AppError {
+  constructor(
+    message = 'An upstream service is unavailable.',
+    details?: AppErrorDetails,
+  ) {
+    super(message, 'EXTERNAL_SERVICE_UNAVAILABLE', 502, details);
+  }
+}

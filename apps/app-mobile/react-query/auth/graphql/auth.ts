@@ -10,9 +10,43 @@ export const AUTH_USER_FRAGMENT = gql`
     firstName
     lastName
     position
+    googleLinked
     createdAt
     updatedAt
   }
+`;
+
+export const LOGIN_WITH_GOOGLE_MUTATION = gql`
+  mutation LoginWithGoogle($input: GoogleAuthInput!) {
+    loginWithGoogle(input: $input) {
+      accessToken
+      refreshToken
+      tokenType
+      expiresIn
+      user {
+        ...AuthUser
+      }
+    }
+  }
+  ${AUTH_USER_FRAGMENT}
+`;
+
+export const LINK_GOOGLE_ACCOUNT_MUTATION = gql`
+  mutation LinkGoogleAccount($input: GoogleAuthInput!) {
+    linkGoogleAccount(input: $input) {
+      ...AuthUser
+    }
+  }
+  ${AUTH_USER_FRAGMENT}
+`;
+
+export const UNLINK_GOOGLE_ACCOUNT_MUTATION = gql`
+  mutation UnlinkGoogleAccount {
+    unlinkGoogleAccount {
+      ...AuthUser
+    }
+  }
+  ${AUTH_USER_FRAGMENT}
 `;
 
 export const LOGIN_MUTATION = gql`

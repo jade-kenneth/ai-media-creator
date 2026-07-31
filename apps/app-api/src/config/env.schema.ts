@@ -122,14 +122,47 @@ export const envSchema = z
       .email('BREVO_SENDER_EMAIL must be a valid email.')
       .min(1, 'BREVO_SENDER_EMAIL is required.'),
     BREVO_SENDER_NAME: z.string().trim().min(1).default('Application'),
+    TURNSTILE_ENABLED: z.preprocess(
+      normalizeBooleanEnv,
+      z.boolean().default(false),
+    ),
+    CLOUDFLARE_TURNSTILE_SECRET_KEY: z.string().trim().min(1).optional(),
+    GOOGLE_OAUTH_ENABLED: z.preprocess(
+      normalizeBooleanEnv,
+      z.boolean().default(false),
+    ),
+    GOOGLE_OAUTH_CLIENT_IDS: z.preprocess(
+      normalizeCommaSeparatedEnv,
+      z.array(z.string().trim().min(1)).default([]),
+    ),
+    XENDIT_ENABLED: z.preprocess(
+      normalizeBooleanEnv,
+      z.boolean().default(false),
+    ),
+    XENDIT_SECRET_KEY: z.string().trim().min(1).optional(),
+    XENDIT_CALLBACK_TOKEN: z.string().trim().min(1).optional(),
+    PAYMENTS_CURRENCY: z.string().trim().length(3).default('PHP'),
+    PAYMENTS_COUNTRY: z.string().trim().length(2).default('PH'),
+    PAYMENTS_SUCCESS_RETURN_URL: z.string().trim().url().optional(),
+    PAYMENTS_FAILURE_RETURN_URL: z.string().trim().url().optional(),
   })
   .superRefine((config, context) => {
     const requireConfig = (
-      flag: 'APPLE_IAP_ENABLED' | 'STORE_IAP_ENABLED',
+      flag:
+        | 'APPLE_IAP_ENABLED'
+        | 'STORE_IAP_ENABLED'
+        | 'TURNSTILE_ENABLED'
+        | 'GOOGLE_OAUTH_ENABLED'
+        | 'XENDIT_ENABLED',
       keys: Array<keyof typeof config>,
     ) => {
       for (const key of keys) {
-        if (config[key] === undefined) {
+        const value = config[key];
+
+        if (
+          value === undefined ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
           context.addIssue({
             code: 'custom',
             path: [key],
@@ -157,6 +190,23 @@ export const envSchema = z
         'GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64',
         'GOOGLE_PLAY_PUBSUB_AUDIENCE',
         'GOOGLE_PLAY_PUBSUB_SERVICE_ACCOUNT_EMAIL',
+      ]);
+    }
+
+    if (config.TURNSTILE_ENABLED) {
+      requireConfig('TURNSTILE_ENABLED', ['CLOUDFLARE_TURNSTILE_SECRET_KEY']);
+    }
+
+    if (config.GOOGLE_OAUTH_ENABLED) {
+      requireConfig('GOOGLE_OAUTH_ENABLED', ['GOOGLE_OAUTH_CLIENT_IDS']);
+    }
+
+    if (config.XENDIT_ENABLED) {
+      requireConfig('XENDIT_ENABLED', [
+        'XENDIT_SECRET_KEY',
+        'XENDIT_CALLBACK_TOKEN',
+        'PAYMENTS_SUCCESS_RETURN_URL',
+        'PAYMENTS_FAILURE_RETURN_URL',
       ]);
     }
   });

@@ -61,6 +61,7 @@
     "enterPassword": "Enter your password",
     "signingIn": "Signing in...",
     "signIn": "Sign in",
+    "orContinueWith": "or continue with",
     "authorizedOnly": "Authorized administrators only",
     "invalidCredentials": "Invalid email or password.",
     "validEmail": "Enter a valid email address.",

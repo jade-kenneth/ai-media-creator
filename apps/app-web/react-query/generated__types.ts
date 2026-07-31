@@ -72,6 +72,12 @@ export type CreateOrganizationInput = {
   slug: Scalars['String']['input'];
 };
 
+export type CreatePaymentInput = {
+  amount: Scalars['Int']['input'];
+  channel: PaymentChannel;
+  description?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CursorPaginationInput = {
   after?: InputMaybe<Scalars['Cursor']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -86,6 +92,10 @@ export type DateTimeFilterInput = {
   lesserThanOrEqual?: InputMaybe<Scalars['DateTime']['input']>;
   notEqual?: InputMaybe<Scalars['DateTime']['input']>;
   notIn?: InputMaybe<Array<Scalars['DateTime']['input']>>;
+};
+
+export type GoogleAuthInput = {
+  idToken: Scalars['String']['input'];
 };
 
 export type IdFilterInput = {
@@ -130,6 +140,19 @@ export type OrganizationFilterInput = {
   name?: InputMaybe<StringFilterInput>;
   slug?: InputMaybe<Scalars['String']['input']>;
 };
+
+export enum PaymentChannel {
+  Gcash = 'GCASH',
+  Paymaya = 'PAYMAYA',
+}
+
+export enum PaymentStatus {
+  Expired = 'EXPIRED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  RequiresAction = 'REQUIRES_ACTION',
+  Succeeded = 'SUCCEEDED',
+}
 
 export type PushDeviceMetadataInput = {
   appOwnership?: InputMaybe<Scalars['String']['input']>;
@@ -480,6 +503,36 @@ export type LoginMutation = {
   };
 };
 
+export type LoginWithGoogleMutationVariables = Exact<{
+  input: GoogleAuthInput;
+}>;
+
+export type LoginWithGoogleMutation = {
+  loginWithGoogle: {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    expiresIn: number;
+    user: { id: string; email: string; role: UserRole; isActive: boolean };
+  };
+};
+
+export type LinkGoogleAccountMutationVariables = Exact<{
+  input: GoogleAuthInput;
+}>;
+
+export type LinkGoogleAccountMutation = {
+  linkGoogleAccount: { id: string; email: string; googleLinked: boolean };
+};
+
+export type UnlinkGoogleAccountMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type UnlinkGoogleAccountMutation = {
+  unlinkGoogleAccount: { id: string; email: string; googleLinked: boolean };
+};
+
 export type MeQueryVariables = Exact<{ [key: string]: never }>;
 
 export type MeQuery = {
@@ -489,6 +542,7 @@ export type MeQuery = {
     role: UserRole;
     organizationId?: string | null;
     isActive: boolean;
+    googleLinked: boolean;
   };
 };
 
@@ -625,6 +679,61 @@ export type ReactivateOrganizationMutation = {
     createdAt: string;
     updatedAt: string;
   };
+};
+
+export type CreatePaymentMutationVariables = Exact<{
+  input: CreatePaymentInput;
+}>;
+
+export type CreatePaymentMutation = {
+  createPayment: {
+    id: string;
+    referenceId: string;
+    status: PaymentStatus;
+    channel: PaymentChannel;
+    amount: number;
+    currency: string;
+    description?: string | null;
+    redirectUrl?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type PaymentQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+export type PaymentQuery = {
+  payment: {
+    id: string;
+    referenceId: string;
+    status: PaymentStatus;
+    channel: PaymentChannel;
+    amount: number;
+    currency: string;
+    description?: string | null;
+    redirectUrl?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type MyPaymentsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type MyPaymentsQuery = {
+  myPayments: Array<{
+    id: string;
+    referenceId: string;
+    status: PaymentStatus;
+    channel: PaymentChannel;
+    amount: number;
+    currency: string;
+    description?: string | null;
+    redirectUrl?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }>;
 };
 
 export type RegisterTestPushTokenMutationVariables = Exact<{

@@ -7,9 +7,12 @@ import { MailModule } from '../mail/mail.module';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { SessionsController } from '../sessions/sessions.controller';
 import { SessionsModule } from '../sessions/sessions.module';
+import { TurnstileModule } from '../turnstile/turnstile.module';
 import { UsersModule } from '../users/users.module';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
+import { GoogleAuthService } from './google-auth.service';
+import { GoogleIdentityService } from './google-identity.service';
 import { GraphqlAuthGuard } from './guards/graphql-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
@@ -50,12 +53,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     OrganizationsModule,
     UsersModule,
     SessionsModule,
+    TurnstileModule,
   ],
 
   controllers: [SessionsController],
   providers: [
     AuthService,
     AuthResolver,
+    GoogleAuthService,
+    GoogleIdentityService,
     JwtStrategy,
     JwtRefreshStrategy,
     GraphqlAuthGuard,
@@ -65,6 +71,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
   ],
   exports: [
     AuthService,
+    GoogleAuthService,
     JwtModule,
     PassportModule,
     GraphqlAuthGuard,
