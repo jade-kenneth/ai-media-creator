@@ -89,7 +89,9 @@ const filterHelper = manifest.tenantFilterHelper;
 const declared = manifest.modules ?? {};
 
 if (!tenantField || !filterHelper) {
-  console.error(`✗ ${MANIFEST} must define tenantField and tenantFilterHelper.`);
+  console.error(
+    `✗ ${MANIFEST} must define tenantField and tenantFilterHelper.`,
+  );
   process.exit(1);
 }
 
@@ -174,7 +176,11 @@ for (const module of onDisk) {
   );
 
   if (repositoryFiles.length === 0) {
-    fail(module, 'has a repositories/ directory with no *.repository.ts file', 'Check the module layout.');
+    fail(
+      module,
+      'has a repositories/ directory with no *.repository.ts file',
+      'Check the module layout.',
+    );
     continue;
   }
 
@@ -230,7 +236,11 @@ for (const module of onDisk) {
     );
   }
 
-  if (serviceFiles.length > 0 && servicesWithHelper.length === 0 && !readsExempt) {
+  if (
+    serviceFiles.length > 0 &&
+    servicesWithHelper.length === 0 &&
+    !readsExempt
+  ) {
     fail(
       module,
       `service never calls ${filterHelper}()`,
@@ -269,18 +279,30 @@ for (const module of onDisk) {
 // ── Report ───────────────────────────────────────────────────────────────────
 
 const summary = {
-  tenantScoped: Object.values(declared).filter((d) => d.scope === 'tenant-scoped').length,
+  tenantScoped: Object.values(declared).filter(
+    (d) => d.scope === 'tenant-scoped',
+  ).length,
   global: Object.values(declared).filter((d) => d.scope === 'global').length,
-  noPersistence: Object.values(declared).filter((d) => d.scope === 'no-persistence').length,
+  noPersistence: Object.values(declared).filter(
+    (d) => d.scope === 'no-persistence',
+  ).length,
 };
 
 if (asJson) {
-  console.log(JSON.stringify({ ok: problems.length === 0, summary, problems, notes }, null, 2));
+  console.log(
+    JSON.stringify(
+      { ok: problems.length === 0, summary, problems, notes },
+      null,
+      2,
+    ),
+  );
   process.exit(problems.length === 0 ? 0 : 1);
 }
 
 if (problems.length > 0) {
-  console.error(`✗ Tenant-scope check failed with ${problems.length} problem(s):\n`);
+  console.error(
+    `✗ Tenant-scope check failed with ${problems.length} problem(s):\n`,
+  );
 
   for (const problem of problems) {
     console.error(`  ${problem.module} — ${problem.message}`);

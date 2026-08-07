@@ -67,7 +67,9 @@ function main() {
     process.exit(0);
   }
 
-  const looksLikeDefect = DEFECT_SIGNALS.some((pattern) => pattern.test(prompt));
+  const looksLikeDefect = DEFECT_SIGNALS.some((pattern) =>
+    pattern.test(prompt),
+  );
   const looksLikeBuild = BUILD_SIGNALS.some((pattern) => pattern.test(prompt));
 
   if (!looksLikeDefect || looksLikeBuild) {

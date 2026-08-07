@@ -66,13 +66,15 @@ function changedSourceFiles() {
     return [];
   }
 
-  return porcelain
-    .split('\n')
-    .map((line) => line.slice(3).trim())
-    // A rename reads as "old -> new"; the new path is what was written.
-    .map((path) => (path.includes(' -> ') ? path.split(' -> ')[1] : path))
-    .filter(Boolean)
-    .filter(isSourcePath);
+  return (
+    porcelain
+      .split('\n')
+      .map((line) => line.slice(3).trim())
+      // A rename reads as "old -> new"; the new path is what was written.
+      .map((path) => (path.includes(' -> ') ? path.split(' -> ')[1] : path))
+      .filter(Boolean)
+      .filter(isSourcePath)
+  );
 }
 
 function hasEvidence(text) {
@@ -134,7 +136,13 @@ function taskFileHasEvidence() {
 
   // Include untracked task files: a task file created this session is exactly
   // where the block for this session's work would be written.
-  const untracked = git(['ls-files', '--others', '--exclude-standard', 'task.md', 'TASK_*.md'])
+  const untracked = git([
+    'ls-files',
+    '--others',
+    '--exclude-standard',
+    'task.md',
+    'TASK_*.md',
+  ])
     .split('\n')
     .map((file) => file.trim())
     .filter(Boolean);

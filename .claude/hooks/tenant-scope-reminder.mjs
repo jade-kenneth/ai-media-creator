@@ -18,7 +18,12 @@ const MANIFEST = 'tenant-scope.config.json';
 
 /** Layers that can compose or drop a tenant filter. */
 const DATA_PATH = /^apps\/app-api\/src\/modules\/([^/]+)\/.*\.(ts)$/;
-const DATA_PATH_SUFFIXES = ['.repository.ts', '.service.ts', '.resolver.ts', '.controller.ts'];
+const DATA_PATH_SUFFIXES = [
+  '.repository.ts',
+  '.service.ts',
+  '.resolver.ts',
+  '.controller.ts',
+];
 
 function readStdin() {
   try {
@@ -31,7 +36,9 @@ function readStdin() {
 function toRepoRelative(filePath) {
   if (!filePath) return '';
 
-  const normalized = isAbsolute(filePath) ? relative(projectDir, filePath) : filePath;
+  const normalized = isAbsolute(filePath)
+    ? relative(projectDir, filePath)
+    : filePath;
 
   return normalized.split('\\').join('/');
 }
@@ -60,7 +67,10 @@ function main() {
   const filePath = toRepoRelative(input?.tool_input?.file_path ?? '');
   const match = filePath.match(DATA_PATH);
 
-  if (!match || !DATA_PATH_SUFFIXES.some((suffix) => filePath.endsWith(suffix))) {
+  if (
+    !match ||
+    !DATA_PATH_SUFFIXES.some((suffix) => filePath.endsWith(suffix))
+  ) {
     process.exit(0);
   }
 

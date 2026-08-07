@@ -14,7 +14,14 @@
 //   node scripts/generate-catalogs.mjs           write docs/catalogs/
 //   node scripts/generate-catalogs.mjs --check   fail if regeneration differs
 
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from 'node:fs';
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  existsSync,
+  mkdirSync,
+  statSync,
+} from 'node:fs';
 import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -51,7 +58,10 @@ function walk(path, extension = '.ts') {
 
     if (entry.isDirectory()) {
       files.push(...walk(child, extension));
-    } else if (entry.name.endsWith(extension) && !entry.name.endsWith('.spec.ts')) {
+    } else if (
+      entry.name.endsWith(extension) &&
+      !entry.name.endsWith('.spec.ts')
+    ) {
       files.push(child);
     }
   }
@@ -88,7 +98,15 @@ function tenantManifest() {
 
 // ── REST endpoints and webhooks ──────────────────────────────────────────────
 
-const HTTP_METHODS = ['Get', 'Post', 'Put', 'Patch', 'Delete', 'Head', 'Options'];
+const HTTP_METHODS = [
+  'Get',
+  'Post',
+  'Put',
+  'Patch',
+  'Delete',
+  'Head',
+  'Options',
+];
 
 function collectRestEndpoints() {
   const endpoints = [];
@@ -100,7 +118,9 @@ function collectRestEndpoints() {
     if (!controller) continue;
 
     const basePath = controller[1] ?? controller[2] ?? '';
-    const controllerIsPublic = /@Controller\([^)]*\)\s*@Public\(\)/.test(source);
+    const controllerIsPublic = /@Controller\([^)]*\)\s*@Public\(\)/.test(
+      source,
+    );
 
     const pattern = new RegExp(
       `@(${HTTP_METHODS.join('|')})\\((?:'([^']*)'|"([^"]*)")?\\)([\\s\\S]{0,400}?)\\n\\s*(?:async\\s+)?(\\w+)\\s*\\(`,
@@ -123,7 +143,9 @@ function collectRestEndpoints() {
     }
   }
 
-  return endpoints.sort((a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method));
+  return endpoints.sort(
+    (a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method),
+  );
 }
 
 /**
@@ -152,7 +174,11 @@ function classLevelDecorators(source) {
 
   return {
     guard: head.match(/@UseGuards\(([^)]+)\)/)?.[1].trim() ?? '',
-    roles: head.match(/@Roles\(([^)]+)\)/)?.[1].replace(/UserRole\./g, '').trim() ?? '',
+    roles:
+      head
+        .match(/@Roles\(([^)]+)\)/)?.[1]
+        .replace(/UserRole\./g, '')
+        .trim() ?? '',
   };
 }
 
@@ -186,8 +212,10 @@ function collectGraphqlOperations() {
         kind,
         name: singleQuoted ?? doubleQuoted ?? handler,
         handler,
-        guard: isPublic ? '' : (guard ? guard[1].trim() : inherited.guard),
-        roles: roles ? roles[1].replace(/UserRole\./g, '').trim() : inherited.roles,
+        guard: isPublic ? '' : guard ? guard[1].trim() : inherited.guard,
+        roles: roles
+          ? roles[1].replace(/UserRole\./g, '').trim()
+          : inherited.roles,
         inherited: !guard && Boolean(inherited.guard) && !isPublic,
         public: isPublic,
         tenantAware: parameters.includes('@CurrentTenant'),
@@ -197,7 +225,9 @@ function collectGraphqlOperations() {
     }
   }
 
-  return operations.sort((a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
+  return operations.sort(
+    (a, b) => a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name),
+  );
 }
 
 // ── Collections ──────────────────────────────────────────────────────────────
@@ -206,7 +236,9 @@ function collectCollections() {
   const manifest = tenantManifest();
   const collections = [];
 
-  for (const file of walk(API_SRC).filter((f) => f.endsWith('.repository.ts'))) {
+  for (const file of walk(API_SRC).filter((f) =>
+    f.endsWith('.repository.ts'),
+  )) {
     const source = read(file);
     // Model name is always the second constructor argument, but the constructor
     // may be MongooseRepository directly or a subclass of it, and the call may
@@ -221,7 +253,9 @@ function collectCollections() {
 
     const moduleName = file.match(/modules\/([^/]+)\//)?.[1] ?? '';
     const declaration = manifest.modules?.[moduleName] ?? {};
-    const indexes = [...source.matchAll(/\[\s*\{([^}]+)\}\s*(?:,\s*\{([^}]*)\})?\s*\]/g)]
+    const indexes = [
+      ...source.matchAll(/\[\s*\{([^}]+)\}\s*(?:,\s*\{([^}]*)\})?\s*\]/g),
+    ]
       .map(([, keys, options]) => {
         const fields = keys
           .split(',')
@@ -263,7 +297,9 @@ function collectScheduledWork() {
         kind,
         schedule: argument.split(',')[0].trim().replace(/['"]/g, ''),
         handler,
-        locked: /withLock|acquire\(/.test(between) || /withLock|acquire\(/.test(source),
+        locked:
+          /withLock|acquire\(/.test(between) ||
+          /withLock|acquire\(/.test(source),
         file,
         line: lineOf(source, match.index),
       });
@@ -282,10 +318,13 @@ function collectEnvVars() {
   const variables = [];
 
   // Keys are declared at a single indent level inside the schema object.
-  for (const match of body.matchAll(/\n {4}([A-Z][A-Z0-9_]*):\s*([\s\S]*?)(?=\n {4}[A-Z][A-Z0-9_]*:|\n {2}\}\))/g)) {
+  for (const match of body.matchAll(
+    /\n {4}([A-Z][A-Z0-9_]*):\s*([\s\S]*?)(?=\n {4}[A-Z][A-Z0-9_]*:|\n {2}\}\))/g,
+  )) {
     const [, name, definition] = match;
     const defaultValue = definition.match(/\.default\(([^)]*)\)/);
-    const isOptional = definition.includes('.optional()') || Boolean(defaultValue);
+    const isOptional =
+      definition.includes('.optional()') || Boolean(defaultValue);
 
     let type = 'string';
     if (/z\.coerce\.number|z\.number/.test(definition)) type = 'number';
@@ -316,8 +355,12 @@ function collectEnvVars() {
 
   return {
     variables: variables.sort((a, b) => a.name.localeCompare(b.name)),
-    missingFromExample: [...schemaKeys].filter((key) => !exampleKeys.has(key)).sort(),
-    missingFromSchema: [...exampleKeys].filter((key) => !schemaKeys.has(key)).sort(),
+    missingFromExample: [...schemaKeys]
+      .filter((key) => !exampleKeys.has(key))
+      .sort(),
+    missingFromSchema: [...exampleKeys]
+      .filter((key) => !schemaKeys.has(key))
+      .sort(),
   };
 }
 
@@ -329,7 +372,9 @@ function renderEndpoints() {
   const plain = [];
 
   for (const endpoint of endpoints) {
-    (isWebhook(endpoint, read(endpoint.file)) ? webhooks : plain).push(endpoint);
+    (isWebhook(endpoint, read(endpoint.file)) ? webhooks : plain).push(
+      endpoint,
+    );
   }
 
   const graphql = collectGraphqlOperations();
@@ -396,8 +441,12 @@ function renderCollections() {
     collections.map((collection) => [
       code(collection.model),
       collection.module,
-      collection.scope === 'tenant-scoped' ? '**tenant-scoped**' : collection.scope,
-      collection.indexes.length ? collection.indexes.map((index) => `\`${index}\``).join('<br>') : '—',
+      collection.scope === 'tenant-scoped'
+        ? '**tenant-scoped**'
+        : collection.scope,
+      collection.indexes.length
+        ? collection.indexes.map((index) => `\`${index}\``).join('<br>')
+        : '—',
       `${collection.file}:${collection.line}`,
     ]),
   );
@@ -486,7 +535,9 @@ if (checkOnly) {
     process.exit(1);
   }
 
-  console.log(`✓ Catalogs match source (${Object.keys(outputs).length} files).`);
+  console.log(
+    `✓ Catalogs match source (${Object.keys(outputs).length} files).`,
+  );
   process.exit(0);
 }
 

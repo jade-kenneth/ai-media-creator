@@ -17,7 +17,8 @@ const projectDir = process.env.CLAUDE_PROJECT_DIR ?? process.cwd();
 const PROTECTED = [
   {
     test: (path) => path === 'AGENTS.md' || path.endsWith('/AGENTS.md'),
-    reason: 'AGENTS.md is generated from skills-source by scripts/sync-skills.mjs.',
+    reason:
+      'AGENTS.md is generated from skills-source by scripts/sync-skills.mjs.',
     fix: [
       'Edit conventions/ or skills/ in the skills-source repository, push, then:',
       '  npm run update-skills -- --sha <full-sha>',
@@ -25,7 +26,8 @@ const PROTECTED = [
     ],
   },
   {
-    test: (path) => path === '.skills-source' || path.startsWith('.skills-source/'),
+    test: (path) =>
+      path === '.skills-source' || path.startsWith('.skills-source/'),
     reason:
       '.skills-source/ is a read-only snapshot of the locked skills-source revision.',
     fix: [
@@ -55,7 +57,8 @@ const PROTECTED = [
   },
   {
     test: (path) => path.startsWith('docs/catalogs/'),
-    reason: 'Technical catalogs are generated from source by scripts/generate-catalogs.mjs.',
+    reason:
+      'Technical catalogs are generated from source by scripts/generate-catalogs.mjs.',
     fix: [
       'Change the code the catalog describes, then regenerate:',
       '  npm run catalogs',
