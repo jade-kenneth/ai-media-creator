@@ -43,7 +43,11 @@ jobs:
       # Cache node_modules
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # app-mobile's test script runs `node --experimental-strip-types`,
+          # which does not exist before Node 22.6 — on Node 20 it fails with
+          # "bad option: --experimental-strip-types" before a single test runs.
+          # GitHub is also deprecating Node 20 on runners.
+          node-version: 22
           cache: 'npm'
 
       - run: npm ci
