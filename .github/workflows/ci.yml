@@ -22,6 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+      # `nest build` type-checks the whole API in one process and exceeded the
+      # default heap on the runner (died at ~2.0 GB, core dumped). The runner has
+      # far more available; the ceiling was Node's, not the machine's.
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,7 +55,10 @@ jobs:
 
       - run: npx nx format:check --base=${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
 
-      - run: npx nx run-many -t lint test build typecheck
+      # Capped parallelism: the default runs every project's build at once, and
+      # a single OOM core-dump takes unrelated sibling tasks down with it, which
+      # reports as a failure in a project that is actually fine.
+      - run: npx nx run-many -t lint test build typecheck --parallel=2
 
       # Tenant-scope classification gate. Every repository-backed API module is
       # either tenant-scoped or explicitly declared global; an undeclared module
