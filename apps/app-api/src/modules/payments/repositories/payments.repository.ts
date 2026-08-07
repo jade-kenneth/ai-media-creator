@@ -20,6 +20,11 @@ export type PaymentRecord = {
   redirectUrl: string | null;
   /** Callback ids already applied, so a redelivered webhook is a no-op. */
   webhookEventIds: string[];
+  /**
+   * Owning tenant, captured from request context at creation. Null only for a
+   * payment created by a super-admin, who carries no tenant slug.
+   */
+  organizationId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -50,6 +55,7 @@ export async function PaymentsRepositoryFactory(
       description: String,
       redirectUrl: String,
       webhookEventIds: [String],
+      organizationId: String,
       createdAt: Date,
       updatedAt: Date,
     },
@@ -58,6 +64,8 @@ export async function PaymentsRepositoryFactory(
       [{ referenceId: 1 }, { unique: true }],
       [{ gatewayReference: 1 }],
       [{ userId: 1, createdAt: -1 }],
+      [{ organizationId: 1, createdAt: -1 }],
+      [{ organizationId: 1, userId: 1, createdAt: -1 }],
     ],
   );
 }

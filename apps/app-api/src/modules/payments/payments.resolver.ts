@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { CurrentTenant } from 'src/common/decorators/current-tenant.decorator';
 import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   CreatePaymentInput,
@@ -19,20 +20,25 @@ export class PaymentsResolver {
   async createPayment(
     @ServiceValidatedArgs('input') input: CreatePaymentInput,
     @CurrentUser() user: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<Payment> {
-    return this.paymentsService.createPayment(user, input);
+    return this.paymentsService.createPayment(user, input, tenantId);
   }
 
   @Query('payment')
   async payment(
     @Args('id') id: string,
     @CurrentUser() user: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<Payment> {
-    return this.paymentsService.findByIdForUser(user, id);
+    return this.paymentsService.findByIdForUser(user, id, tenantId);
   }
 
   @Query('myPayments')
-  async myPayments(@CurrentUser() user: AuthenticatedUser): Promise<Payment[]> {
-    return this.paymentsService.listForUser(user);
+  async myPayments(
+    @CurrentUser() user: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
+  ): Promise<Payment[]> {
+    return this.paymentsService.listForUser(user, tenantId);
   }
 }

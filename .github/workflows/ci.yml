@@ -1,7 +1,17 @@
 name: CI
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
   workflow_dispatch:
+
+# A newer push to the same branch supersedes an in-flight run; main is never
+# cancelled so every landed commit keeps a complete result.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
   actions: read
@@ -10,16 +20,21 @@ permissions:
 jobs:
   main:
     runs-on: ubuntu-latest
+    env:
+      NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
           filter: tree:0
           fetch-depth: 0
 
-      # This enables task distribution via Nx Cloud
-      # Run this command as early as possible, before dependencies are installed
+      # Task distribution via Nx Cloud, as early as possible and before install.
+      # Gated on the token: distribution is an accelerator, and a fork PR or an
+      # unconfigured secret must not stop lint/test/build/typecheck from gating
+      # the pull request.
       # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
+      - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
+        if: env.NX_CLOUD_ACCESS_TOKEN != ''
 
       # Cache node_modules
       - uses: actions/setup-node@v4
@@ -29,9 +44,24 @@ jobs:
 
       - run: npm ci
 
-      # Prepend any command with "nx record --" to record its logs to Nx Cloud
-      - run: npx nx record -- npx nx format:check  --base="remotes/origin/main"
-      - run: npx nx run-many -t lint test build typecheck e2e-ci
-      # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
+      # The locked skills snapshot and the generated AGENTS.md must match the
+      # lock file. Runs before the code checks so a context drift is reported
+      # even when the build is broken.
+      - run: npm run check-skills
+
+      - run: npx nx format:check --base=${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
+
+      - run: npx nx run-many -t lint test build typecheck
+
+      # Tenant-scope classification gate. Every repository-backed API module is
+      # either tenant-scoped or explicitly declared global; an undeclared module
+      # fails the build rather than shipping an unreviewed data path.
+      - run: npm run check-tenant-scope
+
+      # Generated catalogs must match the source they describe.
+      - run: npm run catalogs:check
+
+      # Nx Cloud recommends fixes for failures to help you get CI green faster.
+      # Learn more: https://nx.dev/ci/features/self-healing-ci
       - run: npx nx fix-ci
-        if: always()
+        if: always() && env.NX_CLOUD_ACCESS_TOKEN != ''
