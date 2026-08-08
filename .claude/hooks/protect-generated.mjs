@@ -21,7 +21,7 @@ const PROTECTED = [
       'AGENTS.md is generated from skills-source by scripts/sync-skills.mjs.',
     fix: [
       'Edit conventions/ or skills/ in the skills-source repository, push, then:',
-      '  pnpm update-skills -- --sha <full-sha>',
+      '  pnpm update-skills --sha <full-sha>',
       'and commit the regenerated AGENTS.md with the updated lock.',
     ],
   },
@@ -33,7 +33,7 @@ const PROTECTED = [
     fix: [
       'It is wiped and re-cloned on every sync, so this edit would be lost.',
       'Change the upstream file in the skills-source repository instead, then:',
-      '  pnpm update-skills -- --sha <full-sha>',
+      '  pnpm update-skills --sha <full-sha>',
     ],
   },
   {
@@ -43,8 +43,8 @@ const PROTECTED = [
       'Lock file revisions are advanced by their sync scripts, not by hand — a hand-edited lock records a review that never happened.',
     fix: [
       'Use the command that records the review boundary:',
-      '  pnpm update-skills -- --sha <full-sha>      (skills)',
-      '  pnpm boilerplate:ack -- --sha <full-sha>    (boilerplate)',
+      '  pnpm update-skills --sha <full-sha>      (skills)',
+      '  pnpm boilerplate:ack --sha <full-sha>    (boilerplate)',
     ],
   },
   {

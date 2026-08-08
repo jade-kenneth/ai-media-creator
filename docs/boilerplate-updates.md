@@ -23,7 +23,7 @@ safe, and it refuses to overwrite a remote with an unexpected URL.
 If the source revision cannot be detected, provide the exact commit explicitly:
 
 ```bash
-pnpm boilerplate:setup -- --sha <full-source-sha>
+pnpm boilerplate:setup --sha <full-source-sha>
 ```
 
 If the same source tree appears at multiple upstream revisions, setup treats the
@@ -100,7 +100,7 @@ affected product tests after porting.
 After every commit through a revision has been deliberately applied or declined:
 
 ```bash
-pnpm boilerplate:ack -- --sha <full-40-character-sha>
+pnpm boilerplate:ack --sha <full-40-character-sha>
 git add boilerplate.lock.json
 git commit -m "chore: record reviewed boilerplate updates"
 ```
@@ -152,8 +152,8 @@ Once a change is classified **reusable** or **backported**, port it to
 `app-boilerplate` from the product repository:
 
 ```bash
-pnpm boilerplate:contribute -- --dry-run --sha <full-40-character-sha>
-pnpm boilerplate:contribute -- --sha <full-40-character-sha> [--branch <name>]
+pnpm boilerplate:contribute --dry-run --sha <full-40-character-sha>
+pnpm boilerplate:contribute --sha <full-40-character-sha> [--branch <name>]
 ```
 
 The command accepts only explicit full SHAs from the product's history, refuses

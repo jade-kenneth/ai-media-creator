@@ -34,6 +34,6 @@ jobs:
       - name: Test project identity initialization
         run: |
           pnpm test:project-init
-          pnpm project:init -- --non-interactive --name "CI Product" --namespace com.example --domain ci.example.com --dry-run
+          pnpm project:init --non-interactive --name "CI Product" --namespace com.example --domain ci.example.com --dry-run
       - name: Test Claude Design handoff
         run: pnpm test:design-handoff

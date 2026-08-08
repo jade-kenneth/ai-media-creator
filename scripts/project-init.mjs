@@ -27,7 +27,7 @@ const HELP = `Initialize a product created from app-boilerplate.
 
 Usage:
   pnpm project:init
-  pnpm project:init -- --name "Dala" --namespace com.jadey --domain dala.app
+  pnpm project:init --name "Dala" --namespace com.jadey --domain dala.app
 
 Options:
   --name <display name>          Required product display name

@@ -155,7 +155,7 @@ function detectStartingSha(lock) {
     if (matches.length > 1) {
       throw new Error(
         'The product source tree matches multiple boilerplate revisions. ' +
-          "Run 'pnpm boilerplate:setup -- --sha <full-source-sha>'.",
+          "Run 'pnpm boilerplate:setup --sha <full-source-sha>'.",
       );
     }
     if (matches.length === 1) candidates.add(matches[0]);
@@ -164,13 +164,13 @@ function detectStartingSha(lock) {
   if (candidates.size > 1) {
     throw new Error(
       'Multiple product roots match different boilerplate revisions. ' +
-        "Run 'pnpm boilerplate:setup -- --sha <full-source-sha>'.",
+        "Run 'pnpm boilerplate:setup --sha <full-source-sha>'.",
     );
   }
 
   throw new Error(
     'Unable to identify the boilerplate revision used to create this product. ' +
-      "Run 'pnpm boilerplate:setup -- --sha <full-source-sha>'.",
+      "Run 'pnpm boilerplate:setup --sha <full-source-sha>'.",
   );
 }
 
@@ -371,11 +371,11 @@ function check() {
   }
   console.log(
     'After inspecting commit diffs, preview or port explicit selections on a clean product branch:\n' +
-      '  pnpm boilerplate:port -- --dry-run --sha <full-selected-sha>\n' +
-      '  pnpm boilerplate:port -- --sha <full-selected-sha>',
+      '  pnpm boilerplate:port --dry-run --sha <full-selected-sha>\n' +
+      '  pnpm boilerplate:port --sha <full-selected-sha>',
   );
   console.log(
-    `After every commit through the final boundary was applied or declined, run:\n  pnpm boilerplate:ack -- --sha ${latest}`,
+    `After every commit through the final boundary was applied or declined, run:\n  pnpm boilerplate:ack --sha ${latest}`,
   );
   writeSummary([
     '## Boilerplate updates available',
@@ -391,14 +391,14 @@ function check() {
     'Preview and port only explicitly selected commits on a clean product branch:',
     '',
     '```bash',
-    'pnpm boilerplate:port -- --dry-run --sha <full-selected-sha>',
-    'pnpm boilerplate:port -- --sha <full-selected-sha>',
+    'pnpm boilerplate:port --dry-run --sha <full-selected-sha>',
+    'pnpm boilerplate:port --sha <full-selected-sha>',
     '```',
     '',
     'After every commit through the final boundary was applied or deliberately declined:',
     '',
     '```bash',
-    `pnpm boilerplate:ack -- --sha ${latest}`,
+    `pnpm boilerplate:ack --sha ${latest}`,
     '```',
   ]);
   if (process.env.GITHUB_ACTIONS) {
@@ -689,7 +689,7 @@ function foundationDrift() {
     );
     for (const file of pendingAck) console.log(`- ${file}`);
     console.log(
-      "Run 'pnpm boilerplate:ack -- --sha <reviewed-through-sha>' once the review is complete.",
+      "Run 'pnpm boilerplate:ack --sha <reviewed-through-sha>' once the review is complete.",
     );
   }
   if (diverged.length) {
@@ -701,7 +701,7 @@ function foundationDrift() {
       'Classify each divergence: contribute reusable changes upstream with',
     );
     console.log(
-      "'pnpm boilerplate:contribute -- --sha <full-sha>' or record why they stay product-specific.",
+      "'pnpm boilerplate:contribute --sha <full-sha>' or record why they stay product-specific.",
     );
   }
   writeSummary([

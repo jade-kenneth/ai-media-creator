@@ -32,7 +32,7 @@ Change the canonical file in `skills-source`, validate it there, and then adopt
 the reviewed revision here:
 
 ```bash
-pnpm update-skills -- --sha <full-skills-source-sha>
+pnpm update-skills --sha <full-skills-source-sha>
 pnpm check-skills
 ```
 

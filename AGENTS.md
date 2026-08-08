@@ -6,6 +6,7 @@ You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
 
 ## Automatic project context — no repeated user instruction required
+
 Before planning, editing, reviewing, or implementing application code:
 
 1. Read the repository-root `Product Specification.md` and
@@ -25,6 +26,7 @@ the single `[~]` phase, or start the first unblocked `[ ]` phase when none is in
 progress. Check `[ ]` → `[~]` → `[x]` only after the phase's QA rows pass.
 
 ## Non-negotiables
+
 - Conflict order: design/prototypes > design/system > design/planning >
   this file (code structure ONLY) > boilerplate UI (never wins, always discarded).
 - Fidelity: a screen is done only when it passes every row of the Fidelity QA
@@ -49,6 +51,7 @@ progress. Check `[ ]` → `[~]` → `[x]` only after the phase's QA rows pass.
 - If something is genuinely ambiguous, stop and ask instead of inventing.
 
 ## How to use the skill index
+
 Each skill below lists WHEN it applies and WHERE its full instructions live
 (inside .skills-source/, which is hydrated from the committed lock file).
 Before working on a surface or component a skill covers, OPEN and READ its
@@ -474,11 +477,12 @@ npm run boilerplate:contribute -- --dry-run --sha <full-40-character-sha>
 npm run boilerplate:contribute -- --sha <full-40-character-sha> [--branch <name>]
 ```
 
-  The command accepts only explicit non-merge commits from the product history
-  that touch foundation paths exclusively — split mixed commits first. It
-  cherry-picks them with provenance onto a worktree branched from
-  `boilerplate/main`; push that branch and open a pull request against
-  `app-boilerplate`, where the maintainer accepts or rejects the standard change.
+The command accepts only explicit non-merge commits from the product history
+that touch foundation paths exclusively — split mixed commits first. It
+cherry-picks them with provenance onto a worktree branched from
+`boilerplate/main`; push that branch and open a pull request against
+`app-boilerplate`, where the maintainer accepts or rejects the standard change.
+
 - `npm run boilerplate:foundation-drift` (run weekly by the drift workflow)
   reports foundation files that diverged locally from the reviewed upstream
   revision versus ported updates pending acknowledgement. Resolve divergence by
@@ -789,77 +793,91 @@ Keep PRs scoped to one task. Call out generated files, contract changes, securit
 ## Stack skills (routed index — read the full file before touching its surface)
 
 ### api-app
+
 _API implementation standards for apps/*-api (NestJS + Apollo GraphQL schema-first + Mongoose/MongoDB + TypeScript). USE when writing, reviewing, or refactoring any code in apps/*-api. TRIGGERS: creating modules, resolvers, services, repositories, GraphQL schema (SDL) changes, filters, sorting, pagination, search queries, mutations, guards, auth, multi-tenancy, scheduled jobs/cron, validation, file uploads, codegen, API tests. EXAMPLES: 'add a query', 'add a mutation', 'create a module', 'add a filter', 'paginate this list', 'add a field to the schema', 'write a repository', 'add a cron job', 'protect this resolver', 'add tenant scoping', 'regenerate GraphQL types'._
 
 Full instructions: `.skills-source/skills/api-app/SKILL.md`
 
 ### datatable-builder
+
 _Build or rebuild a DataTable component by porting DataTableReference to the current app's dependency set. Use this skill whenever the user asks to create, rebuild, port, or fix a DataTable component. Trigger on requests like "build the DataTable", "rebuild DataTable", "port DataTableReference", "fix the DataTable", or "create a data table component"._
 
 Full instructions: `.skills-source/skills/datatable-builder/SKILL.md`
 
 ### defect-triage
+
 _Triage and resolve a reported defect in an existing production system — verify the report is real, reproduce it, find the actual cause, fix it, and prove it is resolved with evidence. Use whenever a user reports a bug, regression, incident, failing behavior, error report, alert, or production issue, or asks to work through a defect backlog. Not for building new features from a specification; use fix-and-enhance for scoped enhancements to working behavior._
 
 Full instructions: `.skills-source/skills/defect-triage/SKILL.md`
 
 ### explain-code
+
 _Explains code with visual diagrams and analogies. Use when explaining how code works, teaching about a codebase, or when the user asks "how does this work?"_
 
 Full instructions: `.skills-source/skills/explain-code/SKILL.md`
 
 ### fix-and-enhance
+
 _Repository-agnostic coordinator for bug fixes and enhancements. Uses the project's generated workflow instructions, coordinates tracked work, delegates implementation standards to the matching app skills, and routes verified reusable lessons through `project-learning-contributor`. Use whenever a user asks to fix broken behavior, improve or polish an existing feature, add or change functionality, or implement a scoped feature._
 
 Full instructions: `.skills-source/skills/fix-and-enhance/SKILL.md`
 
 ### mobile-app
+
 _Mobile app implementation standards for apps/*-mobile (React Native + Expo + TypeScript + TanStack Query + NativeWind). USE when writing, reviewing, or refactoring any code in apps/*-mobile. TRIGGERS: creating components, screens, hooks, providers, features, data fetching, forms, navigation, performance work, accessibility, analytics, caching, state management, keyboard handling, safe areas, folder structure decisions. EXAMPLES: 'add a feature', 'build a screen', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix keyboard hiding input', 'improve startup time', 'add safe area handling', 'handle Android back button'._
 
 Full instructions: `.skills-source/skills/mobile-app/SKILL.md`
 
 ### mobile-native-ui-design
+
 _Design and review production-grade mobile interfaces for iOS and Android, including platform adaptation, tokens, typography, color, motion, navigation, accessibility, iconography, brand, research, and handoff. Use for any mobile UI screen or component, native-feel critique, iOS-versus-Android decision, dark-mode or touch-target audit, animation or haptic specification, navigation architecture, cross-platform design system, or mobile HTML mockup. Pair with the mobile implementation skill when writing application code._
 
 Full instructions: `.skills-source/skills/mobile-native-ui-design/SKILL.md`
 
 ### project-learning-auditor
+
 _Scan a project read-only and generate a self-contained HTML learning guide at reference/project-learning-audit/index.html. Use when a user wants repository onboarding, a mental model, architecture and full-stack flow explanations, frontend/backend/database pattern analysis, optimization or accessibility risks, prioritized audit cards, diagrams, comprehension tests, a learning path, or an appended topic deep dive. Produces documentation only and never edits app source, runs builds or tests, deploys, or commits._
 
 Full instructions: `.skills-source/skills/project-learning-auditor/SKILL.md`
 
 ### project-learning-contributor
+
 _Capture verified, reusable engineering lessons from a product repository and route them to the correct canonical skill in skills-source. Use after a bug fix, incident, integration discovery, performance improvement, security correction, or durable architecture lesson should benefit other projects; also use when promoting a reviewed project-learning issue into one or more skills. Produces review-gated proposals and never auto-merges canonical skill changes._
 
 Full instructions: `.skills-source/skills/project-learning-contributor/SKILL.md`
 
 ### prose-builder
+
 _Build or rebuild a Prose component by porting ProseReference to the current app's dependency set — for both web (Next.js/shadcn) and mobile (React Native/NativeWind) targets. Use this skill whenever the user asks to create, rebuild, port, or fix a Prose or typography display component. Trigger on requests like "build the Prose component", "rebuild Prose", "port ProseReference", "fix the Prose component", "create a prose component", or "add a Prose display component"._
 
 Full instructions: `.skills-source/skills/prose-builder/SKILL.md`
 
 ### richtext-builder
+
 _Build or rebuild a RichText (Wysiwyg) component by porting WysiwygReference to the current app's dependency set. Use this skill whenever the user asks to create, rebuild, port, or fix a RichText or Wysiwyg editor component. Trigger on requests like "build the RichText", "rebuild Wysiwyg", "port WysiwygReference", "fix the RichText editor", or "create a rich text editor component"._
 
 Full instructions: `.skills-source/skills/richtext-builder/SKILL.md`
 
 ### shadcn
+
 _Manages shadcn components and projects — adding, searching, fixing, debugging, styling, and composing UI. Provides project context, component docs, and usage examples. Applies when working with shadcn/ui, component registries, presets, --preset codes, or any project with a components.json file. Also triggers for "shadcn init", "create an app with --preset", or "switch to --preset"._
 
 Full instructions: `.skills-source/skills/shadcn/SKILL.md`
 
 ### skill-creator
+
 _Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy._
 
 Full instructions: `.skills-source/skills/skill-creator/SKILL.md`
 
 ### web-app
+
 _Web app implementation standards for apps/*-admin (Next.js App Router + React + TypeScript + TanStack Query + Tailwind + shadcn/ui). USE when writing, reviewing, or refactoring any code in apps/*-admin. TRIGGERS: creating components, hooks, providers, features, data fetching, forms, routing, SSR/SSG, performance work, SEO, accessibility, analytics, caching, state management, folder structure decisions. EXAMPLES: 'add a feature', 'build a page', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix a hydration error', 'improve LCP', 'add SEO metadata'._
 
 Full instructions: `.skills-source/skills/web-app/SKILL.md`
 
 ### web-ui-design
+
 _Complete guide for designing and building production-grade web interfaces. Use for any web UI work: pages, dashboards, forms, tables, dialogs, drawers, navigation, responsive layouts, dark mode, accessibility, motion, charts, empty/loading/error states, and visual polish. Pair with `web-app` for implementation authority._
 
 Full instructions: `.skills-source/skills/web-ui-design/SKILL.md`
-

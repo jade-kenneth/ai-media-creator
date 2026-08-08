@@ -12,7 +12,7 @@ Lesson name: $ARGUMENTS
 2. Execute that canonical command exactly with the lesson name above, using the
    `project-learning-contributor` skill in capture mode.
 3. Write the proposal only under `skill-contributions/` and validate it with
-   `pnpm skills:contribution:validate -- --file <proposal path>`.
+   `pnpm skills:contribution:validate --file <proposal path>`.
 4. Never edit `.skills-source/`, generated `AGENTS.md`, or the skills-source
    repository directly from this command; merging the proposal to the default
    branch dispatches the upstream review issue.

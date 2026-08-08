@@ -143,7 +143,7 @@ After a product fix is verified, run:
 
 The command creates a reviewable JSON proposal under `skill-contributions/` and
 routes it to exact skill categories from the locked snapshot, such as `mobile-app`,
-`web-app`, or `api-app`. Run `pnpm skills:contribution:validate -- --file <path>`
+`web-app`, or `api-app`. Run `pnpm skills:contribution:validate --file <path>`
 before committing it.
 
 When the proposal reaches the product repository's `main` branch,
@@ -174,8 +174,8 @@ git commit -m "chore: record boilerplate starting revision"
 
 Use `pnpm boilerplate:check` to report later template updates, then apply
 explicit reviewed commits on a clean product branch with
-`pnpm boilerplate:port -- --sha <full-app-boilerplate-sha>`. Run
-`pnpm boilerplate:ack -- --sha <full-reviewed-through-sha>` only after every
+`pnpm boilerplate:port --sha <full-app-boilerplate-sha>`. Run
+`pnpm boilerplate:ack --sha <full-reviewed-through-sha>` only after every
 commit through that revision was applied or deliberately declined. Use
 `pnpm boilerplate:contributions` to detect product changes that may be worth
 porting back as reusable architecture. See
