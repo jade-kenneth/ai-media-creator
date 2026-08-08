@@ -1,6 +1,6 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@06fb34b405aced35640b688f7941846872925936`
+Source revision: `jade-kenneth/skills-source@6154c0ed01d052a88a2249600212d0e0b48a712b`
 
 You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
 Claude Code reconciled it with this repository. Your job is to build faithfully.
@@ -509,13 +509,60 @@ Increase validation for authentication, authorization, sensitive data, persisten
 
 Do not claim a check passed unless it ran successfully. If a check cannot run, report the command, reason, and remaining risk.
 
+#### Record verification evidence
+
+Validation that is not recorded is indistinguishable from validation that never ran. Every completion claim carries a verification block in the active task file and in the pull request body. The block is the artifact that makes the claim checkable; prose asserting success is not.
+
+```
+## Verification
+
+Change:   <one line>
+
+Before:   <command or call>
+          <actual output showing the prior behavior or failure>
+
+After:    <same command or call>
+          <actual output showing the new behavior>
+
+Checks:   <command> — <pass/fail, counts>
+          <command> — <pass/fail, counts>
+
+Tenant:   <wrong-tenant case and its result, or "n/a — <why no tenant-owned path>">
+
+Not run:  <check> — <why> — <residual risk>
+```
+
+Rules for the block:
+
+- Paste real output. Counts, status codes, and returned values are the evidence; a summary such as "tests pass" is a claim about evidence, not evidence.
+- For a defect fix, `Before` must show the failure against unmodified code and `After` the same command resolved. A check that never failed against the original code demonstrates only that the check passes; it does not connect the change to the defect. When the prior state genuinely cannot be reproduced at closeout, say so and name the substitute evidence rather than presenting an after-only run as the pair.
+- Never list a check that did not run. A blocked check belongs under `Not run` with its reason and residual risk. An honest gap is acceptable; a fabricated pass is not.
+- `n/a` requires a reason that a reviewer can check. A bare `n/a` is not an answer.
+- For a change touching authorization or tenant-owned data, verify both directions: the denied or wrong-tenant case behaves correctly **and** the permitted case still works. Proving only the denial can mean the feature was broken to close the item.
+
+Do not write "fixed", "verified", "confirmed working", "should work now", or "this resolves it" without the block directly beneath it. If the block cannot be produced, report what changed, what was observed, what was not checked, and what risk remains.
+
+`defect-triage` owns the fuller evidence contract for reported defects, including verdicts and production verification after deploy; this section is the general form that applies to all changes.
+
 ### 7. Close out accurately
 
 - Inspect the final diff and working tree for unintended or unrelated edits.
 - Update task checkboxes and notes to match the actual repository state.
 - Update an authorized tracker only when the user or repository workflow requires it; do not mark incomplete or unvalidated work complete.
-- Update documentation or standards only when the change creates a durable rule, public contract, configuration requirement, or reusable workflow.
+- Update documentation or standards only when the change creates a durable rule, public contract, configuration requirement, or reusable workflow. Documentation whose described behavior the change alters is updated in the same body of work, not deferred.
+- Confirm the verification block exists and its recorded output came from runs that actually happened.
 - Summarize what changed, what was validated, and any limitation, assumption, migration, or follow-up that remains.
+
+## Parallel workstreams
+
+Several changes may be in flight at once, across agents or sessions. Concurrency is safe only when the workstreams cannot write to each other's surfaces; correctness here is a property of the setup, not of care taken during editing.
+
+- One workstream per branch and per working tree. Independent agents never share a tree — a second agent editing the same checkout produces interleaved diffs that neither can validate.
+- Before starting, list the files the change will touch and compare them against other active workstreams. Overlapping surfaces are sequenced, not parallelized. Shared contracts — schema, generated types, common libraries, repository primitives, configuration — count as overlapping for every consumer.
+- Implement shared contracts in dependency order and land them before the workstreams that consume them. Two agents generating the same types concurrently will each regenerate over the other.
+- Never resolve another workstream's conflict on its behalf. Report the collision and let the owning workstream resolve it.
+- Re-run validation after any merge, rebase, or port. Evidence collected before an integration is stale: it describes code that no longer exists.
+- Record in the task which other workstreams were active and what surfaces they held, so a later regression can be attributed.
 
 ## Port reviewed boilerplate updates into a product
 
@@ -646,6 +693,8 @@ Complete when the change implements a prototype-backed or data-backed surface; o
 - [ ] Typecheck passes for the affected project
 - [ ] Relevant tests pass
 - [ ] Expected loading, empty, error, and success states are verified
+- [ ] Verification block recorded with real output, including `Not run` entries and their residual risk
+- [ ] Tenant-owned data paths verified in both directions, or the block records why none applies
 
 ## Notes
 
@@ -748,6 +797,11 @@ Full instructions: `.skills-source/skills/api-app/SKILL.md`
 _Build or rebuild a DataTable component by porting DataTableReference to the current app's dependency set. Use this skill whenever the user asks to create, rebuild, port, or fix a DataTable component. Trigger on requests like "build the DataTable", "rebuild DataTable", "port DataTableReference", "fix the DataTable", or "create a data table component"._
 
 Full instructions: `.skills-source/skills/datatable-builder/SKILL.md`
+
+### defect-triage
+_Triage and resolve a reported defect in an existing production system — verify the report is real, reproduce it, find the actual cause, fix it, and prove it is resolved with evidence. Use whenever a user reports a bug, regression, incident, failing behavior, error report, alert, or production issue, or asks to work through a defect backlog. Not for building new features from a specification; use fix-and-enhance for scoped enhancements to working behavior._
+
+Full instructions: `.skills-source/skills/defect-triage/SKILL.md`
 
 ### explain-code
 _Explains code with visual diagrams and analogies. Use when explaining how code works, teaching about a codebase, or when the user asks "how does this work?"_
