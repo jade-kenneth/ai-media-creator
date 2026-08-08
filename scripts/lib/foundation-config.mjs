@@ -6,9 +6,16 @@ export const SYNC_CONFIG_FILENAME = 'boilerplate-sync.config.json';
 export function loadSyncConfig(root) {
   const configPath = path.join(root, SYNC_CONFIG_FILENAME);
   const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  if (!Array.isArray(config.foundationPaths) || !Array.isArray(config.productPaths) ||
-      [...config.foundationPaths, ...config.productPaths].some((pattern) => typeof pattern !== 'string' || !pattern)) {
-    throw new Error(`${SYNC_CONFIG_FILENAME} is invalid: foundationPaths and productPaths must be arrays of non-empty strings.`);
+  if (
+    !Array.isArray(config.foundationPaths) ||
+    !Array.isArray(config.productPaths) ||
+    [...config.foundationPaths, ...config.productPaths].some(
+      (pattern) => typeof pattern !== 'string' || !pattern,
+    )
+  ) {
+    throw new Error(
+      `${SYNC_CONFIG_FILENAME} is invalid: foundationPaths and productPaths must be arrays of non-empty strings.`,
+    );
   }
   return config;
 }
@@ -22,7 +29,10 @@ function matchSpecificity(file, pattern) {
 }
 
 function bestSpecificity(file, patterns) {
-  return patterns.reduce((best, pattern) => Math.max(best, matchSpecificity(file, pattern)), -1);
+  return patterns.reduce(
+    (best, pattern) => Math.max(best, matchSpecificity(file, pattern)),
+    -1,
+  );
 }
 
 /**

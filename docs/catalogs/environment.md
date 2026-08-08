@@ -3,7 +3,7 @@
 
 Parsed from `apps/app-api/src/config/env.schema.ts`, the single validated source. Values are never recorded here — only names, types, and whether a default exists.
 
-Regenerate with `npm run catalogs`. CI fails when this file does not match source.
+Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 
 | Variable | Type | Required | Default |
 | --- | --- | --- | --- |

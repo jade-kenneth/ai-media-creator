@@ -7,8 +7,8 @@ This runbook covers recurring Expo monorepo issues for `apps/app-mobile`.
 `expo start --dev-client` requires a native development build on the device.
 
 ```bash
-npm run android --workspace=app-mobile
-npm run dev:client --workspace=app-mobile
+pnpm --filter app-mobile android
+pnpm --filter app-mobile dev:client
 ```
 
 Rebuild after changing native plugins, notification credentials, package IDs,
@@ -20,8 +20,8 @@ Install from the repository root and keep the root React overrides aligned with
 Expo's supported version.
 
 ```bash
-npm install
-npm ls react react-dom
+pnpm install
+pnpm -r list react react-dom
 ```
 
 Avoid running a separate install inside `apps/app-mobile`.
@@ -31,7 +31,7 @@ Avoid running a separate install inside `apps/app-mobile`.
 Start with a clean Metro cache:
 
 ```bash
-npm run start --workspace=app-mobile
+pnpm --filter app-mobile start
 ```
 
 The checked-in script already passes `--clear`. Verify that the app uses
@@ -64,7 +64,7 @@ Prefer LAN mode first. For a USB-connected Android device, reverse Metro's port:
 
 ```bash
 adb reverse tcp:8081 tcp:8081
-npm run dev:client --workspace=app-mobile
+pnpm --filter app-mobile dev:client
 ```
 
 Use the checked-in tunnel scripts only when LAN or USB access is unavailable.

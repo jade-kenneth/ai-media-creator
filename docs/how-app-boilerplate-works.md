@@ -13,31 +13,31 @@ This page covers the whole system and links out where a topic has its own page.
 
 **This repository is a restaurant franchise starter kit.**
 
-Not one restaurant — the *kit* you hand to someone opening a branch: a fitted kitchen,
+Not one restaurant — the _kit_ you hand to someone opening a branch: a fitted kitchen,
 a POS system, staff rulebooks, and an inspection regime. Every branch starts identical
 and then serves its own menu.
 
-| Piece | Role in the franchise |
-| --- | --- |
-| `app-boilerplate` | The franchise starter kit. Never serves customers itself. |
-| Your product repo | One actual branch, opened from the kit. |
-| `apps/app-api` | The kitchen. All cooking happens here, nowhere else. |
-| `apps/app-web` | The manager's back office — staff only. |
-| `apps/app-mobile` | The customer's app in their pocket. |
-| `packages/shared-constants` | The label printer both the kitchen and the office use. |
-| MongoDB | The storeroom. |
-| An organization / tenant | One branch's own shelf in that storeroom. |
-| `TenantMiddleware` | The host at the door who reads which branch you belong to. |
-| Guards | The bouncer *and* the "staff only" sign on the office door. |
-| Access token | A wristband. Valid 15 minutes. |
-| Refresh token | Your membership card. Gets you a fresh wristband for 30 days. |
-| `sessions` collection | The guest list at the door. Cross a name off and the card dies. |
-| `skills-source` | Head office's rulebook. |
-| `AGENTS.md` | The laminated copy pinned up in *this* kitchen. |
-| Claude Design | The interior designer. Draws the dining room, never lifts a hammer. |
-| Codex | The build crew. |
-| Claude Code | The foreman and the inspector. |
-| GitHub Actions | The health inspector who shows up unannounced. |
+| Piece                       | Role in the franchise                                               |
+| --------------------------- | ------------------------------------------------------------------- |
+| `app-boilerplate`           | The franchise starter kit. Never serves customers itself.           |
+| Your product repo           | One actual branch, opened from the kit.                             |
+| `apps/app-api`              | The kitchen. All cooking happens here, nowhere else.                |
+| `apps/app-web`              | The manager's back office — staff only.                             |
+| `apps/app-mobile`           | The customer's app in their pocket.                                 |
+| `packages/shared-constants` | The label printer both the kitchen and the office use.              |
+| MongoDB                     | The storeroom.                                                      |
+| An organization / tenant    | One branch's own shelf in that storeroom.                           |
+| `TenantMiddleware`          | The host at the door who reads which branch you belong to.          |
+| Guards                      | The bouncer _and_ the "staff only" sign on the office door.         |
+| Access token                | A wristband. Valid 15 minutes.                                      |
+| Refresh token               | Your membership card. Gets you a fresh wristband for 30 days.       |
+| `sessions` collection       | The guest list at the door. Cross a name off and the card dies.     |
+| `skills-source`             | Head office's rulebook.                                             |
+| `AGENTS.md`                 | The laminated copy pinned up in _this_ kitchen.                     |
+| Claude Design               | The interior designer. Draws the dining room, never lifts a hammer. |
+| Codex                       | The build crew.                                                     |
+| Claude Code                 | The foreman and the inspector.                                      |
+| GitHub Actions              | The health inspector who shows up unannounced.                      |
 
 One rule the analogy is built around: **a branch can never reach another branch's shelf.**
 Almost every security decision below exists to enforce that.
@@ -66,7 +66,7 @@ flowchart TB
 
   DESIGN["Claude Design<br/>the look"]
 
-  BP ==>|"template + npm run project:init"| BRANCH
+  BP ==>|"template + pnpm project:init"| BRANCH
   SS ==>|"generates AGENTS.md"| BRANCH
   DESIGN ==>|"design/ export"| BRANCH
 
@@ -93,22 +93,22 @@ The boilerplate's own UI is scaffolding. It gets discarded — design wins on lo
 ```mermaid
 flowchart TD
   T["Create repo from the template"]
-  T --> S1["npm run boilerplate:setup<br/>remembers which kit version you started from"]
-  S1 --> S2["npm run project:init<br/>names the branch"]
-  S2 --> S3["npm install<br/>postinstall hydrates .skills-source"]
+  T --> S1["pnpm boilerplate:setup<br/>remembers which kit version you started from"]
+  S1 --> S2["pnpm project:init<br/>names the branch"]
+  S2 --> S3["pnpm install<br/>postinstall hydrates .skills-source"]
   S3 --> S4["cp .env.example .env<br/>fill in real values"]
   S4 --> RUN
 
   subgraph RUN["Three terminals"]
-    R1["npm run api → :3001"]
-    R2["npm run web → :4302"]
-    R3["npm run mobile → Expo"]
+    R1["pnpm api → :3001"]
+    R2["pnpm web → :4302"]
+    R3["pnpm mobile → Expo"]
   end
 
   RUN --> SEED["seed-default-admin<br/>creates the first way in"]
 ```
 
-`npm run project:init` is the one people skip and regret. It renames the display name,
+`pnpm project:init` is the one people skip and regret. It renames the display name,
 slug, package scope, mobile bundle identifier, and local database — and it deliberately
 **leaves `app-web`, `app-mobile`, `app-api` alone**. Those internal names stay stable so
 that future kit updates merge cleanly instead of conflicting on every path.
@@ -116,8 +116,8 @@ that future kit updates merge cleanly instead of conflicting on every path.
 It is idempotent and refuses to overwrite an already-customized value without `--force`.
 Preview with `--dry-run`.
 
-*Franchise: you paint your own sign, but the walk-in fridge keeps the part number the
-manufacturer gave it.*
+_Franchise: you paint your own sign, but the walk-in fridge keeps the part number the
+manufacturer gave it._
 
 ---
 
@@ -161,7 +161,7 @@ sequenceDiagram
 `TenantMiddleware` calls `jwt.decode()` — it **reads the token without verifying it**.
 That sounds alarming and isn't, because of the order of the pipeline:
 
-- The middleware only uses the decoded `tenantSlug` to *look something up*. A forged token
+- The middleware only uses the decoded `tenantSlug` to _look something up_. A forged token
   gets you a tenant lookup and nothing else.
 - The **guard** runs afterwards and does the real cryptographic verification. A forged
   token dies there, before any resolver runs.
@@ -181,12 +181,12 @@ so many stages.
 
 Two tokens, two very different jobs.
 
-| | Access token | Refresh token |
-| --- | --- | --- |
-| Analogy | Wristband | Membership card |
-| Lifetime | 15 minutes | 30 days |
-| Sent with | Every request | Only the refresh call |
-| Stored | In memory | Client secure storage |
+|           | Access token           | Refresh token                |
+| --------- | ---------------------- | ---------------------------- |
+| Analogy   | Wristband              | Membership card              |
+| Lifetime  | 15 minutes             | 30 days                      |
+| Sent with | Every request          | Only the refresh call        |
+| Stored    | In memory              | Client secure storage        |
 | Revocable | No — just expires fast | **Yes** — delete its session |
 
 Short-lived wristbands are what make a stolen access token boring: it dies on its own.
@@ -238,11 +238,11 @@ the original request. A user never sees it.
 
 Three roles, and they nest:
 
-| Role | Reach |
-| --- | --- |
-| `USER` | Their own stuff, inside their branch |
-| `ADMIN` | The whole branch |
-| `SUPER_ADMIN` | Every branch |
+| Role          | Reach                                |
+| ------------- | ------------------------------------ |
+| `USER`        | Their own stuff, inside their branch |
+| `ADMIN`       | The whole branch                     |
+| `SUPER_ADMIN` | Every branch                         |
 
 `@Public()` marks login and registration. Leaving `@Roles()` off an operation does **not**
 make it public — it means "any signed-in role." That difference bites people once.
@@ -282,8 +282,8 @@ one set of indexes. The trade is that the filter is now load-bearing: **forget
 tenant context is resolved once at the platform boundary and handed to services through
 `@CurrentTenant()`, rather than each feature rolling its own.
 
-*Franchise: one warehouse, labelled shelves. Cheap and efficient — right up until someone
-grabs from the wrong shelf.*
+_Franchise: one warehouse, labelled shelves. Cheap and efficient — right up until someone
+grabs from the wrong shelf._
 
 ---
 
@@ -309,10 +309,10 @@ flowchart TD
 A few that deserve a sentence each:
 
 - **Presigned S3 uploads.** The API never receives the file. It hands the client a
-  time-limited URL and the client uploads straight to S3. *The kitchen gives you a locker
-  key instead of carrying your bag.*
+  time-limited URL and the client uploads straight to S3. _The kitchen gives you a locker
+  key instead of carrying your bag._
 - **Scheduler locks.** Run three copies of the API and a nightly job would fire three
-  times. A lock row means exactly one instance wins. *One person holds the rota pen.*
+  times. A lock row means exactly one instance wins. _One person holds the rota pen._
 - **Request batch loader.** Fifty rows each needing their author would be fifty queries.
   The batcher collects them into one round trip per request. This is the classic N+1 fix.
 - **Store purchases** sit behind ports and gateways, so Apple and Google are swappable
@@ -374,20 +374,20 @@ and an account-deletion route before they will list an app.
 ```mermaid
 flowchart LR
   GQLF[".gql schema files<br/>hand-written"] --> NEST["Nest generates<br/>server interfaces"]
-  GQLF --> CG["npm run codegen<br/>in each client"]
+  GQLF --> CG["pnpm codegen<br/>in each client"]
   CG --> TYPES["generated__types.ts"]
   TYPES --> UI["typed hooks in the UI"]
 ```
 
 The schema is the contract. Change a `.gql` file, re-run codegen, and TypeScript points at
-every screen that just broke — before anything ships. *One printed menu; kitchen and
-front-of-house cannot disagree about what's on it.*
+every screen that just broke — before anything ships. _One printed menu; kitchen and
+front-of-house cannot disagree about what's on it._
 
 ---
 
 ## 8. The monorepo, and the ownership line
 
-Nx + npm workspaces: one `npm install`, one lint/test/build command, projects that can
+Nx + pnpm workspaces: one `pnpm install`, one lint/test/build command, projects that can
 import each other with real type safety.
 
 ```mermaid
@@ -405,8 +405,8 @@ flowchart TD
   PKG --> P1["shared-constants"]
 ```
 
-**Where does my new code go?** One question answers it: *would a completely different
-product also need this?*
+**Where does my new code go?** One question answers it: _would a completely different
+product also need this?_
 
 - Yes, and it's a genuinely shared contract or pure logic → `packages/`
 - No → the owning app, under `features/` or a module
@@ -416,14 +416,14 @@ freely.
 
 Cutting across that is a second line, defined in `boilerplate-sync.config.json`:
 
-| | `foundationPaths` | `productPaths` |
-| --- | --- | --- |
-| Contains | Auth, common, providers, react-query, scripts, packages | Your features, screens, product modules |
-| Belongs to | The kit | Your branch |
-| Kit updates | Flow into it | Never touch it |
+|             | `foundationPaths`                                       | `productPaths`                          |
+| ----------- | ------------------------------------------------------- | --------------------------------------- |
+| Contains    | Auth, common, providers, react-query, scripts, packages | Your features, screens, product modules |
+| Belongs to  | The kit                                                 | Your branch                             |
+| Kit updates | Flow into it                                            | Never touch it                          |
 
 Edit foundation code in a product and you've customized the walk-in fridge — every future
-kit update now conflicts. `npm run boilerplate:contributions` flags exactly that, so you
+kit update now conflicts. `pnpm boilerplate:contributions` flags exactly that, so you
 can push the improvement back up to the kit instead.
 
 ---
@@ -441,21 +441,21 @@ flowchart TD
   AG["AGENTS.md<br/>GENERATED — never hand-edit"]
 
   SRC --> LOCK
-  LOCK -->|"npm run sync-skills"| SNAP
+  LOCK -->|"pnpm sync-skills"| SNAP
   SNAP -->|"generate"| AG
   AG --> CODEX["Codex reads this<br/>before writing code"]
 
-  CHECK{{"npm run check-skills<br/>skills-drift workflow"}} -.->|"AGENTS.md must match the lock"| AG
+  CHECK{{"pnpm check-skills<br/>skills-drift workflow"}} -.->|"AGENTS.md must match the lock"| AG
 
-  LOCK -->|"npm run update-skills"| NEW["advance to a newer SHA<br/>deliberate, reviewed"]
+  LOCK -->|"pnpm update-skills"| NEW["advance to a newer SHA<br/>deliberate, reviewed"]
 ```
 
-| Command | What it does |
-| --- | --- |
-| `npm install` | Hydrates the **locked** snapshot only. Never moves the lock. |
-| `npm run sync-skills` | Hydrate the locked revision, regenerate `AGENTS.md`. |
-| `npm run update-skills` | Deliberately move the lock forward. A reviewable change. |
-| `npm run check-skills` | Fail if the committed `AGENTS.md` drifted. CI runs this. |
+| Command              | What it does                                                 |
+| -------------------- | ------------------------------------------------------------ |
+| `pnpm install`       | Hydrates the **locked** snapshot only. Never moves the lock. |
+| `pnpm sync-skills`   | Hydrate the locked revision, regenerate `AGENTS.md`.         |
+| `pnpm update-skills` | Deliberately move the lock forward. A reviewable change.     |
+| `pnpm check-skills`  | Fail if the committed `AGENTS.md` drifted. CI runs this.     |
 
 The pin is the point. Two developers and three agents on the same commit read byte-identical
 rules, and rules only change when somebody chooses to change them.
@@ -465,8 +465,8 @@ and regenerate.** Patching `AGENTS.md` locally fixes one branch and CI reverts y
 `/capture-project-learning` is the paved road for that: it writes a reviewable proposal,
 and once merged a workflow forwards it to `skills-source` as a review issue.
 
-*Franchise: when the same mistake happens at three branches, you change the head-office
-rulebook — not the sticky note in one kitchen.*
+_Franchise: when the same mistake happens at three branches, you change the head-office
+rulebook — not the sticky note in one kitchen._
 
 ---
 
@@ -477,12 +477,12 @@ Two repos, four memory files, and a deliberately manual middle.
 ```mermaid
 flowchart TD
   BP["app-boilerplate<br/>improves"]
-  BP -->|"weekly boilerplate-drift job"| CHK["npm run boilerplate:check<br/>what's new since my lock?"]
-  CHK --> PORT["npm run boilerplate:port --sha SHA<br/>apply on a clean branch, review it"]
-  PORT --> ACK["npm run boilerplate:ack --sha SHA<br/>reviewed through here"]
+  BP -->|"weekly boilerplate-drift job"| CHK["pnpm boilerplate:check<br/>what's new since my lock?"]
+  CHK --> PORT["pnpm boilerplate:port --sha SHA<br/>apply on a clean branch, review it"]
+  PORT --> ACK["pnpm boilerplate:ack --sha SHA<br/>reviewed through here"]
 
   PROD["your product<br/>invents something reusable"]
-  PROD -->|"npm run boilerplate:contributions"| BACK["candidate to push back<br/>into the kit"]
+  PROD -->|"pnpm boilerplate:contributions"| BACK["candidate to push back<br/>into the kit"]
   BACK --> BP
 ```
 
@@ -494,11 +494,11 @@ matters: declining is a valid, recorded outcome.
 
 Confusing them is the most common source of "why is this failing?"
 
-| File | Written by | Answers |
-| --- | --- | --- |
-| `skills-source.lock.json` | You, via `update-skills` | Which rulebook revision are we on? |
-| `boilerplate.lock.json` | You, via `boilerplate:ack` | Which kit updates have we reviewed? |
-| `design/design-release.json` | **Claude Design** | What is being delivered in this batch? |
+| File                           | Written by                           | Answers                                                 |
+| ------------------------------ | ------------------------------------ | ------------------------------------------------------- |
+| `skills-source.lock.json`      | You, via `update-skills`             | Which rulebook revision are we on?                      |
+| `boilerplate.lock.json`        | You, via `boilerplate:ack`           | Which kit updates have we reviewed?                     |
+| `design/design-release.json`   | **Claude Design**                    | What is being delivered in this batch?                  |
 | `design/design-sync.lock.json` | **The repository**, via `design:ack` | What have we already accepted, and what did it hash to? |
 
 The last pair is a delivery note and a signed receipt. Claude Design writes the note; the
@@ -515,7 +515,7 @@ Full detail lives in [`docs/claude-design-flow.md`](claude-design-flow.md). The 
 flowchart LR
   P["/prepare-claude-design<br/>or /adapt-design-export"] --> CD["Claude Design"]
   CD --> EX["design/ export<br/>prototypes · system · planning"]
-  EX --> V{"npm run design:validate"}
+  EX --> V{"pnpm design:validate"}
   V -->|fails| EX
   V -->|passes| SY["/sync-build-docs"]
   SY --> D["Product Specification.md<br/>Implementation Plan.md"]
@@ -533,7 +533,7 @@ Four things a beginner should take from it:
    `/finalize-build-docs` is the closing gate, not the starting one.
 2. **Only what's inside `data-app-root` is binding.** Phone frames and annotations are
    presentation, not product.
-3. **Mobile prototypes are HTML, but the app is not.** They're a contract on *outcomes*.
+3. **Mobile prototypes are HTML, but the app is not.** They're a contract on _outcomes_.
    You rebuild with native React Native primitives — never a WebView, never copied CSS.
 4. **The gate remembers.** Every accepted prototype is hashed. Quietly editing an
    already-built screen fails validation instead of silently changing the contract.
@@ -569,12 +569,12 @@ flowchart TD
 
 ## 13. Who does what
 
-| Actor | Does | Never does |
-| --- | --- | --- |
-| **Claude Design** | Screens, design system, `design-release.json` | Write `design-sync.lock.json` |
-| **Claude Code** | Plans, reconciles, reviews, Fidelity QA, syncs Notion | Implement features unless asked |
-| **Codex** | Builds one phase, ticks `[ ] → [~] → [x]` | Edit Notion |
-| **You** | Decide scope, review, approve lock advances | Hand-edit `AGENTS.md` |
+| Actor             | Does                                                  | Never does                      |
+| ----------------- | ----------------------------------------------------- | ------------------------------- |
+| **Claude Design** | Screens, design system, `design-release.json`         | Write `design-sync.lock.json`   |
+| **Claude Code**   | Plans, reconciles, reviews, Fidelity QA, syncs Notion | Implement features unless asked |
+| **Codex**         | Builds one phase, ticks `[ ] → [~] → [x]`             | Edit Notion                     |
+| **You**           | Decide scope, review, approve lock advances           | Hand-edit `AGENTS.md`           |
 
 Notion is the wall board: read by everyone, written only during planning and review.
 
@@ -582,7 +582,7 @@ Notion is the wall board: read by everyone, written only during planning and rev
 
 ## 14. Beginner mistakes, ranked by how much time they cost
 
-1. **Skipping `npm run project:init`** and hand-renaming things — future kit updates
+1. **Skipping `pnpm project:init`** and hand-renaming things — future kit updates
    conflict everywhere.
 2. **Editing `AGENTS.md` directly.** Generated. CI reverts you. Fix upstream.
 3. **Forgetting `organizationId`** in a new query. Not a bug — a data leak.
@@ -594,31 +594,31 @@ Notion is the wall board: read by everyone, written only during planning and rev
 8. **Letting Claude Design write `design-sync.lock.json`.** Repository-owned.
 9. **Waiting for the complete design before building anything.**
 10. **Pasting a connection string** into design or planning docs. Environment variable
-    *name* and sanitized database name only — never a credential.
+    _name_ and sanitized database name only — never a credential.
 
 ---
 
 ## 15. Glossary
 
-| Term | Meaning |
-| --- | --- |
-| Monorepo | One repo holding several apps that share tooling and types. |
-| Nx | The task runner that builds, lints, and tests them together. |
-| Tenant / organization | One customer's isolated slice of the shared database. |
-| `organizationId` | The field that isolation depends on. Never optional. |
-| JWT | A signed token. Readable by anyone, forgeable by no one. |
-| `jti` | The refresh token's ID, stored as a session row. Delete it to revoke. |
-| Token rotation | Refreshing returns a *new* refresh token, retiring the old one. |
-| Guard | NestJS code that runs before a resolver and can reject the request. |
-| Resolver | The GraphQL entry point for one operation. |
-| Service | Where business logic and tenant filtering live. |
-| Repository | The thin layer that talks to MongoDB. |
-| Codegen | Generating TypeScript types from the GraphQL schema. |
-| Presigned URL | A short-lived URL letting a client upload straight to S3. |
-| N+1 | One query per row instead of one for all of them. The batcher fixes it. |
-| `data-app-root` | The single element marking where the real screen begins. Binding. |
-| Foundation vs product path | Kit-owned code vs your code. |
-| Lock file | A recorded revision, so everyone reads the same rules. |
+| Term                       | Meaning                                                                 |
+| -------------------------- | ----------------------------------------------------------------------- |
+| Monorepo                   | One repo holding several apps that share tooling and types.             |
+| Nx                         | The task runner that builds, lints, and tests them together.            |
+| Tenant / organization      | One customer's isolated slice of the shared database.                   |
+| `organizationId`           | The field that isolation depends on. Never optional.                    |
+| JWT                        | A signed token. Readable by anyone, forgeable by no one.                |
+| `jti`                      | The refresh token's ID, stored as a session row. Delete it to revoke.   |
+| Token rotation             | Refreshing returns a _new_ refresh token, retiring the old one.         |
+| Guard                      | NestJS code that runs before a resolver and can reject the request.     |
+| Resolver                   | The GraphQL entry point for one operation.                              |
+| Service                    | Where business logic and tenant filtering live.                         |
+| Repository                 | The thin layer that talks to MongoDB.                                   |
+| Codegen                    | Generating TypeScript types from the GraphQL schema.                    |
+| Presigned URL              | A short-lived URL letting a client upload straight to S3.               |
+| N+1                        | One query per row instead of one for all of them. The batcher fixes it. |
+| `data-app-root`            | The single element marking where the real screen begins. Binding.       |
+| Foundation vs product path | Kit-owned code vs your code.                                            |
+| Lock file                  | A recorded revision, so everyone reads the same rules.                  |
 
 ---
 

@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start --clear",
-    "dev:client": "npx expo start --dev-client",
-    "dev:tunnel": "npx expo start --tunnel --clear",
-    "dev:tunnel:debug": "EXPO_DEBUG=1 npx expo start --tunnel --clear",
-    "dev:android": "npx expo run:android",
-    "dev:ios": "npx expo run:ios",
+    "dev:client": "pnpm exec expo start --dev-client",
+    "dev:tunnel": "pnpm exec expo start --tunnel --clear",
+    "dev:tunnel:debug": "EXPO_DEBUG=1 pnpm exec expo start --tunnel --clear",
+    "dev:android": "pnpm exec expo run:android",
+    "dev:ios": "pnpm exec expo run:ios",
     "android": "expo run:android",
     "build:dev:android": "eas build --profile development --platform android",
     "build:local:android": "eas build --profile development --platform android --local",
@@ -68,6 +68,7 @@
     "react-native-screens": "~4.16.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
+    "sf-symbols-typescript": "^2.2.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -75,11 +76,14 @@
     "@graphql-codegen/cli": "^6.2.1",
     "@graphql-codegen/typescript": "^5.0.9",
     "@graphql-codegen/typescript-operations": "^5.0.9",
+    "@types/node": "^22.10.7",
     "@types/react": "~19.1.0",
+    "@types/react-dom": "~19.1.0",
     "babel-preset-expo": "~54.0.10",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "tailwindcss": "^3.4.19",
+    "type-fest": "^5.5.0",
     "typescript": "~5.9.2"
   },
   "private": true

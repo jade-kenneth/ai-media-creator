@@ -20,13 +20,13 @@ Product-specific domain modules should live outside these platform capabilities 
 Copy `.env.example` to `.env`, replace placeholder credentials, then install dependencies from the workspace root:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Start the API:
 
 ```bash
-npm run -w app-api start:dev
+pnpm --filter app-api start:dev
 ```
 
 The GraphQL endpoint is available at `http://localhost:3001/graphql` by default. REST health endpoints are available at `/` and `/health`.
@@ -36,7 +36,7 @@ The GraphQL endpoint is available at `http://localhost:3001/graphql` by default.
 Schema source files live in `src/graphql/schemas`. After changing SDL, regenerate the committed TypeScript definitions:
 
 ```bash
-npm run -w app-api generate-graphql-types
+pnpm --filter app-api generate-graphql-types
 ```
 
 The generated file is `src/graphql/generated/graphql.ts` and should not be edited by hand.
@@ -46,17 +46,17 @@ The generated file is `src/graphql/generated/graphql.ts` and should not be edite
 Run the smallest API checks from the workspace root:
 
 ```bash
-npm run -w app-api generate-graphql-types
-npm run -w app-api test
-npm run -w app-api build
+pnpm --filter app-api generate-graphql-types
+pnpm --filter app-api test
+pnpm --filter app-api build
 ```
 
 Additional commands:
 
 ```bash
-npm run -w app-api test:e2e
-npm run -w app-api seed:default-admin
-LOCAL_DEV_RESET_CONFIRM=RESET_LOCAL_DATA npm run -w app-api reset:local-dev
+pnpm --filter app-api test:e2e
+pnpm --filter app-api seed:default-admin
+LOCAL_DEV_RESET_CONFIRM=RESET_LOCAL_DATA pnpm --filter app-api reset:local-dev
 ```
 
 The reset command deletes every collection in the configured database. Use it only with a disposable local database.

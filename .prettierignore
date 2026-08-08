@@ -4,9 +4,8 @@
 /.nx/cache
 /.nx/workspace-data
 
-# Generated or synced — their generator owns the formatting, and a hand-applied
-# format would be discarded on the next regeneration while failing format:check
-# in between. Guarded at edit time by .claude/hooks/protect-generated.mjs.
+# Generated from the locked skills snapshot; formatting would make it stale.
 /AGENTS.md
-/.skills-source
-/docs/catalogs
+
+# Generated from source by scripts/generate-catalogs.mjs.
+/docs/catalogs/*.md

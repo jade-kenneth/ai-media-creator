@@ -3,6 +3,6 @@
 
 Cron jobs, intervals, and timeouts. Every recurring job must acquire a scheduler lock before doing work, or it double-fires across replicas.
 
-Regenerate with `npm run catalogs`. CI fails when this file does not match source.
+Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 
 _None found._

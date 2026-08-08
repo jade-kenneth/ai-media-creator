@@ -3,7 +3,7 @@
 
 Every HTTP route and GraphQL operation the API exposes, with its auth posture.
 
-Regenerate with `npm run catalogs`. CI fails when this file does not match source.
+Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 
 ## REST endpoints
 

@@ -8,7 +8,7 @@
 // that mistake is possible, and points at the declared classification so the
 // answer is a lookup rather than a judgement call.
 //
-// Advisory: it never blocks. `npm run check-tenant-scope` is the gate.
+// Advisory: it never blocks. `pnpm check-tenant-scope` is the gate.
 
 import { readFileSync, existsSync } from 'node:fs';
 import { relative, isAbsolute, basename } from 'node:path';
@@ -84,7 +84,7 @@ function main() {
         `Tenant scope: module "${moduleName}" is not declared in ${MANIFEST}.`,
         '',
         'Every repository-backed API module must be declared either "tenant-scoped"',
-        'or "global" with a reason. Add it, then run: npm run check-tenant-scope',
+        'or "global" with a reason. Add it, then run: pnpm check-tenant-scope',
       ].join('\n'),
     );
 

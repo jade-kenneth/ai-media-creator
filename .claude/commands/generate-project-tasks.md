@@ -11,7 +11,7 @@ Project name: $ARGUMENTS
    `Implementation Plan.md`. These are automatically required context; never
    use similarly named files under `design/handoff/` as substitutes.
 2. Read `.skills-source/commands/generate-project-tasks.md` in full. If the
-   locked snapshot is missing, run `npm run sync-skills` first.
+   locked snapshot is missing, run `pnpm sync-skills` first.
 3. Execute that canonical command exactly with the project name above.
 4. Write or reconcile one root file named `TASK_<project-slug>.md`, using the
    lowercase kebab-case project name (for example, `TASK_dala.md`).

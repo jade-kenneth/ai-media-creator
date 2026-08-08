@@ -18,10 +18,10 @@ This page is only an operational command index for this workspace.
 Run focused project checks first, then the broadest practical workspace checks:
 
 ```bash
-npm run lint
-npm run typecheck
-npm test --workspaces --if-present
-npm run build
+pnpm lint
+pnpm typecheck
+pnpm -r --if-present test
+pnpm build
 ```
 
 ## Generated GraphQL clients
@@ -30,16 +30,16 @@ After changing SDL, regenerate the affected clients instead of editing generated
 files:
 
 ```bash
-npm run codegen --workspace=app-web
-npm run codegen --workspace=app-mobile
+pnpm --filter app-web codegen
+pnpm --filter app-mobile codegen
 ```
 
 ## Skills instructions
 
 ```bash
-npm run sync-skills
-npm run check-skills
-npm run update-skills -- --sha <full-skills-source-sha>
+pnpm sync-skills
+pnpm check-skills
+pnpm update-skills --sha <full-skills-source-sha>
 ```
 
 `sync-skills` restores the currently approved revision. `update-skills`
@@ -50,12 +50,12 @@ explicit SHA belongs to the configured `skills-source/main`. Use
 ## Boilerplate code tracking in product repositories
 
 ```bash
-npm run boilerplate:setup
-npm run boilerplate:check
-npm run boilerplate:port -- --dry-run --sha <full-app-boilerplate-sha>
-npm run boilerplate:port -- --sha <full-app-boilerplate-sha>
-npm run boilerplate:contributions
-npm run boilerplate:ack -- --sha <full-app-boilerplate-sha>
+pnpm boilerplate:setup
+pnpm boilerplate:check
+pnpm boilerplate:port --dry-run --sha <full-app-boilerplate-sha>
+pnpm boilerplate:port --sha <full-app-boilerplate-sha>
+pnpm boilerplate:contributions
+pnpm boilerplate:ack --sha <full-app-boilerplate-sha>
 ```
 
 `boilerplate:check` discovers updates, `boilerplate:port` applies explicit reviewed
