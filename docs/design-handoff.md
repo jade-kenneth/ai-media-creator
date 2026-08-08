@@ -83,9 +83,9 @@ copied DOM/CSS.
 ## 3. Declare and validate a design release
 
 ```bash
-npm run sync-skills
-npm run check-skills
-npm run design:validate
+pnpm sync-skills
+pnpm check-skills
+pnpm design:validate
 ```
 
 Every export must include `design/design-release.json`. Batch 1 is the first
@@ -108,7 +108,7 @@ release retires that screen in `removedOrSuperseded`. Logo contracts
 (`logo--*.html`) may appear in `readyForBuild` and are exempt from the
 `data-app-root` requirement, since they are not screens.
 
-The `design-gate` workflow runs `npm run design:validate-ci` on every pull request,
+The `design-gate` workflow runs `pnpm design:validate-ci` on every pull request,
 and no-ops in repositories that have no `design/design-release.json` yet. That mode
 also accepts the acknowledged steady state, because between releases a committed
 repository has `design-release.json` matching `design-sync.lock.json`, which the
@@ -128,7 +128,7 @@ The project-level command delegates to
 `Product Specification.md` and `Implementation Plan.md`; later batches update
 those same files without resetting unrelated phase history. Only
 `readyForBuild` screens become unblocked. It writes a batch/revision sync report
-and runs `npm run design:ack` only after reconciliation succeeds.
+and runs `pnpm design:ack` only after reconciliation succeeds.
 
 Be ready to confirm:
 
@@ -155,7 +155,7 @@ in-design items, and the final release has been synchronized, run:
 /finalize-build-docs <project name>
 ```
 
-Finalization runs `npm run design:validate-final` and performs the completeness
+Finalization runs `pnpm design:validate-final` and performs the completeness
 gate against the unchanged synchronized final release. It is not required before
 Codex starts architecture or an earlier ready slice.
 

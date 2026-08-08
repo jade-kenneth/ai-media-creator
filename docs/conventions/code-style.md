@@ -32,8 +32,8 @@ Change the canonical file in `skills-source`, validate it there, and then adopt
 the reviewed revision here:
 
 ```bash
-npm run update-skills -- --sha <full-skills-source-sha>
-npm run check-skills
+pnpm update-skills -- --sha <full-skills-source-sha>
+pnpm check-skills
 ```
 
 Never edit generated `AGENTS.md` to make a durable rule change.

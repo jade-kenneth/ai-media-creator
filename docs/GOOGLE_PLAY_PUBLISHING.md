@@ -13,17 +13,17 @@ app to your own EAS project, and supply your own store assets before release.
 
 ## Build profiles
 
-| Profile | Artifact | Intended use |
-| --- | --- | --- |
+| Profile       | Artifact           | Intended use             |
+| ------------- | ------------------ | ------------------------ |
 | `development` | Development client | Local native development |
-| `preview` | APK | Internal verification |
-| `production` | AAB | Play Console release |
+| `preview`     | APK                | Internal verification    |
+| `production`  | AAB                | Play Console release     |
 
 Build from the workspace root:
 
 ```bash
-npx eas build --platform android --profile preview --project-dir apps/app-mobile
-npx eas build --platform android --profile production --project-dir apps/app-mobile
+pnpm exec eas build --platform android --profile preview --project-dir apps/app-mobile
+pnpm exec eas build --platform android --profile production --project-dir apps/app-mobile
 ```
 
 Use a cloud build unless a reproducible local Android toolchain is required.

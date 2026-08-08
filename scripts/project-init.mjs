@@ -7,7 +7,6 @@ import readline from 'node:readline/promises';
 
 const PLACEHOLDERS = {
   rootPackage: '@app/boilerplate',
-  legacyRootPackage: '@app/source',
   mobileName: 'App Boilerplate',
   mobileSlug: 'app-mobile',
   mobileDescription:
@@ -27,8 +26,8 @@ const PLACEHOLDERS = {
 const HELP = `Initialize a product created from app-boilerplate.
 
 Usage:
-  npm run project:init
-  npm run project:init -- --name "Dala" --namespace com.jadey --domain dala.app
+  pnpm project:init
+  pnpm project:init -- --name "Dala" --namespace com.jadey --domain dala.app
 
 Options:
   --name <display name>          Required product display name
@@ -54,7 +53,12 @@ function parseArgs(argv) {
     '--database',
     '--root',
   ]);
-  const booleanFlags = new Set(['--dry-run', '--force', '--non-interactive', '--help']);
+  const booleanFlags = new Set([
+    '--dry-run',
+    '--force',
+    '--non-interactive',
+    '--help',
+  ]);
 
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
@@ -64,7 +68,8 @@ function parseArgs(argv) {
     }
     if (!valueFlags.has(flag)) throw new Error(`Unknown option: ${flag}`);
     const value = argv[index + 1];
-    if (!value || value.startsWith('--')) throw new Error(`${flag} requires a value.`);
+    if (!value || value.startsWith('--'))
+      throw new Error(`${flag} requires a value.`);
     options[flag.slice(2)] = value;
     index += 1;
   }
@@ -87,7 +92,9 @@ function validateIdentity(identity) {
     errors.push('name must contain 1-80 characters.');
   }
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(identity.slug)) {
-    errors.push('slug must use lowercase letters, numbers, and single hyphens.');
+    errors.push(
+      'slug must use lowercase letters, numbers, and single hyphens.',
+    );
   }
   if (!/^@[a-z0-9][a-z0-9._-]*$/.test(identity.scope)) {
     errors.push('scope must be an npm scope such as @dala.');
@@ -97,53 +104,88 @@ function validateIdentity(identity) {
     namespaceParts.length < 2 ||
     namespaceParts.some((part) => !/^[a-z][a-z0-9_]*$/.test(part))
   ) {
-    errors.push('namespace must be a lowercase reverse domain such as com.jadey.');
+    errors.push(
+      'namespace must be a lowercase reverse domain such as com.jadey.',
+    );
   }
-  if (identity.domain && !/^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(identity.domain)) {
-    errors.push('domain must be a hostname such as dala.app, without a protocol or path.');
+  if (
+    identity.domain &&
+    !/^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(
+      identity.domain,
+    )
+  ) {
+    errors.push(
+      'domain must be a hostname such as dala.app, without a protocol or path.',
+    );
   }
   if (!/^[a-z0-9][a-z0-9_-]*$/.test(identity.database)) {
-    errors.push('database must use lowercase letters, numbers, hyphens, or underscores.');
+    errors.push(
+      'database must use lowercase letters, numbers, hyphens, or underscores.',
+    );
   }
-  if (errors.length) throw new Error(`Invalid project identity:\n- ${errors.join('\n- ')}`);
+  if (errors.length)
+    throw new Error(`Invalid project identity:\n- ${errors.join('\n- ')}`);
 }
 
 async function collectIdentity(options) {
-  const interactive = process.stdin.isTTY && process.stdout.isTTY && !options.non_interactive;
-  const rl = interactive ? readline.createInterface({ input: process.stdin, output: process.stdout }) : null;
+  const interactive =
+    process.stdin.isTTY && process.stdout.isTTY && !options.non_interactive;
+  const rl = interactive
+    ? readline.createInterface({ input: process.stdin, output: process.stdout })
+    : null;
 
   try {
-    const name = (options.name ?? (rl ? await rl.question('Project display name: ') : '')).trim();
-    if (!name) throw new Error('Project name is required. Pass --name or run interactively.');
+    const name = (
+      options.name ?? (rl ? await rl.question('Project display name: ') : '')
+    ).trim();
+    if (!name)
+      throw new Error(
+        'Project name is required. Pass --name or run interactively.',
+      );
 
     const defaultSlug = slugify(name);
-    const slugInput = options.slug ?? (rl ? await rl.question(`Project slug (${defaultSlug}): `) : '');
+    const slugInput =
+      options.slug ??
+      (rl ? await rl.question(`Project slug (${defaultSlug}): `) : '');
     const slug = (slugInput.trim() || defaultSlug).toLowerCase();
 
     const defaultScope = `@${slug}`;
-    const scopeInput = options.scope ?? (rl ? await rl.question(`Package scope (${defaultScope}): `) : '');
+    const scopeInput =
+      options.scope ??
+      (rl ? await rl.question(`Package scope (${defaultScope}): `) : '');
     const scope = (scopeInput.trim() || defaultScope).toLowerCase();
 
     const namespace = (
       options.namespace ??
-      (rl ? await rl.question('Mobile namespace (required, e.g. com.jadey): ') : '')
+      (rl
+        ? await rl.question('Mobile namespace (required, e.g. com.jadey): ')
+        : '')
     )
       .trim()
       .toLowerCase();
     if (!namespace) {
-      throw new Error('Mobile namespace is required. Pass --namespace or run interactively.');
+      throw new Error(
+        'Mobile namespace is required. Pass --namespace or run interactively.',
+      );
     }
 
     const domain = (
       options.domain ??
-      (rl ? await rl.question('Owned email/web domain (optional, press Enter to skip): ') : '')
+      (rl
+        ? await rl.question(
+            'Owned email/web domain (optional, press Enter to skip): ',
+          )
+        : '')
     )
       .trim()
       .toLowerCase();
 
     const defaultDatabase = `${slug}-db`;
     const databaseInput =
-      options.database ?? (rl ? await rl.question(`Local database name (${defaultDatabase}): `) : '');
+      options.database ??
+      (rl
+        ? await rl.question(`Local database name (${defaultDatabase}): `)
+        : '');
     const database = (databaseInput.trim() || defaultDatabase).toLowerCase();
 
     const idSegment = slug.replaceAll('-', '');
@@ -182,7 +224,14 @@ function parseJson(text, relativePath) {
   }
 }
 
-function assertReplaceable(relativePath, label, current, placeholder, target, force) {
+function assertReplaceable(
+  relativePath,
+  label,
+  current,
+  placeholder,
+  target,
+  force,
+) {
   const placeholders = Array.isArray(placeholder) ? placeholder : [placeholder];
   if (placeholders.includes(current) || current === target || force) return;
   throw new Error(
@@ -191,8 +240,23 @@ function assertReplaceable(relativePath, label, current, placeholder, target, fo
   );
 }
 
-function setJsonValue(relativePath, label, object, key, placeholder, target, force) {
-  assertReplaceable(relativePath, label, object[key], placeholder, target, force);
+function setJsonValue(
+  relativePath,
+  label,
+  object,
+  key,
+  placeholder,
+  target,
+  force,
+) {
+  assertReplaceable(
+    relativePath,
+    label,
+    object[key],
+    placeholder,
+    target,
+    force,
+  );
   object[key] = target;
 }
 
@@ -220,32 +284,29 @@ function planChanges(root, identity, force) {
   );
   planned.set(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
-  const lockPath = 'package-lock.json';
-  const lockText = readText(root, lockPath, false);
-  if (lockText !== null) {
-    const lock = parseJson(lockText, lockPath);
-    const lockPlaceholders = [PLACEHOLDERS.rootPackage, PLACEHOLDERS.legacyRootPackage];
-    setJsonValue(lockPath, 'name', lock, 'name', lockPlaceholders, identity.rootPackage, force);
-    if (lock.packages?.['']) {
-      setJsonValue(
-        lockPath,
-        'packages[""].name',
-        lock.packages[''],
-        'name',
-        lockPlaceholders,
-        identity.rootPackage,
-        force,
-      );
-    }
-    planned.set(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
-  }
-
   const mobilePath = 'apps/app-mobile/app.json';
   const mobileJson = parseJson(readText(root, mobilePath), mobilePath);
   const expo = mobileJson.expo;
-  if (!expo?.ios || !expo?.android) throw new Error(`${mobilePath}: expected Expo iOS and Android config.`);
-  setJsonValue(mobilePath, 'expo.name', expo, 'name', PLACEHOLDERS.mobileName, identity.name, force);
-  setJsonValue(mobilePath, 'expo.slug', expo, 'slug', PLACEHOLDERS.mobileSlug, identity.slug, force);
+  if (!expo?.ios || !expo?.android)
+    throw new Error(`${mobilePath}: expected Expo iOS and Android config.`);
+  setJsonValue(
+    mobilePath,
+    'expo.name',
+    expo,
+    'name',
+    PLACEHOLDERS.mobileName,
+    identity.name,
+    force,
+  );
+  setJsonValue(
+    mobilePath,
+    'expo.slug',
+    expo,
+    'slug',
+    PLACEHOLDERS.mobileSlug,
+    identity.slug,
+    force,
+  );
   setJsonValue(
     mobilePath,
     'expo.description',
@@ -417,11 +478,15 @@ function applyChanges(root, planned, dryRun) {
 
   console.log('\nProject identity files:');
   for (const relativePath of changed) console.log(`- change: ${relativePath}`);
-  for (const relativePath of unchanged) console.log(`- unchanged: ${relativePath}`);
+  for (const relativePath of unchanged)
+    console.log(`- unchanged: ${relativePath}`);
 
   if (!dryRun) {
     for (const relativePath of changed) {
-      fs.writeFileSync(path.join(root, relativePath), planned.get(relativePath));
+      fs.writeFileSync(
+        path.join(root, relativePath),
+        planned.get(relativePath),
+      );
     }
   }
   return { changed, unchanged };
@@ -446,16 +511,21 @@ async function main() {
   console.log(`- domain: ${identity.domain || 'not configured'}`);
 
   const result = applyChanges(root, planned, Boolean(options.dry_run));
-  if (options.dry_run) console.log('\nDry run complete. No files were written.');
-  else if (!result.changed.length) console.log('\nProject identity already matches; nothing changed.');
+  if (options.dry_run)
+    console.log('\nDry run complete. No files were written.');
+  else if (!result.changed.length)
+    console.log('\nProject identity already matches; nothing changed.');
   else console.log('\nProject identity initialized successfully.');
 
   console.log('\nStill configure separately:');
-  if (!identity.domain) console.log('- owned domain and public/admin email addresses');
+  if (!identity.domain)
+    console.log('- owned domain and public/admin email addresses');
   console.log('- Expo owner and EAS project ID');
   console.log('- S3, deployment projects, and production secrets');
   console.log('- product logos, icons, colors, copy, and store assets');
-  console.log('\nArchitectural names such as app-web, app-mobile, and app-api were preserved.');
+  console.log(
+    '\nArchitectural names such as app-web, app-mobile, and app-api were preserved.',
+  );
 }
 
 main().catch((error) => {

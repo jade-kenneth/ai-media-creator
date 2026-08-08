@@ -31,16 +31,9 @@ jobs:
         with:
           filter: tree:0
           fetch-depth: 0
-
-      # Task distribution via Nx Cloud, as early as possible and before install.
-      # Gated on the token: distribution is an accelerator, and a fork PR or an
-      # unconfigured secret must not stop lint/test/build/typecheck from gating
-      # the pull request.
-      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
-      - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
-        if: env.NX_CLOUD_ACCESS_TOKEN != ''
-
-      # Cache node_modules
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
       - uses: actions/setup-node@v4
         with:
           # app-mobile's test script runs `node --experimental-strip-types`,
@@ -48,38 +41,46 @@ jobs:
           # "bad option: --experimental-strip-types" before a single test runs.
           # GitHub is also deprecating Node 20 on runners.
           node-version: 22
-          cache: 'npm'
+          cache: 'pnpm'
 
-      - run: npm ci
+      # Task distribution via Nx Cloud, as early as possible and before install.
+      # Gated on the token: distribution is an accelerator, and a fork PR or an
+      # unconfigured secret must not stop lint/test/build/typecheck from gating
+      # the pull request.
+      # Learn more at https://nx.dev/ci/reference/nx-cloud-cli#npx-nxcloud-startcirun
+      - run: pnpm exec nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="build"
+        if: env.NX_CLOUD_ACCESS_TOKEN != ''
+
+      - run: pnpm install --frozen-lockfile
 
       # The locked skills snapshot and the generated AGENTS.md must match the
       # lock file. Runs before the code checks so a context drift is reported
       # even when the build is broken.
-      - run: npm run check-skills
+      - run: pnpm check-skills
 
-      - run: npx nx format:check --base=${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
+      - run: pnpm exec nx format:check --base=${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
 
       # Capped parallelism: the default runs every project's build at once, and
       # a single OOM core-dump takes unrelated sibling tasks down with it, which
       # reports as a failure in a project that is actually fine.
-      - run: npx nx run-many -t test build typecheck --parallel=2
+      - run: pnpm exec nx run-many -t test build typecheck --parallel=2
 
       # Lint runs for every project except app-web, which carries 7 pre-existing
       # react-hooks errors that predate CI being enabled at all. Excluding the
       # single failing target — rather than the whole project, or the whole lint
       # step — keeps app-web's test, build, and typecheck enforced above.
       # TODO(#40): drop --exclude once those errors are fixed.
-      - run: npx nx run-many -t lint --parallel=2 --exclude=app-web
+      - run: pnpm exec nx run-many -t lint --parallel=2 --exclude=app-web
 
       # Tenant-scope classification gate. Every repository-backed API module is
       # either tenant-scoped or explicitly declared global; an undeclared module
       # fails the build rather than shipping an unreviewed data path.
-      - run: npm run check-tenant-scope
+      - run: pnpm check-tenant-scope
 
       # Generated catalogs must match the source they describe.
-      - run: npm run catalogs:check
+      - run: pnpm catalogs:check
 
       # Nx Cloud recommends fixes for failures to help you get CI green faster.
       # Learn more: https://nx.dev/ci/features/self-healing-ci
-      - run: npx nx fix-ci
+      - run: pnpm exec nx fix-ci
         if: always() && env.NX_CLOUD_ACCESS_TOKEN != ''

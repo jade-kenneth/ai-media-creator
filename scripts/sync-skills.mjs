@@ -38,11 +38,7 @@ function writeLock(lock) {
 }
 
 function resolveLatestSha(lock) {
-  const output = git([
-    'ls-remote',
-    lock.repository,
-    `refs/heads/${lock.ref}`,
-  ]);
+  const output = git(['ls-remote', lock.repository, `refs/heads/${lock.ref}`]);
   const sha = output.split(/\s+/)[0] || '';
   if (!SHA_PATTERN.test(sha)) {
     throw new Error(`Unable to resolve ${lock.repository}#${lock.ref}`);
@@ -116,13 +112,11 @@ function hydrate(lock) {
 }
 
 function generateAgents(lock, outputPath = AGENTS_PATH) {
-  const generator = path.join(
-    SNAPSHOT_PATH,
-    'scripts',
-    'build-agents-md.js',
-  );
+  const generator = path.join(SNAPSHOT_PATH, 'scripts', 'build-agents-md.js');
   if (!fs.existsSync(generator)) {
-    throw new Error('The locked skills snapshot does not contain the AGENTS generator.');
+    throw new Error(
+      'The locked skills snapshot does not contain the AGENTS generator.',
+    );
   }
 
   execFileSync(process.execPath, [generator, outputPath], {
@@ -137,7 +131,9 @@ function requestedSha() {
   if (shaIndex === -1) return '';
   const sha = process.argv[shaIndex + 1] || '';
   if (!SHA_PATTERN.test(sha)) {
-    throw new Error('--sha must be followed by a full 40-character commit SHA.');
+    throw new Error(
+      '--sha must be followed by a full 40-character commit SHA.',
+    );
   }
   return sha;
 }
@@ -165,12 +161,7 @@ function verifyShaOnConfiguredRef(lock, sha) {
     );
     try {
       git(
-        [
-          'merge-base',
-          '--is-ancestor',
-          sha,
-          `refs/remotes/origin/${lock.ref}`,
-        ],
+        ['merge-base', '--is-ancestor', sha, `refs/remotes/origin/${lock.ref}`],
         tempPath,
       );
     } catch {
@@ -240,7 +231,7 @@ function check(lock) {
         // git diff exits with status 1 when it successfully finds a difference.
       }
       throw new Error(
-        "AGENTS.md is stale. Run 'npm run sync-skills' and commit the result.",
+        "AGENTS.md is stale. Run 'pnpm sync-skills' and commit the result.",
       );
     }
     console.log(`Skills output matches lock @ ${lock.sha.slice(0, 8)}`);

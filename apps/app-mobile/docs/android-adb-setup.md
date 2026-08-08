@@ -2,7 +2,7 @@
 
 ## Problem
 
-Running `npx react-native log-android` or `adb reverse` fails with:
+Running `pnpm exec react-native log-android` or `adb reverse` fails with:
 
 ```
 error spawnSync adb ENOENT

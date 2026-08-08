@@ -8,7 +8,7 @@ argument-hint: [optional: project name to register after setup]
 Project to register (optional): $ARGUMENTS
 
 1. Read `.skills-source/commands/notion-setup.md` in full. If the locked
-   snapshot or command is missing, run `npm run sync-skills` first.
+   snapshot or command is missing, run `pnpm sync-skills` first.
 2. Execute that canonical command exactly with the project name above, using
    the Notion MCP tools.
 3. Be idempotent: search before creating, update instead of duplicating, and

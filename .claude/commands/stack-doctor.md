@@ -5,7 +5,7 @@ description: Verify the whole agent stack is wired correctly — skills, command
 # Diagnose the agent stack
 
 1. Read `.skills-source/commands/stack-doctor.md` in full. If the locked
-   snapshot or command is missing, run `npm run sync-skills` first.
+   snapshot or command is missing, run `pnpm sync-skills` first.
 2. Execute that canonical command exactly. Every check is read-only: report
    problems and the exact fix command, but change nothing unless I approve
    after seeing the report.

@@ -1,6 +1,7 @@
 {
   "name": "@app/boilerplate",
   "version": "0.0.0",
+  "packageManager": "pnpm@11.16.0",
   "license": "MIT",
   "scripts": {
     "web": "nx run app-web:dev",
@@ -31,7 +32,7 @@
     "boilerplate:foundation-drift": "node scripts/boilerplate-sync.mjs foundation-drift",
     "boilerplate:contributions": "node scripts/check-boilerplate-contributions.mjs",
     "test:sync-automation": "node scripts/test-sync-automation.mjs",
-    "postinstall": "node scripts/sync-skills.mjs hydrate || echo '⚠ locked skills hydration failed (offline?) — run npm run sync-skills before agent work'",
+    "postinstall": "node scripts/sync-skills.mjs hydrate || echo '⚠ locked skills hydration failed (offline?) — run pnpm sync-skills before agent work'",
     "project:init": "node scripts/project-init.mjs",
     "test:project-init": "node scripts/test-project-init.mjs"
   },
@@ -45,18 +46,11 @@
     "@nx/next": "22.7.6",
     "@nx/webpack": "22.7.6",
     "@swc/core": "^1.15.43",
+    "@swc/helpers": "^0.5.17",
     "eslint": "^9.8.0",
     "nx": "22.7.6",
     "shadcn": "^4.4.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.63.0"
-  },
-  "overrides": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0"
-  },
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ]
+  }
 }
