@@ -6,3 +6,6 @@
 
 # Generated from the locked skills snapshot; formatting would make it stale.
 /AGENTS.md
+
+# Generated from source by scripts/generate-catalogs.mjs.
+/docs/catalogs/*.md
