@@ -1,0 +1,93 @@
+{
+  "$comment": [
+    "Tenant-isolation classification for every API module. Enforced by",
+    "scripts/check-tenant-scope.mjs in CI. A module that is not declared here",
+    "fails the build: an undeclared data path is an unreviewed one.",
+    "",
+    "scope values:",
+    "  tenant-scoped  — owns tenant data; every read and write composes the",
+    "                   tenant field with the caller's filter.",
+    "  global         — deliberately crosses or precedes tenant boundaries.",
+    "                   Requires a reason. Adding a tenant filter to one of",
+    "                   these is a defect, not a fix.",
+    "  no-persistence — holds no repository; nothing to scope."
+  ],
+  "tenantField": "organizationId",
+  "tenantContextDecorator": "CurrentTenant",
+  "tenantFilterHelper": "applyTenantFilter",
+  "modules": {
+    "account-deletion-requests": {
+      "scope": "tenant-scoped",
+      "collection": "AccountDeletionRequests"
+    },
+    "admin-management": {
+      "scope": "global",
+      "reason": "Super-admin surface that manages admin accounts across every tenant; scoping it would make cross-tenant administration impossible."
+    },
+    "auth": {
+      "scope": "global",
+      "reason": "Authentication precedes tenant resolution. Credential lookup and login-attempt records are keyed by email before a tenant is known, so the tenant middleware cannot have run yet."
+    },
+    "mail": {
+      "scope": "no-persistence",
+      "reason": "Transactional send only; owns no repository."
+    },
+    "notifications": {
+      "scope": "tenant-scoped",
+      "collection": "Notifications"
+    },
+    "organizations": {
+      "scope": "global",
+      "reason": "This is the tenant registry itself. findBySlug is called by TenantMiddleware to establish tenant context, so it must resolve before any tenant scope exists."
+    },
+    "payments": {
+      "scope": "tenant-scoped",
+      "collection": "Payments"
+    },
+    "push-notifications": {
+      "scope": "no-persistence",
+      "reason": "Dispatch service; reads through the push-tokens repository, which carries the tenant scope."
+    },
+    "push-tokens": {
+      "scope": "tenant-scoped",
+      "collection": "PushTokens"
+    },
+    "s3": {
+      "scope": "no-persistence",
+      "reason": "Presigned URL issuance; owns no repository."
+    },
+    "scheduler-locks": {
+      "scope": "global",
+      "reason": "Cross-replica mutual-exclusion primitive. Locks are named singletons across the whole deployment; scoping them per tenant would let one lock be acquired concurrently by every tenant and break the guarantee it exists to provide."
+    },
+    "sessions": {
+      "scope": "tenant-scoped",
+      "collection": "Sessions"
+    },
+    "store-purchases": {
+      "scope": "tenant-scoped",
+      "collection": "StorePurchases",
+      "unscopedReads": {
+        "allReads": true,
+        "reason": "Lookups are keyed by the store-issued (store, storeReference) pair, which is uniquely indexed across the collection, and every read path is a store webhook carrying no session and therefore no tenant. Ownership is enforced by the userId check in savePurchase; organizationId is persisted for reporting and is read from the record rather than supplied by a caller."
+      }
+    },
+    "turnstile": {
+      "scope": "no-persistence",
+      "reason": "Stateless bot-protection verification against an external API."
+    },
+    "users": {
+      "scope": "tenant-scoped",
+      "collection": "Users",
+      "unscopedReads": {
+        "reason": "Credential and identity lookups run before tenant context exists — the tenant is derived from the account these resolve.",
+        "methods": [
+          "findByEmail",
+          "findRecordByEmail",
+          "findRecordByGoogleSub",
+          "existsByEmail"
+        ]
+      }
+    }
+  }
+}

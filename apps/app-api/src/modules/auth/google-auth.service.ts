@@ -51,6 +51,7 @@ export class GoogleAuthService {
     await this.sessionsService.createSession({
       accountId: userRecord.id,
       jti,
+      organizationId: userRecord.organizationId ?? null,
       dateTimeCreated: new Date(),
       dateTimeLastRefreshed: new Date(),
     });

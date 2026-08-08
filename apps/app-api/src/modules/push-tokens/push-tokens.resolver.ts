@@ -30,7 +30,8 @@ export class PushTokensResolver {
   unregisterPushToken(
     @ServiceValidatedArgs('input') input: UnregisterPushTokenInput,
     @CurrentUser() user: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<boolean> {
-    return this.pushTokensService.unregisterPushToken(input, user.id);
+    return this.pushTokensService.unregisterPushToken(input, user.id, tenantId);
   }
 }

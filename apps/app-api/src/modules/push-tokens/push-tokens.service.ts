@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { ValidationError } from 'src/common/errors/app.error';
+import { applyTenantFilter } from 'src/common/utils/tenant-filter';
 import type {
   RegisterPushTokenInput,
   UnregisterPushTokenInput,
@@ -49,6 +50,9 @@ export class PushTokensService {
       Object.values(rawDeviceMetadata).some((value) => value !== null)
         ? rawDeviceMetadata
         : null;
+    // Deliberately unscoped: (token, platform) is uniquely indexed across the
+    // whole collection, so a device re-registering under a different tenant must
+    // resolve the existing row and move it, rather than fail the unique index.
     const tokenFilter = {
       token,
       platform: input.platform,
@@ -84,6 +88,7 @@ export class PushTokensService {
   async unregisterPushToken(
     input: UnregisterPushTokenInput,
     userId: string,
+    organizationId?: string | null,
   ): Promise<boolean> {
     const token = input.token.trim();
 
@@ -93,11 +98,14 @@ export class PushTokensService {
       });
     }
 
-    const filter = {
-      token,
-      platform: input.platform,
-      userId,
-    };
+    const filter = applyTenantFilter(
+      {
+        token,
+        platform: input.platform,
+        userId,
+      },
+      organizationId,
+    );
     const exists = await this.pushTokensRepository.exists(filter);
 
     if (!exists) {

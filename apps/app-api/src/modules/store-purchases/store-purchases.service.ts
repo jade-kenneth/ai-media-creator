@@ -39,6 +39,7 @@ export class StorePurchasesService {
   async verifyPurchase(
     input: VerifyStorePurchaseInput,
     user: AuthenticatedUser,
+    organizationId?: string | null,
   ): Promise<StorePurchaseResult> {
     const gateway = this.gateway(input.store);
     gateway.assertEnabled();
@@ -52,7 +53,7 @@ export class StorePurchasesService {
     const verified = await gateway.verifyPurchase(reference);
     this.assertMatchesRequest(input, verified);
 
-    await this.savePurchase(input.store, user.id, verified);
+    await this.savePurchase(input.store, user.id, verified, organizationId);
     const extension = await this.entitlements.grant(
       user.id,
       input.productId,
@@ -134,6 +135,7 @@ export class StorePurchasesService {
     store: StorePlatform,
     userId: string,
     verified: VerifiedPurchase,
+    organizationId?: string | null,
   ): Promise<void> {
     const existing = await this.findPurchase(store, verified.storeReference);
     if (!existing) {
@@ -148,6 +150,7 @@ export class StorePurchasesService {
         active: verified.active,
         expiresAt: verified.expiresAt,
         webhookEventIds: [],
+        organizationId: organizationId ?? null,
         createdAt: now,
         updatedAt: now,
       });
@@ -197,6 +200,13 @@ export class StorePurchasesService {
     );
   }
 
+  /**
+   * Deliberately unscoped: (store, storeReference) is a store-issued identifier,
+   * uniquely indexed across the collection, and the webhook paths that call this
+   * carry no session and therefore no tenant. The record's own organizationId is
+   * the tenant of record; cross-account claiming is prevented by the userId check
+   * in savePurchase rather than by a tenant filter.
+   */
   private async findPurchase(
     store: StorePlatform,
     storeReference: string,

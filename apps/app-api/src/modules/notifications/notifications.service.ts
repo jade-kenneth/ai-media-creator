@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { NotFoundError } from 'src/common/errors/app.error';
+import { applyTenantFilter } from 'src/common/utils/tenant-filter';
 import type { RepositoryFilter, RepositorySort } from 'src/libs/repository';
 import { TOKENS } from 'src/types/tokens';
 import type {
@@ -40,17 +41,23 @@ export class NotificationsService {
     sort?: RepositorySort<Notification>,
     first?: number,
     after?: string,
+    organizationId?: string | null,
   ): Promise<NotificationConnection> {
     const [connection, unreadCount] = await Promise.all([
       this.notificationsRepository
-        .list(buildNotificationsFilter(userId, filter), {
-          sort: sort ?? DEFAULT_MY_NOTIFICATIONS_SORT,
-        })
+        .list(
+          applyTenantFilter(
+            buildNotificationsFilter(userId, filter),
+            organizationId,
+          ),
+          {
+            sort: sort ?? DEFAULT_MY_NOTIFICATIONS_SORT,
+          },
+        )
         .connection({ first, after }),
-      this.notificationsRepository.count({
-        userId,
-        isRead: false,
-      }),
+      this.notificationsRepository.count(
+        applyTenantFilter({ userId, isRead: false }, organizationId),
+      ),
     ]);
 
     return {
@@ -62,26 +69,33 @@ export class NotificationsService {
   async markNotificationAsRead(
     id: string,
     userId: string,
+    organizationId?: string | null,
   ): Promise<Notification> {
-    const notification = await this.findNotificationForUserOrThrow(id, userId);
+    const scoped = applyTenantFilter({ id, userId }, organizationId);
+    const notification = await this.findNotificationForUserOrThrow(
+      id,
+      userId,
+      organizationId,
+    );
 
     if (!notification.isRead) {
-      await this.notificationsRepository.update(
-        { id, userId },
-        { isRead: true },
-      );
+      await this.notificationsRepository.update(scoped, { isRead: true });
     }
 
-    return this.notificationsRepository.find({ id, userId });
+    return this.notificationsRepository.find(scoped);
   }
 
   async markAllNotificationsAsRead(
     userId: string,
+    organizationId?: string | null,
   ): Promise<MarkAllNotificationsAsReadResult> {
-    const unreadFilter: RepositoryFilter<Notification> = {
-      userId,
-      isRead: false,
-    };
+    const unreadFilter: RepositoryFilter<Notification> = applyTenantFilter(
+      {
+        userId,
+        isRead: false,
+      },
+      organizationId,
+    );
     const updatedCount = await this.notificationsRepository.count(unreadFilter);
 
     if (updatedCount === 0) {
@@ -114,8 +128,12 @@ export class NotificationsService {
   private async findNotificationForUserOrThrow(
     id: string,
     userId: string,
+    organizationId?: string | null,
   ): Promise<Notification> {
-    const filter: RepositoryFilter<Notification> = { id, userId };
+    const filter: RepositoryFilter<Notification> = applyTenantFilter(
+      { id, userId },
+      organizationId,
+    );
     const exists = await this.notificationsRepository.exists(filter);
 
     if (!exists) {

@@ -1,5 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ValidationError } from 'src/common/errors/app.error';
+import { applyTenantFilter } from 'src/common/utils/tenant-filter';
 import { TOKENS } from 'src/types/tokens';
 import type {
   SessionRecord,
@@ -9,6 +10,7 @@ import type {
 interface CreateSessionInput {
   accountId: string;
   jti: string;
+  organizationId?: string | null;
   dateTimeCreated?: Date;
   dateTimeLastRefreshed?: Date;
 }
@@ -45,19 +47,23 @@ export class SessionsService {
     return this.sessionsRepository.create({
       accountId,
       jti,
+      organizationId: input.organizationId ?? null,
       dateTimeCreated,
       dateTimeLastRefreshed: input.dateTimeLastRefreshed ?? dateTimeCreated,
     });
   }
 
-  async findByJti(jti: string): Promise<SessionRecord | null> {
+  async findByJti(
+    jti: string,
+    organizationId?: string | null,
+  ): Promise<SessionRecord | null> {
     const normalizedJti = jti.trim();
 
     if (!normalizedJti) {
       return null;
     }
 
-    const filter = { jti: normalizedJti };
+    const filter = applyTenantFilter({ jti: normalizedJti }, organizationId);
     const exists = await this.sessionsRepository.exists(filter);
 
     if (!exists) {
@@ -83,6 +89,7 @@ export class SessionsService {
   async refreshSession(
     jti: string,
     refreshedAt: Date = new Date(),
+    organizationId?: string | null,
   ): Promise<SessionRecord | null> {
     const normalizedJti = jti.trim();
 
@@ -90,7 +97,7 @@ export class SessionsService {
       return null;
     }
 
-    const filter = { jti: normalizedJti };
+    const filter = applyTenantFilter({ jti: normalizedJti }, organizationId);
     const exists = await this.sessionsRepository.exists(filter);
 
     if (!exists) {
@@ -104,14 +111,17 @@ export class SessionsService {
     return this.sessionsRepository.find(filter);
   }
 
-  async deleteSessionByJti(jti: string): Promise<boolean> {
+  async deleteSessionByJti(
+    jti: string,
+    organizationId?: string | null,
+  ): Promise<boolean> {
     const normalizedJti = jti;
 
     if (!normalizedJti) {
       return false;
     }
 
-    const filter = { jti: normalizedJti };
+    const filter = applyTenantFilter({ jti: normalizedJti }, organizationId);
     const exists = await this.sessionsRepository.exists(filter);
 
     if (!exists) {
@@ -123,15 +133,18 @@ export class SessionsService {
     return true;
   }
 
-  async deleteSessionsByAccountId(accountId: string): Promise<void> {
+  async deleteSessionsByAccountId(
+    accountId: string,
+    organizationId?: string | null,
+  ): Promise<void> {
     const normalizedAccountId = accountId;
 
     if (!normalizedAccountId) {
       return;
     }
 
-    await this.sessionsRepository.delete({
-      accountId: normalizedAccountId,
-    });
+    await this.sessionsRepository.delete(
+      applyTenantFilter({ accountId: normalizedAccountId }, organizationId),
+    );
   }
 }
