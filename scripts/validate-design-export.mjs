@@ -2,6 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { DESIGN_CONFIG_FILENAME, resolveDesignSource } from './lib/design-source.mjs';
 
 const rootIndex = process.argv.indexOf('--root');
 const ROOT = path.resolve(rootIndex === -1 ? process.cwd() : process.argv[rootIndex + 1] || '');
@@ -16,6 +17,19 @@ const RELEASE_PATH = path.join(DESIGN, 'design-release.json');
 const LOCK_PATH = path.join(DESIGN, 'design-sync.lock.json');
 const supportedSurfaces = new Set(['web', 'mobile', 'tablet', 'desktop']);
 const supportedChanges = new Set(['added', 'updated', 'unchanged']);
+
+// A product built from a written brief has no Claude Design export, so there is no
+// release to validate. The CI gate and the planner commands call this script in every
+// mode; exiting cleanly here is what makes Claude Design optional for them.
+const designSource = resolveDesignSource(ROOT);
+if (designSource.source === 'spec') {
+  console.log(
+    'Design source is "spec" (' + DESIGN_CONFIG_FILENAME + '): no Claude Design release to validate.',
+  );
+  for (const warning of designSource.warnings) console.log('warning: ' + warning);
+  console.log('In Claude Code run: /sync-build-docs <project name> to reconcile the brief.');
+  process.exit(0);
+}
 
 function filesUnder(directory) {
   if (!fs.existsSync(directory)) return [];
@@ -398,7 +412,10 @@ const errors = [...metadataErrors, ...releaseErrors];
 if (errors.length) {
   throw new Error(
     'Claude Design release validation failed:\n- ' + errors.join('\n- ') +
-      '\nUse /adapt-design-export <project name> for export-contract corrections.',
+      '\nUse /adapt-design-export <project name> for export-contract corrections.' +
+      (designSource.source === 'undecided'
+        ? '\nIf this project will not use Claude Design, run: npm run design:source -- --set spec'
+        : ''),
   );
 }
 

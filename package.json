@@ -15,6 +15,7 @@
     "skills:contribution:validate": "node scripts/skill-contribution.mjs validate",
     "skills:contribution:render": "node scripts/skill-contribution.mjs render",
     "test:skill-contribution": "node scripts/test-skill-contribution.mjs",
+    "design:source": "node scripts/design-source.mjs",
     "design:validate": "node scripts/validate-design-export.mjs",
     "design:validate-final": "node scripts/validate-design-export.mjs --allow-synced",
     "design:validate-ci": "node scripts/validate-design-export.mjs --accept-acknowledged",

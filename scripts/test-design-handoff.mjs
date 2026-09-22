@@ -9,11 +9,12 @@ import { fileURLToPath } from 'node:url';
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const VALIDATOR = path.join(DIR, 'validate-design-export.mjs');
 const ACK = path.join(DIR, 'acknowledge-design-release.mjs');
+const SOURCE = path.join(DIR, 'design-source.mjs');
 const TEMP = fs.mkdtempSync(path.join(os.tmpdir(), 'design-release-'));
 
-function run(script, expectSuccess, extraArgs = []) {
+function run(script, expectSuccess, extraArgs = [], root = TEMP) {
   try {
-    const output = execFileSync(process.execPath, [script, '--root', TEMP, ...extraArgs], {
+    const output = execFileSync(process.execPath, [script, '--root', root, ...extraArgs], {
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -58,6 +59,7 @@ try {
   assert.match(empty, /No supported screen prototype contracts/);
   assert.match(empty, /design\/design-release\.json is missing/);
   assert.match(empty, /design\/system\/ must contain the normative design system export/);
+  assert.match(empty, /npm run design:source -- --set spec/);
 
   write(
     'design/prototypes/Home.dc.html',
@@ -413,4 +415,67 @@ try {
   console.log('Incremental design release tests passed.');
 } finally {
   fs.rmSync(TEMP, { recursive: true, force: true });
+}
+
+const SPEC = fs.mkdtempSync(path.join(os.tmpdir(), 'design-source-'));
+const writeSpec = (relative, content) => {
+  const file = path.join(SPEC, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content);
+};
+
+try {
+  assert.match(run(SOURCE, true, [], SPEC), /Design source: undecided/);
+
+  // A committed release manifest keeps pre-switch Claude Design products working.
+  writeSpec('design/design-release.json', JSON.stringify(manifest(), null, 2) + '\n');
+  assert.match(
+    run(SOURCE, true, [], SPEC),
+    /Design source: claude-design \(inferred from design\/design-release\.json\)/,
+  );
+
+  // An explicit spec source wins over the manifest and makes the design gate a no-op.
+  assert.match(
+    run(SOURCE, true, ['--set', 'spec', '--brief', 'BRIEF.md'], SPEC),
+    /Design source: spec \(from design\.config\.json\)[\s\S]*brief BRIEF\.md does not exist yet[\s\S]*is ignored while designSource is "spec"/,
+  );
+  assert.deepEqual(
+    JSON.parse(fs.readFileSync(path.join(SPEC, 'design.config.json'), 'utf8')),
+    { designSource: 'spec', brief: 'BRIEF.md' },
+  );
+  const specValidation = run(VALIDATOR, true, [], SPEC);
+  assert.match(specValidation, /Design source is "spec"/);
+  assert.match(run(VALIDATOR, true, ['--accept-acknowledged'], SPEC), /Design source is "spec"/);
+  assert.match(run(ACK, false, [], SPEC), /no Claude Design release to acknowledge/);
+  assert.ok(!fs.existsSync(path.join(SPEC, 'design/design-sync.lock.json')));
+
+  writeSpec('BRIEF.md', '# Brief\n');
+  const json = JSON.parse(run(SOURCE, true, ['--json'], SPEC));
+  assert.equal(json.source, 'spec');
+  assert.equal(json.brief, 'BRIEF.md');
+  assert.ok(!json.warnings.some((warning) => warning.includes('does not exist')));
+
+  // Invalid input fails loudly and never rewrites the committed choice.
+  assert.match(
+    run(SOURCE, false, ['--set', 'spec', '--brief', '../outside.md'], SPEC),
+    /brief must stay inside the repository/,
+  );
+  assert.match(
+    run(SOURCE, false, ['--set', 'claude-design', '--brief', 'BRIEF.md'], SPEC),
+    /--brief is only valid with --set spec/,
+  );
+  assert.match(run(SOURCE, false, ['--set', 'figma'], SPEC), /must be one of: claude-design, spec/);
+  assert.equal(JSON.parse(run(SOURCE, true, ['--json'], SPEC)).brief, 'BRIEF.md');
+
+  writeSpec('design.config.json', JSON.stringify({ designSource: 'none' }) + '\n');
+  assert.match(run(VALIDATOR, false, [], SPEC), /designSource must be one of/);
+
+  assert.match(
+    run(SOURCE, true, ['--set', 'claude-design'], SPEC),
+    /Design source: claude-design \(from design\.config\.json\)/,
+  );
+
+  console.log('Design source tests passed.');
+} finally {
+  fs.rmSync(SPEC, { recursive: true, force: true });
 }

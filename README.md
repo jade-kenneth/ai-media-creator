@@ -69,6 +69,23 @@ Configure MongoDB, JWT, S3, email, Expo/EAS, and deployment credentials before
 using those integrations. App-specific public environment variables are
 documented in each app's `.env.example`.
 
+## Design source
+
+Claude Design is optional. Pick where the product's UI and behavior come from and
+record it in `design.config.json`:
+
+```bash
+npm run design:source -- --set claude-design                        # design in Claude Design
+npm run design:source -- --set spec --brief docs/product-brief.md   # build from a written brief
+```
+
+In spec mode there is no `design/` export. Run `/sync-build-docs <project name>`
+to draft the root build documents from the brief and the boilerplate's own
+design system, approve each screen's spec section, and let Codex build approved
+screens against the Spec QA checklist. See
+[Building without Claude Design](docs/design-handoff.md#building-without-claude-design).
+The rest of this section describes the Claude Design path.
+
 ## Claude Design handoff
 
 Before design work begins, open Claude Code in the product repository and run:

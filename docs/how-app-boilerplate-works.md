@@ -82,9 +82,12 @@ Three separate supply lines feed a product repo, and they are genuinely independ
 
 - **The kit** gives you working backend plumbing on day one.
 - **skills-source** gives the agents their rules.
-- **Claude Design** gives the product its look and scope.
+- **A design source** gives the product its look and scope: Claude Design, or — when you
+  skip it — a written product brief (see §11).
 
-The boilerplate's own UI is scaffolding. It gets discarded — design wins on look, always.
+With Claude Design, the boilerplate's own UI is scaffolding. It gets discarded — design wins
+on look, always. Without it, the boilerplate's component library and tokens become the design
+system, re-branded; only its demo screens are discarded.
 
 ---
 
@@ -472,7 +475,7 @@ rulebook — not the sticky note in one kitchen.*
 
 ## 10. Kit updates, in both directions
 
-Two repos, four memory files, and a deliberately manual middle.
+Two repos, a handful of memory files, and a deliberately manual middle.
 
 ```mermaid
 flowchart TD
@@ -490,7 +493,7 @@ Nothing auto-merges. Updates are proposed, applied on a branch, and acknowledged
 every commit through that SHA was applied **or deliberately declined**. That last clause
 matters: declining is a valid, recorded outcome.
 
-### The four memory files
+### The memory files
 
 Confusing them is the most common source of "why is this failing?"
 
@@ -498,6 +501,7 @@ Confusing them is the most common source of "why is this failing?"
 | --- | --- | --- |
 | `skills-source.lock.json` | You, via `update-skills` | Which rulebook revision are we on? |
 | `boilerplate.lock.json` | You, via `boilerplate:ack` | Which kit updates have we reviewed? |
+| `design.config.json` | You, via `design:source` | Is this product designed in Claude Design or built from a written brief? |
 | `design/design-release.json` | **Claude Design** | What is being delivered in this batch? |
 | `design/design-sync.lock.json` | **The repository**, via `design:ack` | What have we already accepted, and what did it hash to? |
 
@@ -509,7 +513,13 @@ separation is what makes the design gate meaningful.
 
 ## 11. The design pipeline, in brief
 
-Full detail lives in [`docs/claude-design-flow.md`](claude-design-flow.md). The shape:
+Claude Design is optional. `design.config.json` picks the path: `claude-design` follows the
+flow below; `spec` skips the export entirely — `/sync-build-docs` drafts the Product
+Specification from a written brief, you approve each screen, and Codex builds it on the
+boilerplate's own design system against a Spec QA checklist instead of a prototype. See
+[Building without Claude Design](design-handoff.md#building-without-claude-design).
+
+Full detail of the Claude Design path lives in [`docs/claude-design-flow.md`](claude-design-flow.md). The shape:
 
 ```mermaid
 flowchart LR
@@ -571,8 +581,8 @@ flowchart TD
 
 | Actor | Does | Never does |
 | --- | --- | --- |
-| **Claude Design** | Screens, design system, `design-release.json` | Write `design-sync.lock.json` |
-| **Claude Code** | Plans, reconciles, reviews, Fidelity QA, syncs Notion | Implement features unless asked |
+| **Claude Design** (optional) | Screens, design system, `design-release.json` | Write `design-sync.lock.json` |
+| **Claude Code** | Plans, reconciles, reviews, Fidelity QA or Spec QA, syncs Notion | Implement features unless asked |
 | **Codex** | Builds one phase, ticks `[ ] → [~] → [x]` | Edit Notion |
 | **You** | Decide scope, review, approve lock advances | Hand-edit `AGENTS.md` |
 

@@ -3,6 +3,23 @@
 Run this workflow in the product repository created from app-boilerplate, never in
 the reusable boilerplate source repository.
 
+## 0. Choose a design source
+
+Claude Design is optional. The repository-root `design.config.json` records where
+the product's UI and behavior come from:
+
+```bash
+npm run design:source                                               # show the current source
+npm run design:source -- --set claude-design                        # design in Claude Design
+npm run design:source -- --set spec --brief docs/product-brief.md   # build from a written brief
+```
+
+Without the file, a committed `design/design-release.json` means
+`claude-design`, so products that already use Claude Design need no change. With
+neither, `/sync-build-docs` asks once and records the answer. Sections 1–6 below
+describe the Claude Design path; for the spec path, skip to
+[Building without Claude Design](#building-without-claude-design).
+
 ## 1. Prepare the Claude Design prompt
 
 Open Claude Code in the new product repository and run:
@@ -109,7 +126,8 @@ release retires that screen in `removedOrSuperseded`. Logo contracts
 `data-app-root` requirement, since they are not screens.
 
 The `design-gate` workflow runs `npm run design:validate-ci` on every pull request,
-and no-ops in repositories that have no `design/design-release.json` yet. That mode
+and no-ops in repositories that have no `design/design-release.json` yet or whose
+design source is `spec`. That mode
 also accepts the acknowledged steady state, because between releases a committed
 repository has `design-release.json` matching `design-sync.lock.json`, which the
 ordinary transition rules reject on purpose. Prototype hashes are still enforced in
@@ -172,3 +190,36 @@ application work, so the user can simply request the feature, fix, named phase, 
 “next phase” without repeating document-loading instructions. `AGENTS.md` governs
 code structure; the Product Specification wins on look and interaction; the Implementation Plan wins on
 build order and approach.
+
+## Building without Claude Design
+
+With `designSource` set to `spec`, a written product brief replaces the design
+export. There is no `design/` folder to import, no release manifest, and no
+`design:ack`; `npm run design:validate` reports the spec source and passes.
+
+1. Write or point to the brief: purpose, users and roles, surfaces, core flows,
+   screens, data, and brand identity. `/sync-build-docs` gathers anything missing
+   and can write `docs/product-brief.md` for you.
+2. Run `/sync-build-docs <project name>`. Claude Code drafts the root
+   `Product Specification.md` and `Implementation Plan.md` from the brief and the
+   repository's own design system: a text wireframe per screen built from the
+   existing components, verbatim copy, every state, routes, and a production
+   mapping. Anything the brief does not settle is marked `⚠ decision`; screens it
+   only names are `⚠ needs spec`.
+3. Review each screen section and approve it. A screen becomes buildable only
+   when it records `Approved: <date>` and has no open decision. Re-run
+   `/sync-build-docs` whenever the brief changes; the `Spec sync log` at the end
+   of the Implementation Plan tracks the brief's fingerprint.
+4. Codex builds approved screens with the boilerplate's component library and
+   tokens, re-branded per the Product Specification. Boilerplate demo screens are
+   still removed.
+5. Each screen passes the Spec QA checklist — copy, layout, design-system
+   conformance, states, routing, architecture mapping, accessibility, and a
+   screenshot review against its spec section — before it is marked done.
+6. Run `/finalize-build-docs <project name>` once every MVP screen in the brief is
+   approved.
+
+To adopt Claude Design later, run `/prepare-claude-design <project name>`. It
+switches the source to `claude-design`, and each screen that gains a released
+prototype moves from Spec QA to Fidelity QA; only screens whose prototype differs
+from what was built reopen.

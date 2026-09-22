@@ -7,6 +7,10 @@ argument-hint: [project name]
 
 Project name: $ARGUMENTS
 
+0. Run `npm run design:source`. This command applies only to `claude-design`.
+   For `spec`, write no Claude Design request: list each design gap as a
+   `⚠ needs spec` or `⚠ decision` item for the user to settle in the brief and
+   direct them to `/sync-build-docs <project name>`.
 1. Read the repository-root `TASK_<project-slug>.md` for the project name
    above. If it does not exist, stop and direct the user to
    `/generate-project-tasks <project name>` first.

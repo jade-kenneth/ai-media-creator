@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveDesignSource } from './lib/design-source.mjs';
 
 const rootIndex = process.argv.indexOf('--root');
 const ROOT = path.resolve(rootIndex === -1 ? process.cwd() : process.argv[rootIndex + 1] || '');
@@ -14,6 +15,11 @@ const VALIDATOR = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   'validate-design-export.mjs',
 );
+
+if (resolveDesignSource(ROOT).source === 'spec') {
+  console.error('Design source is "spec": there is no Claude Design release to acknowledge.');
+  process.exit(1);
+}
 
 execFileSync(process.execPath, [VALIDATOR, '--root', ROOT], {
   stdio: ['ignore', 'pipe', 'inherit'],

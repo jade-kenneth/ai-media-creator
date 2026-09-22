@@ -51,15 +51,19 @@ reviewed. The full workflow is documented in `docs/boilerplate-updates.md`.
 
 `lib/foundation-config.mjs` is the shared helper behind these: it loads
 `boilerplate-sync.config.json` and classifies paths as foundation or product.
+`lib/design-source.mjs` resolves `design.config.json` for the design scripts.
 
 ## Design handoff (Claude Design → build docs)
 
-The `design/` export from Claude Design is the origin of product look,
-behavior, and scope; these scripts guard its integrity before build docs are
-finalized (see `docs/design-handoff.md`).
+Claude Design is optional. `design.config.json` declares the product's design
+source: `claude-design` (the `design/` export is the origin of product look,
+behavior, and scope, and these scripts guard its integrity before build docs are
+finalized) or `spec` (a written product brief; the validation scripts report the
+source and pass, and acknowledgement is refused). See `docs/design-handoff.md`.
 
 | npm script | File | Purpose |
 | --- | --- | --- |
+| `design:source` | `design-source.mjs` | Prints the resolved design source, or records it with `-- --set <claude-design\|spec> [--brief <path>]`. Without `design.config.json`, a committed `design/design-release.json` resolves to `claude-design`; with neither, the source is undecided. |
 | `design:validate` | `validate-design-export.mjs` | Validates the imported design export against the handoff contract. Run before `/sync-build-docs`, and before `/finalize-build-docs`. |
 | `design:validate-final` | `validate-design-export.mjs --allow-synced` | Same validation, plus it additionally accepts a final release already acknowledged into build docs. It does not reject an unsynchronized final release; `/finalize-build-docs` reconciles that case itself. |
 | `design:validate-ci` | `validate-design-export.mjs --accept-acknowledged` | Same validation, plus it accepts the acknowledged steady state where the release already matches the lock. Used by the `design-gate` workflow, because a committed repository between releases is in exactly that state and plain `design:validate` rejects it by design. Prototype hashes are still enforced, so a changed prototype fails here too. |

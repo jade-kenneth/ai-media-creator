@@ -7,6 +7,12 @@ the same content, see the companion explainer artifact.
 Run every command below in the **product repository** created from `app-boilerplate`,
 never in the reusable boilerplate source repository.
 
+> **Claude Design is optional.** This flow applies when the product's design source is
+> `claude-design`. To build from a written product brief instead, run
+> `npm run design:source -- --set spec --brief <path>` and go straight to
+> `/sync-build-docs`; see
+> [Building without Claude Design](design-handoff.md#building-without-claude-design).
+
 ## The analogy
 
 The project is a building site.

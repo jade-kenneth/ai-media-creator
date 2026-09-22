@@ -23,9 +23,12 @@ jobs:
           if [ ! -f design/design-release.json ]; then
             echo "No design/design-release.json in this repository; nothing to validate."
             echo "Product repositories created from this boilerplate get their release"
-            echo "manifest from the first Claude Design export."
+            echo "manifest from the first Claude Design export. Claude Design is optional;"
+            echo "products built from a written brief set designSource \"spec\" in design.config.json."
             exit 0
           fi
+          # A product whose design.config.json declares designSource "spec" passes here too:
+          # the validator reports the spec source and exits cleanly.
           # Accepts the acknowledged steady state as well as a pending transition. A
           # committed repository normally has release == lock, which the ordinary
           # transition rules reject on purpose, so plain design:validate would fail
