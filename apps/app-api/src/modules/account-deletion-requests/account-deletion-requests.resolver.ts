@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { CurrentTenant } from 'src/common/decorators/current-tenant.decorator';
 import { ServiceValidatedArgs } from 'src/common/decorators/service-validated-args.decorator';
 import type {
   Connection,
@@ -41,8 +42,15 @@ export class AccountDeletionRequestsResolver {
     @Args('sort') sort?: RepositorySort<AccountDeletionRequestRecord>,
     @Args('first') first?: number,
     @Args('after') after?: string,
+    @CurrentTenant() tenantId?: string,
   ): Promise<Connection<AccountDeletionRequest>> {
-    return this.accountDeletionRequestsService.list(filter, sort, first, after);
+    return this.accountDeletionRequestsService.list(
+      filter,
+      sort,
+      first,
+      after,
+      tenantId,
+    );
   }
 
   @Query('adminAccountDeletionRequest')
@@ -50,8 +58,9 @@ export class AccountDeletionRequestsResolver {
   @Roles(UserRole.SUPER_ADMIN)
   async adminAccountDeletionRequest(
     @Args('id') id: string,
+    @CurrentTenant() tenantId?: string,
   ): Promise<AccountDeletionRequest | null> {
-    return this.accountDeletionRequestsService.findById(id);
+    return this.accountDeletionRequestsService.findById(id, tenantId);
   }
 
   @Mutation('reviewAccountDeletionRequest')
@@ -60,7 +69,12 @@ export class AccountDeletionRequestsResolver {
   async reviewAccountDeletionRequest(
     @ServiceValidatedArgs('input') input: ReviewAccountDeletionRequestInput,
     @CurrentUser() user?: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<AccountDeletionRequest> {
-    return this.accountDeletionRequestsService.review(input, user!.id);
+    return this.accountDeletionRequestsService.review(
+      input,
+      user!.id,
+      tenantId,
+    );
   }
 }

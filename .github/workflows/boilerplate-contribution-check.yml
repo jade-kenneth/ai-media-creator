@@ -15,22 +15,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.16.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Detect reusable foundation changes
         env:
           BOILERPLATE_CONTRIBUTION_BASE: origin/${{ github.base_ref }}
-        run: npm run boilerplate:contributions
+        run: pnpm boilerplate:contributions
       - name: Test synchronization automation
-        run: npm run test:sync-automation
+        run: pnpm test:sync-automation
       - name: Test categorized project learning
         run: |
-          npm run sync-skills
-          npm run test:skill-contribution
+          pnpm sync-skills
+          pnpm test:skill-contribution
       - name: Test project identity initialization
         run: |
-          npm run test:project-init
-          npm run project:init -- --non-interactive --name "CI Product" --namespace com.example --domain ci.example.com --dry-run
+          pnpm test:project-init
+          pnpm project:init --non-interactive --name "CI Product" --namespace com.example --domain ci.example.com --dry-run
       - name: Test Claude Design handoff
-        run: npm run test:design-handoff
+        run: pnpm test:design-handoff

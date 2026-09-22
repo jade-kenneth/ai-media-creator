@@ -14,21 +14,30 @@
   gap while reviewing, the fix goes upstream to skills-source, then regenerate.
 - Skills-source repo (for durable rule updates): https://github.com/jade-kenneth/skills-source
 
+## Package manager
+
+- Use pnpm 11.16.0 for installs, workspace scripts, and Nx commands. The pinned
+  version in `package.json` and `pnpm-lock.yaml` is the executable repository
+  contract.
+- Generated `AGENTS.md` may still contain npm examples from the locked upstream
+  skills snapshot. Translate those examples to pnpm in this repository; do not
+  edit the generated file or bypass `pnpm check-skills`.
+
 ## Skills synchronization
 
 - `skills-source.lock.json` is the reviewed source revision for this project.
-- `npm run sync-skills` hydrates that exact revision and regenerates `AGENTS.md`.
-- `npm run update-skills` intentionally advances the lock to latest `main` and
+- `pnpm sync-skills` hydrates that exact revision and regenerates `AGENTS.md`.
+- `pnpm update-skills` intentionally advances the lock to latest `main` and
   regenerates `AGENTS.md`; use `-- --sha <full-sha>` for a specific revision.
-- `npm run check-skills` verifies that committed generated instructions match the
+- `pnpm check-skills` verifies that committed generated instructions match the
   lock. Do not bypass this check and do not edit generated `AGENTS.md` directly.
 - Normal installation only hydrates the locked `.skills-source/` snapshot. It does
   not silently advance the lock or modify tracked files.
 
 ## Design source (Claude Design is optional)
 
-- `design.config.json` declares the source; `npm run design:source` prints it and
-  `npm run design:source -- --set <claude-design|spec> [--brief <path>]` records it.
+- `design.config.json` declares the source; `pnpm design:source` prints it and
+  `pnpm design:source --set <claude-design|spec> [--brief <path>]` records it.
   Without the file, a committed `design/design-release.json` means `claude-design`;
   with neither, ask the user once and record the answer. Never infer `spec` from an
   empty design/ folder.
@@ -58,7 +67,7 @@
 - design/planning/ — context only (flows, IA, scope). Never ported as markup.
 - Conflict order: prototypes > system > planning > repo conventions (code only) >
   boilerplate UI (never wins).
-- Before either build-doc command, run `npm run design:validate`.
+- Before either build-doc command, run `pnpm design:validate`.
 
 ### `spec` — built from a written product brief
 

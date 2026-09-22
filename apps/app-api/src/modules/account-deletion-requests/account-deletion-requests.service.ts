@@ -5,6 +5,7 @@ import {
   NotFoundError,
   ValidationError,
 } from 'src/common/errors/app.error';
+import { applyTenantFilter } from 'src/common/utils/tenant-filter';
 import type {
   Connection,
   RepositoryFilter,
@@ -64,14 +65,21 @@ export class AccountDeletionRequestsService {
     });
   }
 
+  /**
+   * `filter` arrives from the caller, so tenant scope is composed on top of it
+   * rather than trusted from it. Today every caller is a super-admin carrying no
+   * tenant, which passes through unchanged; the composition is what keeps this
+   * safe if the operation is ever opened to tenant-scoped roles.
+   */
   async list(
     filter?: RepositoryFilter<AccountDeletionRequestRecord>,
     sort?: RepositorySort<AccountDeletionRequestRecord>,
     first?: number,
     after?: string,
+    organizationId?: string | null,
   ): Promise<Connection<AccountDeletionRequest>> {
     return this.accountDeletionRequestsRepository
-      .list(filter, {
+      .list(applyTenantFilter(filter, organizationId), {
         sort: sort ?? ACCOUNT_DELETION_REQUESTS_SORT,
       })
       .connection({ first, after });
@@ -79,31 +87,40 @@ export class AccountDeletionRequestsService {
 
   async count(
     filter?: RepositoryFilter<AccountDeletionRequestRecord>,
+    organizationId?: string | null,
   ): Promise<number> {
-    return this.accountDeletionRequestsRepository.count(filter);
+    return this.accountDeletionRequestsRepository.count(
+      applyTenantFilter(filter, organizationId),
+    );
   }
 
-  async findById(id: string): Promise<AccountDeletionRequest | null> {
-    return this.findRecordById(id);
+  async findById(
+    id: string,
+    organizationId?: string | null,
+  ): Promise<AccountDeletionRequest | null> {
+    return this.findRecordById(id, organizationId);
   }
 
   async findRecordById(
     id: string,
+    organizationId?: string | null,
   ): Promise<AccountDeletionRequestRecord | null> {
-    const exists = await this.accountDeletionRequestsRepository.exists({ id });
+    const filter = applyTenantFilter({ id }, organizationId);
+    const exists = await this.accountDeletionRequestsRepository.exists(filter);
 
     if (!exists) {
       return null;
     }
 
-    return this.accountDeletionRequestsRepository.find({ id });
+    return this.accountDeletionRequestsRepository.find(filter);
   }
 
   async review(
     input: ReviewAccountDeletionRequestInput,
     reviewedBy: string,
+    organizationId?: string | null,
   ): Promise<AccountDeletionRequest> {
-    const request = await this.findByIdOrThrow(input.requestId);
+    const request = await this.findByIdOrThrow(input.requestId, organizationId);
 
     if (request.status !== AccountDeletionRequestStatus.PENDING) {
       throw new ForbiddenError(
@@ -146,8 +163,9 @@ export class AccountDeletionRequestsService {
 
   private async findByIdOrThrow(
     id: string,
+    organizationId?: string | null,
   ): Promise<AccountDeletionRequestRecord> {
-    const request = await this.findRecordById(id);
+    const request = await this.findRecordById(id, organizationId);
 
     if (!request) {
       throw new NotFoundError('Account deletion request not found.');

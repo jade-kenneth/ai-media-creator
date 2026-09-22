@@ -6,7 +6,11 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    // Generated output is owned by its generator, not by lint. A formatting
+    // error reported here cannot be fixed durably — the next codegen run
+    // rewrites the file — so it only ever blocks CI. Same rationale as the
+    // generated entries in .prettierignore.
+    ignores: ['eslint.config.mjs', 'src/graphql/generated/**'],
   },
   eslint.configs.recommended,
   eslintPluginPrettierRecommended,

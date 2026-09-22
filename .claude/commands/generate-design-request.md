@@ -7,7 +7,7 @@ argument-hint: [project name]
 
 Project name: $ARGUMENTS
 
-0. Run `npm run design:source`. This command applies only to `claude-design`.
+0. Run `pnpm design:source`. This command applies only to `claude-design`.
    For `spec`, write no Claude Design request: list each design gap as a
    `⚠ needs spec` or `⚠ decision` item for the user to settle in the brief and
    direct them to `/sync-build-docs <project name>`.
@@ -15,7 +15,7 @@ Project name: $ARGUMENTS
    above. If it does not exist, stop and direct the user to
    `/generate-project-tasks <project name>` first.
 2. Read `.skills-source/commands/generate-design-request.md` in full. If the
-   locked snapshot is missing, run `npm run sync-skills` first.
+   locked snapshot is missing, run `pnpm sync-skills` first.
 3. Execute that canonical command exactly with the project name above.
 4. Verify every candidate gap against `Product Specification.md`,
    `design/planning/screen-inventory.md`, and the actual files under
@@ -32,5 +32,5 @@ Project name: $ARGUMENTS
 
 Do not design screens, edit prototypes, or modify the task tracker in this
 command. After Claude Design exports the requested batch, run
-`npm run design:validate`, then `/sync-build-docs <project name>`, then re-run
+`pnpm design:validate`, then `/sync-build-docs <project name>`, then re-run
 `/generate-project-tasks <project name>` to unblock the waiting tasks.

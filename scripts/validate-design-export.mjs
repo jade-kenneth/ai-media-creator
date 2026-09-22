@@ -414,7 +414,7 @@ if (errors.length) {
     'Claude Design release validation failed:\n- ' + errors.join('\n- ') +
       '\nUse /adapt-design-export <project name> for export-contract corrections.' +
       (designSource.source === 'undecided'
-        ? '\nIf this project will not use Claude Design, run: npm run design:source -- --set spec'
+        ? '\nIf this project will not use Claude Design, run: pnpm design:source --set spec'
         : ''),
   );
 }

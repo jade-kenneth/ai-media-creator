@@ -12,12 +12,12 @@ approved rules. The reviewed rules are embedded in the generated root
 
 ## Workspace map
 
-| Path | Owner |
-| --- | --- |
-| `apps/app-api` | NestJS GraphQL/REST API, persistence, auth, integrations, and server orchestration |
-| `apps/app-web` | Next.js tenant and super-admin web application |
-| `apps/app-mobile` | Expo tenant-aware mobile application |
-| `packages/shared-constants` | Stable product-neutral contracts and pure logic used across apps |
+| Path                        | Owner                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `apps/app-api`              | NestJS GraphQL/REST API, persistence, auth, integrations, and server orchestration |
+| `apps/app-web`              | Next.js tenant and super-admin web application                                     |
+| `apps/app-mobile`           | Expo tenant-aware mobile application                                               |
+| `packages/shared-constants` | Stable product-neutral contracts and pure logic used across apps                   |
 
 Use the full **Project Structure** section in `AGENTS.md` for API module layout,
 feature organization, GraphQL placement, generated files, and the placement
@@ -33,5 +33,5 @@ third-party integration scaffolds remain possible boilerplate contributions.
 Run the advisory detector on a product branch with:
 
 ```bash
-npm run boilerplate:contributions
+pnpm boilerplate:contributions
 ```

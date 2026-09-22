@@ -12,12 +12,12 @@ replace them. Stop this workflow and run
 `/adapt-design-export <project name>` instead.
 
 Claude Design is optional, and this command opts the product into it. Run
-`npm run design:source` first; when it reports `spec`, confirm the switch with
+`pnpm design:source` first; when it reports `spec`, confirm the switch with
 the user before continuing. After writing the prompt, record the source with
-`npm run design:source -- --set claude-design`.
+`pnpm design:source --set claude-design`.
 
 1. Read `.skills-source/commands/prepare-claude-design.md` in full. If the locked
-   snapshot is missing, run `npm run sync-skills` first.
+   snapshot is missing, run `pnpm sync-skills` first.
 2. Execute that canonical command exactly, using the project name above wherever
    the canonical command refers to `$ARGUMENTS`.
 3. Write the result to `design/CLAUDE_DESIGN_PROMPT.md` as required by the

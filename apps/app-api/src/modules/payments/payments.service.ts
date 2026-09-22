@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Types } from 'mongoose';
 import { NotFoundError, ValidationError } from 'src/common/errors/app.error';
+import { applyTenantFilter } from 'src/common/utils/tenant-filter';
 import { TOKENS } from 'src/types/tokens';
 import {
   PaymentStatus,
@@ -10,6 +11,7 @@ import {
 } from '../../graphql/generated/graphql';
 import type { AuthenticatedUser } from '../auth/types/auth-context';
 import { toPaymentStatus, XenditGateway } from './gateways/xendit.gateway';
+import type { RepositoryFilter } from 'src/libs/repository';
 import type {
   PaymentRecord,
   PaymentsRepository,
@@ -38,6 +40,7 @@ export class PaymentsService {
   async createPayment(
     currentUser: AuthenticatedUser,
     input: CreatePaymentInput,
+    organizationId?: string | null,
   ): Promise<Payment> {
     if (!Number.isInteger(input.amount) || input.amount < MINIMUM_AMOUNT) {
       throw new ValidationError(
@@ -66,6 +69,7 @@ export class PaymentsService {
       description: input.description?.trim() || null,
       redirectUrl: null,
       webhookEventIds: [],
+      organizationId: organizationId ?? null,
       createdAt: now,
       updatedAt: now,
     });
@@ -106,8 +110,11 @@ export class PaymentsService {
   async findByIdForUser(
     currentUser: AuthenticatedUser,
     id: string,
+    organizationId?: string | null,
   ): Promise<Payment> {
-    const record = await this.findRecord({ id, userId: currentUser.id });
+    const record = await this.findRecord(
+      applyTenantFilter({ id, userId: currentUser.id }, organizationId),
+    );
 
     if (!record) {
       throw new NotFoundError('Payment not found.');
@@ -116,12 +123,14 @@ export class PaymentsService {
     return toPayment(record);
   }
 
-  async listForUser(currentUser: AuthenticatedUser): Promise<Payment[]> {
+  async listForUser(
+    currentUser: AuthenticatedUser,
+    organizationId?: string | null,
+  ): Promise<Payment[]> {
     const records = await this.paymentsRepository
-      .list(
-        { userId: currentUser.id },
-        { sort: { createdAt: 'DESC', id: 'DESC' } },
-      )
+      .list(applyTenantFilter({ userId: currentUser.id }, organizationId), {
+        sort: { createdAt: 'DESC', id: 'DESC' },
+      })
       .collect();
 
     return records.map(toPayment);
@@ -131,6 +140,11 @@ export class PaymentsService {
    * Applies a provider callback. Redeliveries are ignored by event id, and a
    * payment that already reached a terminal status is never moved again, so a
    * late or out-of-order callback cannot revive a settled payment.
+   *
+   * Deliberately unscoped: a webhook carries no session and therefore no tenant
+   * context. `referenceId` is server-generated and unique across tenants, so the
+   * lookup resolves exactly one payment and the tenant is read from the record
+   * rather than supplied by the caller.
    */
   async receiveXenditCallback(body: XenditCallbackBody): Promise<void> {
     const record = await this.findRecord({
@@ -201,7 +215,7 @@ export class PaymentsService {
   }
 
   private async findRecord(
-    filter: Partial<Pick<PaymentRecord, 'id' | 'userId' | 'referenceId'>>,
+    filter: RepositoryFilter<PaymentRecord>,
   ): Promise<PaymentRecord | null> {
     if (!(await this.paymentsRepository.exists(filter))) {
       return null;

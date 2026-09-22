@@ -21,30 +21,31 @@ shared contracts or pure logic in `packages/`.
 
 ## Workspace
 
-| Project | Stack | Purpose |
-| --- | --- | --- |
-| `apps/app-api` | NestJS, GraphQL, MongoDB | API and reusable platform services |
-| `apps/app-web` | Next.js, shadcn/ui | Tenant and super-admin web app |
-| `apps/app-mobile` | Expo, React Native, NativeWind | Tenant-aware mobile starter app |
-| `packages/shared-constants` | TypeScript | Cross-app constants and contracts |
+| Project                     | Stack                          | Purpose                            |
+| --------------------------- | ------------------------------ | ---------------------------------- |
+| `apps/app-api`              | NestJS, GraphQL, MongoDB       | API and reusable platform services |
+| `apps/app-web`              | Next.js, shadcn/ui             | Tenant and super-admin web app     |
+| `apps/app-mobile`           | Expo, React Native, NativeWind | Tenant-aware mobile starter app    |
+| `packages/shared-constants` | TypeScript                     | Cross-app constants and contracts  |
 
 ## Getting started
 
-Prerequisites: Node.js 20+ and npm.
+Prerequisites: Node.js 22.6+ and pnpm 11.16.0. The `packageManager` field pins
+the pnpm release used by local worktrees and CI.
 
 For a repository created from this template, initialize upstream tracking and
 product identity before feature work:
 
 ```bash
-npm run boilerplate:setup
-npm run project:init
+pnpm boilerplate:setup
+pnpm project:init
 ```
 
 The interactive initializer asks for the display name, slug, package scope,
 mobile namespace, optional owned domain, and local database name. For automation:
 
 ```bash
-npm run project:init -- \
+pnpm project:init -- \
   --name "Dala" \
   --namespace com.jadey \
   --domain dala.app
@@ -58,11 +59,11 @@ stable for cleaner boilerplate updates.
 Then install and run the workspace:
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env
-npm run api
-npm run web
-npm run mobile
+pnpm api
+pnpm web
+pnpm mobile
 ```
 
 Configure MongoDB, JWT, S3, email, Expo/EAS, and deployment credentials before
@@ -75,8 +76,8 @@ Claude Design is optional. Pick where the product's UI and behavior come from an
 record it in `design.config.json`:
 
 ```bash
-npm run design:source -- --set claude-design                        # design in Claude Design
-npm run design:source -- --set spec --brief docs/product-brief.md   # build from a written brief
+pnpm design:source --set claude-design                        # design in Claude Design
+pnpm design:source --set spec --brief docs/product-brief.md   # build from a written brief
 ```
 
 In spec mode there is no `design/` export. Run `/sync-build-docs <project name>`
@@ -115,8 +116,8 @@ handoff boundaries without redesigning the screens. Paste it into that existing
 design, export the corrected files into `design/` as the first buildable batch, then run:
 
 ```bash
-npm run sync-skills
-npm run design:validate
+pnpm sync-skills
+pnpm design:validate
 ```
 
 For every validated design batch, open Claude Code and run:
@@ -159,7 +160,7 @@ After a product fix is verified, run:
 
 The command creates a reviewable JSON proposal under `skill-contributions/` and
 routes it to exact skill categories from the locked snapshot, such as `mobile-app`,
-`web-app`, or `api-app`. Run `npm run skills:contribution:validate -- --file <path>`
+`web-app`, or `api-app`. Run `pnpm skills:contribution:validate --file <path>`
 before committing it.
 
 When the proposal reaches the product repository's `main` branch,
@@ -172,28 +173,28 @@ Canonical skill changes still require a separate reviewed promotion PR.
 ## Useful commands
 
 ```bash
-npm run build
-npm run lint
-npm run typecheck
-npm test --workspaces --if-present
-npm run check-skills
+pnpm build
+pnpm lint
+pnpm typecheck
+pnpm -r --if-present test
+pnpm check-skills
 ```
 
 When this template becomes a new product repository, initialize its upstream
 boilerplate tracking once:
 
 ```bash
-npm run boilerplate:setup
+pnpm boilerplate:setup
 git add boilerplate.lock.json
 git commit -m "chore: record boilerplate starting revision"
 ```
 
-Use `npm run boilerplate:check` to report later template updates, then apply
+Use `pnpm boilerplate:check` to report later template updates, then apply
 explicit reviewed commits on a clean product branch with
-`npm run boilerplate:port -- --sha <full-app-boilerplate-sha>`. Run
-`npm run boilerplate:ack -- --sha <full-reviewed-through-sha>` only after every
+`pnpm boilerplate:port --sha <full-app-boilerplate-sha>`. Run
+`pnpm boilerplate:ack --sha <full-reviewed-through-sha>` only after every
 commit through that revision was applied or deliberately declined. Use
-`npm run boilerplate:contributions` to detect product changes that may be worth
+`pnpm boilerplate:contributions` to detect product changes that may be worth
 porting back as reusable architecture. See
 [`docs/boilerplate-updates.md`](docs/boilerplate-updates.md) for the reviewed
 update and contribution workflow.
@@ -201,8 +202,8 @@ update and contribution workflow.
 GraphQL client types are generated from the local API schema:
 
 ```bash
-npm run codegen --workspace=app-web
-npm run codegen --workspace=app-mobile
+pnpm --filter app-web codegen
+pnpm --filter app-mobile codegen
 ```
 
 ## Engineering conventions
@@ -218,5 +219,5 @@ multi-tenancy, the skills/design pipelines, and CI gates — with diagrams throu
   Turnstile, Google sign-in, and Xendit payments; all optional and off by default
 
 Agent instructions are generated from the locked `skills-source` revision. Use
-`npm run sync-skills` to hydrate the locked revision, `npm run update-skills` to
-intentionally update it, and `npm run check-skills` to detect drift.
+`pnpm sync-skills` to hydrate the locked revision, `pnpm update-skills` to
+intentionally update it, and `pnpm check-skills` to detect drift.

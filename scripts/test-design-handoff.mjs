@@ -59,7 +59,7 @@ try {
   assert.match(empty, /No supported screen prototype contracts/);
   assert.match(empty, /design\/design-release\.json is missing/);
   assert.match(empty, /design\/system\/ must contain the normative design system export/);
-  assert.match(empty, /npm run design:source -- --set spec/);
+  assert.match(empty, /pnpm design:source --set spec/);
 
   write(
     'design/prototypes/Home.dc.html',

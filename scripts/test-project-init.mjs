@@ -7,7 +7,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const SCRIPT = path.join(path.dirname(fileURLToPath(import.meta.url)), 'project-init.mjs');
+const SCRIPT = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'project-init.mjs',
+);
 
 function write(root, relativePath, content) {
   const target = path.join(root, relativePath);
@@ -17,11 +20,10 @@ function write(root, relativePath, content) {
 
 function createFixture() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'project-init-'));
-  write(root, 'package.json', '{\n  "name": "@app/boilerplate",\n  "private": true\n}\n');
   write(
     root,
-    'package-lock.json',
-    '{\n  "name": "@app/source",\n  "lockfileVersion": 3,\n  "packages": {\n    "": {\n      "name": "@app/source"\n    }\n  }\n}\n',
+    'package.json',
+    '{\n  "name": "@app/boilerplate",\n  "private": true\n}\n',
   );
   write(
     root,
@@ -106,14 +108,15 @@ function run(root, extra = []) {
 function snapshot(root) {
   const files = [
     'package.json',
-    'package-lock.json',
     'apps/app-mobile/app.json',
     '.env.example',
     'apps/app-api/.env.example',
     'apps/app-web/.env.example',
     'README.md',
   ];
-  return Object.fromEntries(files.map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]));
+  return Object.fromEntries(
+    files.map((file) => [file, fs.readFileSync(path.join(root, file), 'utf8')]),
+  );
 }
 
 const roots = [];
@@ -123,7 +126,11 @@ try {
   const beforeDryRun = snapshot(dryRoot);
   const dryRun = run(dryRoot, ['--dry-run']);
   assert.equal(dryRun.status, 0, dryRun.stderr);
-  assert.deepEqual(snapshot(dryRoot), beforeDryRun, 'dry run must not write files');
+  assert.deepEqual(
+    snapshot(dryRoot),
+    beforeDryRun,
+    'dry run must not write files',
+  );
   assert.match(dryRun.stdout, /No files were written/);
 
   const root = createFixture();
@@ -131,13 +138,14 @@ try {
   const first = run(root);
   assert.equal(first.status, 0, first.stderr);
 
-  const rootPackage = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+  const rootPackage = JSON.parse(
+    fs.readFileSync(path.join(root, 'package.json'), 'utf8'),
+  );
   assert.equal(rootPackage.name, '@dala/workspace');
-  const lock = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
-  assert.equal(lock.name, '@dala/workspace');
-  assert.equal(lock.packages[''].name, '@dala/workspace');
 
-  const mobile = JSON.parse(fs.readFileSync(path.join(root, 'apps/app-mobile/app.json'), 'utf8'));
+  const mobile = JSON.parse(
+    fs.readFileSync(path.join(root, 'apps/app-mobile/app.json'), 'utf8'),
+  );
   assert.equal(mobile.expo.name, 'Dala');
   assert.equal(mobile.expo.slug, 'dala');
   assert.equal(mobile.expo.scheme, 'dala');
@@ -149,13 +157,22 @@ try {
   assert.match(rootEnv, /BREVO_SENDER_NAME=Dala/);
   assert.match(rootEnv, /BREVO_SENDER_EMAIL=no-reply@dala\.app/);
   assert.match(rootEnv, /DEFAULT_ADMIN_EMAIL=admin@dala\.app/);
-  const apiEnv = fs.readFileSync(path.join(root, 'apps/app-api/.env.example'), 'utf8');
+  const apiEnv = fs.readFileSync(
+    path.join(root, 'apps/app-api/.env.example'),
+    'utf8',
+  );
   assert.match(apiEnv, /MONGODB_URI=mongodb:\/\/127\.0\.0\.1:27017\/dala-db/);
   assert.match(apiEnv, /BREVO_SENDER_EMAIL=no-reply@dala\.app/);
-  const webEnv = fs.readFileSync(path.join(root, 'apps/app-web/.env.example'), 'utf8');
+  const webEnv = fs.readFileSync(
+    path.join(root, 'apps/app-web/.env.example'),
+    'utf8',
+  );
   assert.match(webEnv, /NEXT_PUBLIC_APP_NAME=Dala/);
   assert.match(webEnv, /NEXT_PUBLIC_PRIVACY_CONTACT_EMAIL=privacy@dala\.app/);
-  assert.match(fs.readFileSync(path.join(root, 'README.md'), 'utf8'), /^# Dala/);
+  assert.match(
+    fs.readFileSync(path.join(root, 'README.md'), 'utf8'),
+    /^# Dala/,
+  );
 
   const afterFirst = snapshot(root);
   const second = run(root);
@@ -165,19 +182,29 @@ try {
 
   const guardedRoot = createFixture();
   roots.push(guardedRoot);
-  const customPackage = JSON.parse(fs.readFileSync(path.join(guardedRoot, 'package.json'), 'utf8'));
+  const customPackage = JSON.parse(
+    fs.readFileSync(path.join(guardedRoot, 'package.json'), 'utf8'),
+  );
   customPackage.name = '@existing/workspace';
-  fs.writeFileSync(path.join(guardedRoot, 'package.json'), `${JSON.stringify(customPackage, null, 2)}\n`);
+  fs.writeFileSync(
+    path.join(guardedRoot, 'package.json'),
+    `${JSON.stringify(customPackage, null, 2)}\n`,
+  );
   const guardedBefore = snapshot(guardedRoot);
   const guarded = run(guardedRoot);
   assert.notEqual(guarded.status, 0);
   assert.match(guarded.stderr, /already customized/);
-  assert.deepEqual(snapshot(guardedRoot), guardedBefore, 'guard failure must be atomic');
+  assert.deepEqual(
+    snapshot(guardedRoot),
+    guardedBefore,
+    'guard failure must be atomic',
+  );
 
   const forced = run(guardedRoot, ['--force']);
   assert.equal(forced.status, 0, forced.stderr);
   assert.equal(
-    JSON.parse(fs.readFileSync(path.join(guardedRoot, 'package.json'), 'utf8')).name,
+    JSON.parse(fs.readFileSync(path.join(guardedRoot, 'package.json'), 'utf8'))
+      .name,
     '@dala/workspace',
   );
 

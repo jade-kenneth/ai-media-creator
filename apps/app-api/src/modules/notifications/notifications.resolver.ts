@@ -6,6 +6,7 @@ import type {
   NotificationConnection,
   NotificationsFilterInput,
 } from '../../graphql/generated/graphql';
+import { CurrentTenant } from 'src/common/decorators/current-tenant.decorator';
 import type { RepositorySort } from 'src/libs/repository';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { GraphqlAuthGuard } from '../auth/guards/graphql-auth.guard';
@@ -24,6 +25,7 @@ export class NotificationsResolver {
     @Args('first') first?: number,
     @Args('after') after?: string,
     @CurrentUser() user?: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<NotificationConnection> {
     return this.notificationsService.myNotifications(
       user!.id,
@@ -31,6 +33,7 @@ export class NotificationsResolver {
       sort,
       first,
       after,
+      tenantId,
     );
   }
 
@@ -39,15 +42,24 @@ export class NotificationsResolver {
   async markNotificationAsRead(
     @Args('id') id: string,
     @CurrentUser() user?: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<Notification> {
-    return this.notificationsService.markNotificationAsRead(id, user!.id);
+    return this.notificationsService.markNotificationAsRead(
+      id,
+      user!.id,
+      tenantId,
+    );
   }
 
   @Mutation('markAllNotificationsAsRead')
   @UseGuards(GraphqlAuthGuard)
   async markAllNotificationsAsRead(
     @CurrentUser() user?: AuthenticatedUser,
+    @CurrentTenant() tenantId?: string,
   ): Promise<MarkAllNotificationsAsReadResult> {
-    return this.notificationsService.markAllNotificationsAsRead(user!.id);
+    return this.notificationsService.markAllNotificationsAsRead(
+      user!.id,
+      tenantId,
+    );
   }
 }

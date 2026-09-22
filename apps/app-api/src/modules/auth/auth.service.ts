@@ -96,6 +96,7 @@ export class AuthService {
       await this.sessionsService.createSession({
         accountId: user.id,
         jti,
+        organizationId: organization.id,
         dateTimeCreated: new Date(),
         dateTimeLastRefreshed: new Date(),
       });
@@ -183,6 +184,7 @@ export class AuthService {
     await this.sessionsService.createSession({
       accountId: user.id,
       jti,
+      organizationId: user.organizationId ?? null,
       dateTimeCreated: new Date(),
       dateTimeLastRefreshed: new Date(),
     });

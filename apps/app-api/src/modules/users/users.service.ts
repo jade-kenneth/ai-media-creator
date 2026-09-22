@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
 import { NotFoundError } from 'src/common/errors/app.error';
+import { applyTenantFilter } from 'src/common/utils/tenant-filter';
 import type { RepositoryFilter } from 'src/libs/repository';
 import { TOKENS } from 'src/types/tokens';
 import {
@@ -34,29 +35,49 @@ export class UsersService {
     private readonly usersRepository: UsersRepository,
   ) {}
 
-  async findById(id: string): Promise<User | null> {
-    const user = await this.findRecord({ id });
+  async findById(
+    id: string,
+    organizationId?: string | null,
+  ): Promise<User | null> {
+    const user = await this.findRecord(
+      applyTenantFilter({ id }, organizationId),
+    );
 
     return user ? toUser(user) : null;
   }
 
-  async findManyByIds(ids: string[]): Promise<Map<string, User>> {
-    const users = await this.findManyRecordsByIds(ids);
+  async findManyByIds(
+    ids: string[],
+    organizationId?: string | null,
+  ): Promise<Map<string, User>> {
+    const users = await this.findManyRecordsByIds(ids, organizationId);
 
     return new Map(Array.from(users, ([id, user]) => [id, toUser(user)]));
   }
 
+  /**
+   * Unscoped by design: login resolves an account from an email before any
+   * tenant context exists — the tenant is derived from the account this
+   * returns. Email is globally unique, so this cannot cross tenants ambiguously.
+   * Callers that already hold tenant context must use `findById` instead.
+   */
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.findRecord({ email: normalizeEmail(email) });
 
     return user ? toUser(user) : null;
   }
 
-  async findRecordById(id: string): Promise<UserRecord | null> {
-    return this.findRecord({ id });
+  async findRecordById(
+    id: string,
+    organizationId?: string | null,
+  ): Promise<UserRecord | null> {
+    return this.findRecord(applyTenantFilter({ id }, organizationId));
   }
 
-  async findManyRecordsByIds(ids: string[]): Promise<Map<string, UserRecord>> {
+  async findManyRecordsByIds(
+    ids: string[],
+    organizationId?: string | null,
+  ): Promise<Map<string, UserRecord>> {
     const uniqueIds = Array.from(new Set(ids));
 
     if (uniqueIds.length === 0) {
@@ -64,20 +85,27 @@ export class UsersService {
     }
 
     const users = await this.usersRepository
-      .list({
-        id: {
-          in: uniqueIds,
-        },
-      })
+      .list(
+        applyTenantFilter(
+          {
+            id: {
+              in: uniqueIds,
+            },
+          },
+          organizationId,
+        ),
+      )
       .collect();
 
     return new Map(users.map((user) => [user.id, user]));
   }
 
+  /** Unscoped by design — see `findByEmail`. */
   async findRecordByEmail(email: string): Promise<UserRecord | null> {
     return this.findRecord({ email: normalizeEmail(email) });
   }
 
+  /** Unscoped by design: Google sign-in resolves an account before tenant context exists. */
   async findRecordByGoogleSub(googleSub: string): Promise<UserRecord | null> {
     return this.findRecord({ googleSub });
   }
@@ -154,22 +182,21 @@ export class UsersService {
   async updateRecordById(
     id: string,
     data: Partial<UserRecord>,
+    organizationId?: string | null,
   ): Promise<UserRecord | null> {
-    const existingUser = await this.findRecord({ id });
+    const scoped = applyTenantFilter({ id }, organizationId);
+    const existingUser = await this.findRecord(scoped);
 
     if (!existingUser) {
       return null;
     }
 
-    await this.usersRepository.update(
-      { id },
-      {
-        ...data,
-        updatedAt: new Date(),
-      },
-    );
+    await this.usersRepository.update(scoped, {
+      ...data,
+      updatedAt: new Date(),
+    });
 
-    return this.usersRepository.find({ id });
+    return this.usersRepository.find(scoped);
   }
 
   async updatePasswordHash(id: string, passwordHash: string): Promise<void> {
@@ -218,32 +245,45 @@ export class UsersService {
     });
   }
 
-  async findAdminRecords(): Promise<UserRecord[]> {
+  async findAdminRecords(
+    organizationId?: string | null,
+  ): Promise<UserRecord[]> {
     return this.usersRepository
       .list(
-        {
-          role: {
-            equal: UserRole.ADMIN,
+        applyTenantFilter(
+          {
+            role: {
+              equal: UserRole.ADMIN,
+            },
           },
-        },
+          organizationId,
+        ),
         { sort: { createdAt: 'DESC', id: 'DESC' } },
       )
       .collect();
   }
 
-  async countAdminAccounts(isActive?: boolean): Promise<number> {
-    return this.usersRepository.count({
-      role: {
-        equal: UserRole.ADMIN,
-      },
-      ...(typeof isActive === 'boolean'
-        ? {
-            isActive: {
-              equal: isActive,
-            },
-          }
-        : {}),
-    });
+  async countAdminAccounts(
+    isActive?: boolean,
+    organizationId?: string | null,
+  ): Promise<number> {
+    return this.usersRepository.count(
+      applyTenantFilter(
+        {
+          role: {
+            equal: UserRole.ADMIN,
+          },
+          ...(typeof isActive === 'boolean'
+            ? {
+                isActive: {
+                  equal: isActive,
+                },
+              }
+            : {}),
+        },
+        organizationId,
+      ),
+    );
   }
 
   async findAdminEmailsByOrganizationId(
@@ -260,8 +300,10 @@ export class UsersService {
     return admins.map((admin) => admin.email);
   }
 
-  async deleteById(id: string): Promise<void> {
-    await this.usersRepository.delete({ id });
+  async deleteById(id: string, organizationId?: string | null): Promise<void> {
+    await this.usersRepository.delete(
+      applyTenantFilter({ id }, organizationId),
+    );
   }
 
   private async findRecord(

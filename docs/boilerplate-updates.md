@@ -9,7 +9,7 @@ Each product created from this template is an independent repository. Its
 Run this once immediately after creating the product repository:
 
 ```bash
-npm run boilerplate:setup
+pnpm boilerplate:setup
 git add boilerplate.lock.json
 git commit -m "chore: record boilerplate starting revision"
 ```
@@ -23,7 +23,7 @@ safe, and it refuses to overwrite a remote with an unexpected URL.
 If the source revision cannot be detected, provide the exact commit explicitly:
 
 ```bash
-npm run boilerplate:setup -- --sha <full-source-sha>
+pnpm boilerplate:setup --sha <full-source-sha>
 ```
 
 If the same source tree appears at multiple upstream revisions, setup treats the
@@ -33,7 +33,7 @@ revision as reviewed.
 ## Check for updates
 
 ```bash
-npm run boilerplate:check
+pnpm boilerplate:check
 ```
 
 The command fetches upstream and lists commits after the reviewed revision. The
@@ -51,7 +51,7 @@ explicit commits you selected:
 
 ```bash
 git switch -c chore/update-boilerplate
-npm run boilerplate:port -- \
+pnpm boilerplate:port -- \
   --dry-run \
   --sha <full-40-character-sha> \
   --sha <another-full-40-character-sha>
@@ -60,7 +60,7 @@ npm run boilerplate:port -- \
 When the preview is correct, remove `--dry-run`:
 
 ```bash
-npm run boilerplate:port -- \
+pnpm boilerplate:port -- \
   --sha <full-40-character-sha> \
   --sha <another-full-40-character-sha>
 ```
@@ -100,7 +100,7 @@ affected product tests after porting.
 After every commit through a revision has been deliberately applied or declined:
 
 ```bash
-npm run boilerplate:ack -- --sha <full-40-character-sha>
+pnpm boilerplate:ack --sha <full-40-character-sha>
 git add boilerplate.lock.json
 git commit -m "chore: record reviewed boilerplate updates"
 ```
@@ -114,7 +114,7 @@ to the GitHub Actions job summary.
 
 ## Detect reusable discoveries
 
-Product PRs run `npm run boilerplate:contributions`. The command compares the PR
+Product PRs run `pnpm boilerplate:contributions`. The command compares the PR
 with its base branch and reports changes under reusable architecture paths such
 as API common/libs and standard modules, GraphQL and React Query clients,
 providers, shared packages, and CI/scripts. The protected surface is declared in
@@ -152,8 +152,8 @@ Once a change is classified **reusable** or **backported**, port it to
 `app-boilerplate` from the product repository:
 
 ```bash
-npm run boilerplate:contribute -- --dry-run --sha <full-40-character-sha>
-npm run boilerplate:contribute -- --sha <full-40-character-sha> [--branch <name>]
+pnpm boilerplate:contribute --dry-run --sha <full-40-character-sha>
+pnpm boilerplate:contribute --sha <full-40-character-sha> [--branch <name>]
 ```
 
 The command accepts only explicit full SHAs from the product's history, refuses
@@ -169,17 +169,17 @@ review.
 ## Detect foundation drift
 
 ```bash
-npm run boilerplate:foundation-drift [-- --strict]
+pnpm boilerplate:foundation-drift [-- --strict]
 ```
 
 The command compares every foundation path against the reviewed upstream
 revision and classifies each difference:
 
 - **Pending acknowledgement** — the file matches a newer upstream revision (a
-  ported update); finish the review and run `npm run boilerplate:ack`.
+  ported update); finish the review and run `pnpm boilerplate:ack`.
 - **Diverged locally** — the file was changed or added in the product; classify
   the divergence and contribute reusable parts upstream with
-  `npm run boilerplate:contribute`, or record why it stays product-specific.
+  `pnpm boilerplate:contribute`, or record why it stays product-specific.
 
 The scheduled `boilerplate-drift` workflow runs this weekly alongside the update
 check and writes the report to the job summary. With `--strict` the command

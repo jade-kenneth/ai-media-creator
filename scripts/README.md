@@ -63,7 +63,7 @@ source and pass, and acknowledgement is refused). See `docs/design-handoff.md`.
 
 | npm script | File | Purpose |
 | --- | --- | --- |
-| `design:source` | `design-source.mjs` | Prints the resolved design source, or records it with `-- --set <claude-design\|spec> [--brief <path>]`. Without `design.config.json`, a committed `design/design-release.json` resolves to `claude-design`; with neither, the source is undecided. |
+| `design:source` | `design-source.mjs` | Prints the resolved design source, or records it with `--set <claude-design\|spec> [--brief <path>]`. Without `design.config.json`, a committed `design/design-release.json` resolves to `claude-design`; with neither, the source is undecided. |
 | `design:validate` | `validate-design-export.mjs` | Validates the imported design export against the handoff contract. Run before `/sync-build-docs`, and before `/finalize-build-docs`. |
 | `design:validate-final` | `validate-design-export.mjs --allow-synced` | Same validation, plus it additionally accepts a final release already acknowledged into build docs. It does not reject an unsynchronized final release; `/finalize-build-docs` reconciles that case itself. |
 | `design:validate-ci` | `validate-design-export.mjs --accept-acknowledged` | Same validation, plus it accepts the acknowledged steady state where the release already matches the lock. Used by the `design-gate` workflow, because a committed repository between releases is in exactly that state and plain `design:validate` rejects it by design. Prototype hashes are still enforced, so a changed prototype fails here too. |

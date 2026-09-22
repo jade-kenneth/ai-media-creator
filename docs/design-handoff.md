@@ -9,9 +9,9 @@ Claude Design is optional. The repository-root `design.config.json` records wher
 the product's UI and behavior come from:
 
 ```bash
-npm run design:source                                               # show the current source
-npm run design:source -- --set claude-design                        # design in Claude Design
-npm run design:source -- --set spec --brief docs/product-brief.md   # build from a written brief
+pnpm design:source                                            # show the current source
+pnpm design:source --set claude-design                        # design in Claude Design
+pnpm design:source --set spec --brief docs/product-brief.md   # build from a written brief
 ```
 
 Without the file, a committed `design/design-release.json` means
@@ -100,9 +100,9 @@ copied DOM/CSS.
 ## 3. Declare and validate a design release
 
 ```bash
-npm run sync-skills
-npm run check-skills
-npm run design:validate
+pnpm sync-skills
+pnpm check-skills
+pnpm design:validate
 ```
 
 Every export must include `design/design-release.json`. Batch 1 is the first
@@ -125,7 +125,7 @@ release retires that screen in `removedOrSuperseded`. Logo contracts
 (`logo--*.html`) may appear in `readyForBuild` and are exempt from the
 `data-app-root` requirement, since they are not screens.
 
-The `design-gate` workflow runs `npm run design:validate-ci` on every pull request,
+The `design-gate` workflow runs `pnpm design:validate-ci` on every pull request,
 and no-ops in repositories that have no `design/design-release.json` yet or whose
 design source is `spec`. That mode
 also accepts the acknowledged steady state, because between releases a committed
@@ -146,7 +146,7 @@ The project-level command delegates to
 `Product Specification.md` and `Implementation Plan.md`; later batches update
 those same files without resetting unrelated phase history. Only
 `readyForBuild` screens become unblocked. It writes a batch/revision sync report
-and runs `npm run design:ack` only after reconciliation succeeds.
+and runs `pnpm design:ack` only after reconciliation succeeds.
 
 Be ready to confirm:
 
@@ -173,7 +173,7 @@ in-design items, and the final release has been synchronized, run:
 /finalize-build-docs <project name>
 ```
 
-Finalization runs `npm run design:validate-final` and performs the completeness
+Finalization runs `pnpm design:validate-final` and performs the completeness
 gate against the unchanged synchronized final release. It is not required before
 Codex starts architecture or an earlier ready slice.
 
@@ -195,7 +195,7 @@ build order and approach.
 
 With `designSource` set to `spec`, a written product brief replaces the design
 export. There is no `design/` folder to import, no release manifest, and no
-`design:ack`; `npm run design:validate` reports the spec source and passes.
+`design:ack`; `pnpm design:validate` reports the spec source and passes.
 
 1. Write or point to the brief: purpose, users and roles, surfaces, core flows,
    screens, data, and brand identity. `/sync-build-docs` gathers anything missing

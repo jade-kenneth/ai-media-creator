@@ -9,7 +9,7 @@ never in the reusable boilerplate source repository.
 
 > **Claude Design is optional.** This flow applies when the product's design source is
 > `claude-design`. To build from a written product brief instead, run
-> `npm run design:source -- --set spec --brief <path>` and go straight to
+> `pnpm design:source --set spec --brief <path>` and go straight to
 > `/sync-build-docs`; see
 > [Building without Claude Design](design-handoff.md#building-without-claude-design).
 
@@ -17,18 +17,18 @@ never in the reusable boilerplate source repository.
 
 The project is a building site.
 
-| Piece | Role on site |
-| --- | --- |
-| Claude Design | The architect. Draws, never builds. |
-| `design/` export | The sealed drawing tube delivered to site. |
-| `npm run design:validate` | The building inspector at the gate. |
-| `/sync-build-docs` | The foreman turning drawings into a work order. |
-| `Product Specification.md` | The elevation drawings — how it must look. |
-| `Implementation Plan.md` | The construction schedule — what gets built when. |
-| Codex | The crew. Builds exactly to drawing, one phase at a time. |
-| Claude Code | Foreman plus inspector. Plans, reviews, signs off rooms. |
-| `AGENTS.md` + `.skills-source/` | The building code — same rules on every site. |
-| Notion | The office wall board. Crew never writes on it. |
+| Piece                           | Role on site                                              |
+| ------------------------------- | --------------------------------------------------------- |
+| Claude Design                   | The architect. Draws, never builds.                       |
+| `design/` export                | The sealed drawing tube delivered to site.                |
+| `pnpm design:validate`          | The building inspector at the gate.                       |
+| `/sync-build-docs`              | The foreman turning drawings into a work order.           |
+| `Product Specification.md`      | The elevation drawings — how it must look.                |
+| `Implementation Plan.md`        | The construction schedule — what gets built when.         |
+| Codex                           | The crew. Builds exactly to drawing, one phase at a time. |
+| Claude Code                     | Foreman plus inspector. Plans, reviews, signs off rooms.  |
+| `AGENTS.md` + `.skills-source/` | The building code — same rules on every site.             |
+| Notion                          | The office wall board. Crew never writes on it.           |
 
 The point of the whole pipeline: the drawings are binding and machine-checkable, so
 "the app looks a bit off" becomes something you can fail a gate on.
@@ -47,13 +47,13 @@ flowchart TD
 
   CD --> EXPORT["Export lands in design/<br/>prototypes · system · planning · handoff<br/>+ design-release.json"]
 
-  EXPORT --> VAL{"npm run design:validate"}
+  EXPORT --> VAL{"pnpm design:validate"}
   VAL -->|fails| FIX["Fix the export<br/>or /adapt-design-export"]
   FIX --> VAL
 
   VAL -->|passes| SYNC["/sync-build-docs"]
   SYNC --> DOCS["Product Specification.md<br/>Implementation Plan.md"]
-  SYNC --> ACK["npm run design:ack<br/>stamps design-sync.lock.json"]
+  SYNC --> ACK["pnpm design:ack<br/>stamps design-sync.lock.json"]
 
   DOCS --> TASKS["/generate-project-tasks<br/>TASK_&lt;project&gt;.md"]
   TASKS --> CODEX["CODEX builds ONE phase<br/>guided by AGENTS.md"]
@@ -71,13 +71,13 @@ project — design a slice, build a slice, repeat. You do not wait for the whole
 designed before anyone writes code.
 
 Note that the final release is not a separate lane. It is exported, validated, and
-synchronized exactly like every other batch; `/finalize-build-docs` runs *after* that,
+synchronized exactly like every other batch; `/finalize-build-docs` runs _after_ that,
 which is why the arrow into it comes from acknowledgement rather than straight from
 Claude Design.
 
 ## Ownership boundaries
 
-Most confusion here is really a question of *who owns this file*.
+Most confusion here is really a question of _who owns this file_.
 
 - **Claude Design owns `design/`**, including `design-release.json`.
 - **The repository owns `design/design-sync.lock.json`.** Claude Design must never create
@@ -100,7 +100,7 @@ Interviews you on the product problem, users and roles, target surfaces, MVP vs 
 scope, brand, platform requirements, and constraints. Writes the self-contained
 `design/CLAUDE_DESIGN_PROMPT.md` to paste into Claude Design. Never asks for secrets.
 
-*On site: the client brief before the architect draws. Vague here costs a redesign later.*
+_On site: the client brief before the architect draws. Vague here costs a redesign later._
 
 ### 01b — Adapt instead of restarting
 
@@ -113,7 +113,7 @@ overwrite them. This writes `design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md`, which m
 Claude Design inventory its live screens, states, flows, and assets, then add the missing
 handoff metadata while preserving design, copy, and interactions exactly.
 
-*On site: the house is drawn but the title block and scale are missing. Annotate, don't redraw.*
+_On site: the house is drawn but the title block and scale are missing. Annotate, don't redraw._
 
 ### 02 — Import into authority-separated folders
 
@@ -131,8 +131,10 @@ Every screen prototype declares its surface and its production boundary:
 
 ```html
 <body data-prototype-surface="mobile">
-  <div data-preview-shell>        <!-- phone frame, not shipped -->
-    <main data-app-root>          <!-- THE CONTRACT -->
+  <div data-preview-shell>
+    <!-- phone frame, not shipped -->
+    <main data-app-root>
+      <!-- THE CONTRACT -->
       ...actual application screen...
     </main>
   </div>
@@ -153,9 +155,9 @@ Do not rename prototype files to satisfy a convention; both named screen exports
 ### 03 — Declare a release, pass the inspection
 
 ```bash
-npm run sync-skills      # hydrate the locked conventions
-npm run check-skills     # generated AGENTS.md matches the lock
-npm run design:validate  # the gate
+pnpm sync-skills      # hydrate the locked conventions
+pnpm check-skills     # generated AGENTS.md matches the lock
+pnpm design:validate  # the gate
 ```
 
 Every export ships `design/design-release.json`, authored by Claude Design. It names the
@@ -191,10 +193,10 @@ flowchart TD
 The last two checks are the subtle ones. The repository stores a hash of every accepted
 prototype. Edit one and re-export it under the old batch/revision and the gate says
 `design/<file> changed; mark it updated.` And a prototype the current release says
-*nothing* about is still held to its recorded hash — an already-built screen cannot be
+_nothing_ about is still held to its recorded hash — an already-built screen cannot be
 quietly redesigned by omitting it from `readyForBuild`.
 
-*On site: the inspector keeps a photocopy of every drawing they approved.*
+_On site: the inspector keeps a photocopy of every drawing they approved._
 
 ### 04 — Reconcile the release into build documents
 
@@ -212,7 +214,7 @@ boilerplate apps to product surfaces, or a material stack conflict. It confirms 
 database **environment variable name** and a sanitized database name — never a connection
 string, credential, or token.
 
-Only after reconciliation succeeds does it run `npm run design:ack`, stamping
+Only after reconciliation succeeds does it run `pnpm design:ack`, stamping
 `design/design-sync.lock.json` with the batch, revision, release ID, and prototype hashes.
 
 ### 05 — Expand into tasks, build one phase
@@ -238,7 +240,7 @@ does phase status get synced to Notion.
 If a convention gap surfaces during review, the fix goes upstream to skills-source and the
 project regenerates — it is not patched locally.
 
-*On site: snagging. And when the same defect appears on three sites, you change the code, not the wall.*
+_On site: snagging. And when the same defect appears on three sites, you change the code, not the wall._
 
 ### 07 — Finalize, at the end only
 
@@ -250,11 +252,11 @@ Run only when Claude Design sets `"status": "final"` and required MVP scope has 
 `stillInDesign` or `planned` entries. It is **not** a prerequisite for starting — Codex
 builds earlier ready slices long before finalization.
 
-Note what `--allow-synced` does and does not do: it *additionally* accepts a final
+Note what `--allow-synced` does and does not do: it _additionally_ accepts a final
 release that was already acknowledged into the lock. It does not reject an
 unsynchronized final release — a brand-new final batch still passes the transition
 check. The command itself is responsible for reading `design/design-sync.lock.json`,
-reconciling the release when it is newer than the lock, and running `npm run design:ack`
+reconciling the release when it is newer than the lock, and running `pnpm design:ack`
 only after that succeeds.
 
 Afterwards: verify every prototype has a Product Specification section, every planned but
@@ -280,26 +282,26 @@ interaction, Implementation Plan wins on build order and approach.**
 - Restarting a design that already exists instead of running `/adapt-design-export`.
 - Copying prototype DOM/CSS into the app instead of rebuilding with native primitives.
 - Letting Claude Design write `design-sync.lock.json` — that file is repository-owned.
-- Editing generated `AGENTS.md` directly; `npm run check-skills` will catch it.
+- Editing generated `AGENTS.md` directly; `pnpm check-skills` will catch it.
 - Renaming prototype files, or putting batch numbers in filenames.
 - Waiting for the full design before building — `/finalize-build-docs` is the closing gate.
 - Pasting a database connection string; only the env var name and sanitized DB name belong here.
 
 ## Glossary
 
-| Term | Meaning |
-| --- | --- |
-| `data-app-root` | The single element marking where the real application begins. Binding. |
-| `data-preview-shell` | Device frame or canvas for viewing only. Never shipped. |
-| `data-prototype-surface` | `web`, `mobile`, `tablet`, or `desktop`. Exactly one per screen. |
-| `design-release.json` | Claude Design's delivery note: batch, revision, status, screen buckets. |
-| `design-sync.lock.json` | The repository's receipt: last reconciled release, prototype hashes, and the screen each prototype belongs to. |
-| batch / revision | Batch = new ready scope. Revision = correction to released scope. |
-| `readyForBuild` | The only screens a sync unblocks for implementation. |
-| `*.dc.html` | A Design Component export. Supported — don't rename it. |
-| Fidelity QA | Side-by-side review of an implemented screen against its prototype. |
-| skills-source | Upstream conventions repo, pinned by `skills-source.lock.json`. |
-| `⚠ needs design` | Marker on a planned surface with no prototype yet. |
+| Term                     | Meaning                                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `data-app-root`          | The single element marking where the real application begins. Binding.                                         |
+| `data-preview-shell`     | Device frame or canvas for viewing only. Never shipped.                                                        |
+| `data-prototype-surface` | `web`, `mobile`, `tablet`, or `desktop`. Exactly one per screen.                                               |
+| `design-release.json`    | Claude Design's delivery note: batch, revision, status, screen buckets.                                        |
+| `design-sync.lock.json`  | The repository's receipt: last reconciled release, prototype hashes, and the screen each prototype belongs to. |
+| batch / revision         | Batch = new ready scope. Revision = correction to released scope.                                              |
+| `readyForBuild`          | The only screens a sync unblocks for implementation.                                                           |
+| `*.dc.html`              | A Design Component export. Supported — don't rename it.                                                        |
+| Fidelity QA              | Side-by-side review of an implemented screen against its prototype.                                            |
+| skills-source            | Upstream conventions repo, pinned by `skills-source.lock.json`.                                                |
+| `⚠ needs design`         | Marker on a planned surface with no prototype yet.                                                             |
 
 ## Shortest possible summary
 

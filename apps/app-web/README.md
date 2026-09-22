@@ -25,10 +25,10 @@ name, privacy contact, and optional S3 public hostname.
 Run from the repository root:
 
 ```bash
-npm run web
-npm run lint --workspace=app-web
-npm run build --workspace=app-web
-npm run codegen --workspace=app-web
+pnpm web
+pnpm --filter app-web lint
+pnpm --filter app-web build
+pnpm --filter app-web codegen
 ```
 
 The root route redirects to `/login`. Authenticated organization admins use

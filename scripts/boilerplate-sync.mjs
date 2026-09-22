@@ -32,17 +32,25 @@ function tryGit(args) {
 }
 
 function normalizeRepository(value) {
-  return value.trim().replace(/^git@github\.com:/, 'https://github.com/')
+  return value
+    .trim()
+    .replace(/^git@github\.com:/, 'https://github.com/')
     .replace(/^ssh:\/\/git@github\.com\//, 'https://github.com/')
-    .replace(/\.git$/, '').replace(/\/$/, '').toLowerCase();
+    .replace(/\.git$/, '')
+    .replace(/\/$/, '')
+    .toLowerCase();
 }
 
 function readLock() {
   const lock = JSON.parse(fs.readFileSync(LOCK_PATH, 'utf8'));
-  if (typeof lock.repository !== 'string' || typeof lock.ref !== 'string' ||
-      !Array.isArray(lock.appliedUpdates) ||
-      lock.appliedUpdates.some((sha) => !SHA_PATTERN.test(sha)) ||
-      (lock.reviewedThroughSha !== null && !SHA_PATTERN.test(lock.reviewedThroughSha))) {
+  if (
+    typeof lock.repository !== 'string' ||
+    typeof lock.ref !== 'string' ||
+    !Array.isArray(lock.appliedUpdates) ||
+    lock.appliedUpdates.some((sha) => !SHA_PATTERN.test(sha)) ||
+    (lock.reviewedThroughSha !== null &&
+      !SHA_PATTERN.test(lock.reviewedThroughSha))
+  ) {
     throw new Error('boilerplate.lock.json is invalid.');
   }
   return lock;
@@ -54,7 +62,10 @@ function writeLock(lock) {
 
 function isBoilerplateRepository(lock) {
   const origin = tryGit(['remote', 'get-url', 'origin']);
-  return Boolean(origin && normalizeRepository(origin) === normalizeRepository(lock.repository));
+  return Boolean(
+    origin &&
+    normalizeRepository(origin) === normalizeRepository(lock.repository),
+  );
 }
 
 function ensureRemote(lock) {
@@ -62,13 +73,22 @@ function ensureRemote(lock) {
   if (!current) {
     git(['remote', 'add', 'boilerplate', lock.repository]);
     console.log(`Added boilerplate remote: ${lock.repository}`);
-  } else if (normalizeRepository(current) !== normalizeRepository(lock.repository)) {
-    throw new Error(`The boilerplate remote points to ${current}. Refusing to replace it automatically.`);
+  } else if (
+    normalizeRepository(current) !== normalizeRepository(lock.repository)
+  ) {
+    throw new Error(
+      `The boilerplate remote points to ${current}. Refusing to replace it automatically.`,
+    );
   } else {
     console.log('Boilerplate remote is already configured.');
   }
-  git(['fetch', '--quiet', '--prune', 'boilerplate',
-    `+refs/heads/${lock.ref}:refs/remotes/boilerplate/${lock.ref}`]);
+  git([
+    'fetch',
+    '--quiet',
+    '--prune',
+    'boilerplate',
+    `+refs/heads/${lock.ref}:refs/remotes/boilerplate/${lock.ref}`,
+  ]);
   return git(['rev-parse', `refs/remotes/boilerplate/${lock.ref}`]);
 }
 
@@ -76,7 +96,8 @@ function requestedSha({ required = true } = {}) {
   const index = process.argv.indexOf('--sha');
   const sha = index === -1 ? '' : process.argv[index + 1] || '';
   if (!sha && !required) return '';
-  if (!SHA_PATTERN.test(sha)) throw new Error('--sha must be a full 40-character commit SHA.');
+  if (!SHA_PATTERN.test(sha))
+    throw new Error('--sha must be a full 40-character commit SHA.');
   return sha;
 }
 
@@ -86,13 +107,19 @@ function requestedShas() {
     if (process.argv[index] !== '--sha') continue;
     const sha = process.argv[index + 1] || '';
     if (!SHA_PATTERN.test(sha)) {
-      throw new Error('Every --sha must be followed by a full 40-character commit SHA.');
+      throw new Error(
+        'Every --sha must be followed by a full 40-character commit SHA.',
+      );
     }
     shas.push(sha);
     index += 1;
   }
-  if (!shas.length) throw new Error('boilerplate:port requires one or more explicit --sha values.');
-  if (new Set(shas).size !== shas.length) throw new Error('Duplicate --sha selections are not allowed.');
+  if (!shas.length)
+    throw new Error(
+      'boilerplate:port requires one or more explicit --sha values.',
+    );
+  if (new Set(shas).size !== shas.length)
+    throw new Error('Duplicate --sha selections are not allowed.');
   return shas;
 }
 
@@ -128,7 +155,7 @@ function detectStartingSha(lock) {
     if (matches.length > 1) {
       throw new Error(
         'The product source tree matches multiple boilerplate revisions. ' +
-          "Run 'npm run boilerplate:setup -- --sha <full-source-sha>'.",
+          "Run 'pnpm boilerplate:setup --sha <full-source-sha>'.",
       );
     }
     if (matches.length === 1) candidates.add(matches[0]);
@@ -137,18 +164,19 @@ function detectStartingSha(lock) {
   if (candidates.size > 1) {
     throw new Error(
       'Multiple product roots match different boilerplate revisions. ' +
-        "Run 'npm run boilerplate:setup -- --sha <full-source-sha>'.",
+        "Run 'pnpm boilerplate:setup --sha <full-source-sha>'.",
     );
   }
 
   throw new Error(
     'Unable to identify the boilerplate revision used to create this product. ' +
-      "Run 'npm run boilerplate:setup -- --sha <full-source-sha>'.",
+      "Run 'pnpm boilerplate:setup --sha <full-source-sha>'.",
   );
 }
 
 function classify(subject, body) {
-  if (/BREAKING CHANGE|^[a-z]+(?:\(.+\))?!:/i.test(`${subject}\n${body}`)) return 'breaking';
+  if (/BREAKING CHANGE|^[a-z]+(?:\(.+\))?!:/i.test(`${subject}\n${body}`))
+    return 'breaking';
   if (/^(security|fix)(\(.+\))?:/i.test(subject)) return 'required';
   if (/^(feat|perf|refactor)(\(.+\))?:/i.test(subject)) return 'recommended';
   return 'maintenance';
@@ -157,25 +185,39 @@ function classify(subject, body) {
 function availableCommits(fromSha, toSha) {
   const delimiter = '\u001f';
   const record = '\u001e';
-  const output = git(['log', '--reverse',
-    `--format=%H${delimiter}%s${delimiter}%b${record}`, `${fromSha}..${toSha}`]);
+  const output = git([
+    'log',
+    '--reverse',
+    `--format=%H${delimiter}%s${delimiter}%b${record}`,
+    `${fromSha}..${toSha}`,
+  ]);
   if (!output) return [];
-  return output.split(record).map((item) => item.trim()).filter(Boolean).map((item) => {
-    const [sha, subject, body = ''] = item.split(delimiter);
-    return { sha, subject, category: classify(subject, body) };
-  });
+  return output
+    .split(record)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const [sha, subject, body = ''] = item.split(delimiter);
+      return { sha, subject, category: classify(subject, body) };
+    });
 }
 
 function currentBranch() {
   const branch = tryGit(['symbolic-ref', '--quiet', '--short', 'HEAD']);
-  if (!branch) throw new Error('Refusing to port boilerplate updates from a detached HEAD.');
+  if (!branch)
+    throw new Error(
+      'Refusing to port boilerplate updates from a detached HEAD.',
+    );
   return branch;
 }
 
 function configuredDefaultBranches() {
   const branches = new Set(['main', 'master']);
   const originHead = tryGit([
-    'symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD',
+    'symbolic-ref',
+    '--quiet',
+    '--short',
+    'refs/remotes/origin/HEAD',
   ]).replace(/^origin\//, '');
   if (originHead) branches.add(originHead);
   return branches;
@@ -192,7 +234,9 @@ function cherryPickInProgress() {
 
 function assertPortWorkspace(lock) {
   if (isBoilerplateRepository(lock)) {
-    throw new Error('Boilerplate porting is only used in downstream product repositories.');
+    throw new Error(
+      'Boilerplate porting is only used in downstream product repositories.',
+    );
   }
   if (cherryPickInProgress()) {
     throw new Error(
@@ -201,10 +245,14 @@ function assertPortWorkspace(lock) {
   }
   const branch = currentBranch();
   if (configuredDefaultBranches().has(branch)) {
-    throw new Error(`Refusing to port boilerplate updates directly on protected branch '${branch}'.`);
+    throw new Error(
+      `Refusing to port boilerplate updates directly on protected branch '${branch}'.`,
+    );
   }
   if (git(['status', '--porcelain'])) {
-    throw new Error('Refusing to port boilerplate updates with a dirty worktree. Commit or stash changes first.');
+    throw new Error(
+      'Refusing to port boilerplate updates with a dirty worktree. Commit or stash changes first.',
+    );
   }
 }
 
@@ -227,11 +275,20 @@ function hasCherryPickProvenance(sha) {
 }
 
 function alreadyApplied(lock, sha) {
-  return lock.appliedUpdates.includes(sha) || isAncestorOfHead(sha) || hasCherryPickProvenance(sha);
+  return (
+    lock.appliedUpdates.includes(sha) ||
+    isAncestorOfHead(sha) ||
+    hasCherryPickProvenance(sha)
+  );
 }
 
 function orderedUnreviewedShas(fromSha, toSha) {
-  const output = git(['rev-list', '--reverse', '--topo-order', `${fromSha}..${toSha}`]);
+  const output = git([
+    'rev-list',
+    '--reverse',
+    '--topo-order',
+    `${fromSha}..${toSha}`,
+  ]);
   return output ? output.split('\n').filter(Boolean) : [];
 }
 
@@ -252,17 +309,24 @@ function writeSummary(lines) {
 function setup() {
   const lock = readLock();
   if (isBoilerplateRepository(lock)) {
-    console.log('This is the boilerplate source repository; downstream lock initialization was skipped.');
+    console.log(
+      'This is the boilerplate source repository; downstream lock initialization was skipped.',
+    );
     return;
   }
   const latest = ensureRemote(lock);
   if (!lock.reviewedThroughSha) {
-    const startingSha = requestedSha({ required: false }) || detectStartingSha(lock);
+    const startingSha =
+      requestedSha({ required: false }) || detectStartingSha(lock);
     assertUpstreamAncestor(lock, startingSha, latest);
     writeLock({ ...lock, reviewedThroughSha: startingSha });
-    console.log(`Initialized boilerplate lock at source revision ${startingSha}.`);
+    console.log(
+      `Initialized boilerplate lock at source revision ${startingSha}.`,
+    );
     if (startingSha !== latest) {
-      console.log(`Latest upstream is ${latest}; run 'npm run boilerplate:check' to review updates.`);
+      console.log(
+        `Latest upstream is ${latest}; run 'pnpm boilerplate:check' to review updates.`,
+      );
     }
   } else {
     console.log(`Reviewed through: ${lock.reviewedThroughSha}`);
@@ -273,12 +337,16 @@ function setup() {
 function check() {
   const lock = readLock();
   if (isBoilerplateRepository(lock)) {
-    console.log('This is the boilerplate source repository; downstream update detection was skipped.');
+    console.log(
+      'This is the boilerplate source repository; downstream update detection was skipped.',
+    );
     return;
   }
   const latest = ensureRemote(lock);
   if (!lock.reviewedThroughSha) {
-    throw new Error("Boilerplate lock is not initialized. Run 'npm run boilerplate:setup' and commit the lock file.");
+    throw new Error(
+      "Boilerplate lock is not initialized. Run 'pnpm boilerplate:setup' and commit the lock file.",
+    );
   }
   assertUpstreamAncestor(lock, lock.reviewedThroughSha, latest);
   const commits = availableCommits(lock.reviewedThroughSha, latest);
@@ -288,36 +356,64 @@ function check() {
     return;
   }
   console.log(`\n${commits.length} boilerplate update(s) are available:\n`);
-  for (const category of ['breaking', 'required', 'recommended', 'maintenance']) {
+  for (const category of [
+    'breaking',
+    'required',
+    'recommended',
+    'maintenance',
+  ]) {
     const matches = commits.filter((commit) => commit.category === category);
     if (!matches.length) continue;
     console.log(`${category.toUpperCase()}:`);
-    for (const commit of matches) console.log(`- ${commit.sha.slice(0, 12)} ${commit.subject}`);
+    for (const commit of matches)
+      console.log(`- ${commit.sha.slice(0, 12)} ${commit.subject}`);
     console.log('');
   }
   console.log(
     'After inspecting commit diffs, preview or port explicit selections on a clean product branch:\n' +
-      '  npm run boilerplate:port -- --dry-run --sha <full-selected-sha>\n' +
-      '  npm run boilerplate:port -- --sha <full-selected-sha>',
+      '  pnpm boilerplate:port --dry-run --sha <full-selected-sha>\n' +
+      '  pnpm boilerplate:port --sha <full-selected-sha>',
   );
-  console.log(`After every commit through the final boundary was applied or declined, run:\n  npm run boilerplate:ack -- --sha ${latest}`);
-  writeSummary(['## Boilerplate updates available', '',
-    `Reviewed through: \`${lock.reviewedThroughSha}\`  `, `Latest upstream: \`${latest}\``, '',
-    ...commits.map((commit) => `- **${commit.category}** \`${commit.sha.slice(0, 12)}\` ${commit.subject}`),
-    '', 'Preview and port only explicitly selected commits on a clean product branch:', '',
-    '```bash', 'npm run boilerplate:port -- --dry-run --sha <full-selected-sha>',
-    'npm run boilerplate:port -- --sha <full-selected-sha>', '```', '',
-    'After every commit through the final boundary was applied or deliberately declined:', '',
-    '```bash', `npm run boilerplate:ack -- --sha ${latest}`, '```']);
+  console.log(
+    `After every commit through the final boundary was applied or declined, run:\n  pnpm boilerplate:ack --sha ${latest}`,
+  );
+  writeSummary([
+    '## Boilerplate updates available',
+    '',
+    `Reviewed through: \`${lock.reviewedThroughSha}\`  `,
+    `Latest upstream: \`${latest}\``,
+    '',
+    ...commits.map(
+      (commit) =>
+        `- **${commit.category}** \`${commit.sha.slice(0, 12)}\` ${commit.subject}`,
+    ),
+    '',
+    'Preview and port only explicitly selected commits on a clean product branch:',
+    '',
+    '```bash',
+    'pnpm boilerplate:port --dry-run --sha <full-selected-sha>',
+    'pnpm boilerplate:port --sha <full-selected-sha>',
+    '```',
+    '',
+    'After every commit through the final boundary was applied or deliberately declined:',
+    '',
+    '```bash',
+    `pnpm boilerplate:ack --sha ${latest}`,
+    '```',
+  ]);
   if (process.env.GITHUB_ACTIONS) {
-    console.log('::warning::New app-boilerplate revisions are available; see the job summary.');
+    console.log(
+      '::warning::New app-boilerplate revisions are available; see the job summary.',
+    );
   }
 }
 
 function acknowledge() {
   const lock = readLock();
   if (isBoilerplateRepository(lock)) {
-    throw new Error('Boilerplate acknowledgement is only used in downstream product repositories.');
+    throw new Error(
+      'Boilerplate acknowledgement is only used in downstream product repositories.',
+    );
   }
   const latest = ensureRemote(lock);
   const sha = requestedSha();
@@ -331,7 +427,9 @@ function port() {
   const lock = readLock();
   assertPortWorkspace(lock);
   if (!lock.reviewedThroughSha) {
-    throw new Error("Boilerplate lock is not initialized. Run 'npm run boilerplate:setup' first.");
+    throw new Error(
+      "Boilerplate lock is not initialized. Run 'pnpm boilerplate:setup' first.",
+    );
   }
 
   const selected = requestedShas();
@@ -355,13 +453,17 @@ function port() {
       );
     }
     if (alreadyApplied(lock, sha)) {
-      throw new Error(`${sha} was already applied; refusing to apply it twice.`);
+      throw new Error(
+        `${sha} was already applied; refusing to apply it twice.`,
+      );
     }
   }
 
   const selectedSet = new Set(selected);
   const ordered = unreviewed.filter((sha) => selectedSet.has(sha));
-  console.log(`${dryRun ? 'Would port' : 'Porting'} ${ordered.length} boilerplate commit(s) in upstream order:`);
+  console.log(
+    `${dryRun ? 'Would port' : 'Porting'} ${ordered.length} boilerplate commit(s) in upstream order:`,
+  );
   for (const sha of ordered) {
     console.log(`- ${sha} ${git(['show', '-s', '--format=%s', sha])}`);
   }
@@ -389,9 +491,15 @@ function port() {
   }
 
   recordApplied(lock, appliedNow);
-  console.log(`Applied ${appliedNow.length} boilerplate commit(s) with cherry-pick provenance.`);
-  console.log('Updated boilerplate.lock.json.appliedUpdates without advancing reviewedThroughSha.');
-  console.log('Review and commit boilerplate.lock.json separately; acknowledgement remains a separate step.');
+  console.log(
+    `Applied ${appliedNow.length} boilerplate commit(s) with cherry-pick provenance.`,
+  );
+  console.log(
+    'Updated boilerplate.lock.json.appliedUpdates without advancing reviewedThroughSha.',
+  );
+  console.log(
+    'Review and commit boilerplate.lock.json separately; acknowledgement remains a separate step.',
+  );
 }
 
 function requestedBranchName() {
@@ -414,12 +522,15 @@ function commitFiles(sha) {
 function contribute() {
   const lock = readLock();
   if (isBoilerplateRepository(lock)) {
-    throw new Error('Boilerplate contribution is only used in downstream product repositories.');
+    throw new Error(
+      'Boilerplate contribution is only used in downstream product repositories.',
+    );
   }
   const config = loadSyncConfig(ROOT);
   const selected = requestedShas();
   const dryRun = process.argv.includes('--dry-run');
-  const branch = requestedBranchName() ||
+  const branch =
+    requestedBranchName() ||
     `boilerplate-contrib/${new Date().toISOString().slice(0, 10)}-${selected[0].slice(0, 12)}`;
   ensureRemote(lock);
 
@@ -441,7 +552,9 @@ function contribute() {
     if (!files.length) {
       throw new Error(`${sha} contains no file changes to contribute.`);
     }
-    const nonFoundation = files.filter((file) => classifyPath(file, config) !== 'foundation');
+    const nonFoundation = files.filter(
+      (file) => classifyPath(file, config) !== 'foundation',
+    );
     if (nonFoundation.length) {
       throw new Error(
         `${sha} touches paths outside the reusable foundation surface:\n` +
@@ -455,7 +568,9 @@ function contribute() {
   const ordered = git(['rev-list', '--reverse', '--topo-order', 'HEAD'])
     .split('\n')
     .filter((sha) => selectedSet.has(sha));
-  console.log(`${dryRun ? 'Would contribute' : 'Contributing'} ${ordered.length} commit(s) upstream in product-history order:`);
+  console.log(
+    `${dryRun ? 'Would contribute' : 'Contributing'} ${ordered.length} commit(s) upstream in product-history order:`,
+  );
   for (const sha of ordered) {
     console.log(`- ${sha} ${git(['show', '-s', '--format=%s', sha])}`);
   }
@@ -464,11 +579,23 @@ function contribute() {
     return;
   }
 
-  const worktree = fs.mkdtempSync(path.join(os.tmpdir(), 'boilerplate-contrib-'));
-  git(['worktree', 'add', '-b', branch, worktree, `refs/remotes/boilerplate/${lock.ref}`]);
-  const worktreeGit = (args) => execFileSync('git', args, {
-    cwd: worktree, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
+  const worktree = fs.mkdtempSync(
+    path.join(os.tmpdir(), 'boilerplate-contrib-'),
+  );
+  git([
+    'worktree',
+    'add',
+    '-b',
+    branch,
+    worktree,
+    `refs/remotes/boilerplate/${lock.ref}`,
+  ]);
+  const worktreeGit = (args) =>
+    execFileSync('git', args, {
+      cwd: worktree,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }).trim();
 
   for (const sha of ordered) {
     try {
@@ -482,38 +609,67 @@ function contribute() {
     }
   }
 
-  console.log(`\nCreated contribution branch '${branch}' in worktree ${worktree}.`);
+  console.log(
+    `\nCreated contribution branch '${branch}' in worktree ${worktree}.`,
+  );
   console.log('Next steps:');
-  console.log(`  1. Review the result: git -C ${worktree} log --oneline boilerplate/${lock.ref}..HEAD`);
-  console.log(`  2. Push it upstream:  git -C ${worktree} push boilerplate ${branch}`);
-  console.log('     (without upstream write access, push the branch to a fork instead)');
-  console.log('  3. Open a pull request against app-boilerplate main; the maintainer accepts or rejects it there.');
+  console.log(
+    `  1. Review the result: git -C ${worktree} log --oneline boilerplate/${lock.ref}..HEAD`,
+  );
+  console.log(
+    `  2. Push it upstream:  git -C ${worktree} push boilerplate ${branch}`,
+  );
+  console.log(
+    '     (without upstream write access, push the branch to a fork instead)',
+  );
+  console.log(
+    '  3. Open a pull request against app-boilerplate main; the maintainer accepts or rejects it there.',
+  );
   console.log(`  4. Clean up afterwards: git worktree remove ${worktree}`);
 }
 
 function foundationDrift() {
   const lock = readLock();
   if (isBoilerplateRepository(lock)) {
-    console.log('This is the boilerplate source repository; foundation drift detection was skipped.');
+    console.log(
+      'This is the boilerplate source repository; foundation drift detection was skipped.',
+    );
     return;
   }
   if (!lock.reviewedThroughSha) {
-    throw new Error("Boilerplate lock is not initialized. Run 'npm run boilerplate:setup' first.");
+    throw new Error(
+      "Boilerplate lock is not initialized. Run 'pnpm boilerplate:setup' first.",
+    );
   }
   const config = loadSyncConfig(ROOT);
   const strict = process.argv.includes('--strict');
   const latest = ensureRemote(lock);
   assertUpstreamAncestor(lock, lock.reviewedThroughSha, latest);
 
-  const diff = tryGit(['diff', '--name-only', lock.reviewedThroughSha, 'HEAD', '--',
-    ...foundationPathspecs(config)]);
+  const diff = tryGit([
+    'diff',
+    '--name-only',
+    lock.reviewedThroughSha,
+    'HEAD',
+    '--',
+    ...foundationPathspecs(config),
+  ]);
   const files = diff
-    ? diff.split('\n').filter(Boolean).filter((file) => classifyPath(file, config) === 'foundation')
+    ? diff
+        .split('\n')
+        .filter(Boolean)
+        .filter((file) => classifyPath(file, config) === 'foundation')
     : [];
 
   if (!files.length) {
-    console.log(`Foundation paths match the reviewed boilerplate revision ${lock.reviewedThroughSha}.`);
-    writeSummary(['## Foundation drift', '', 'No foundation paths differ from the reviewed boilerplate revision.']);
+    console.log(
+      `Foundation paths match the reviewed boilerplate revision ${lock.reviewedThroughSha}.`,
+    );
+    writeSummary([
+      '## Foundation drift',
+      '',
+      'No foundation paths differ from the reviewed boilerplate revision.',
+    ]);
     return;
   }
 
@@ -522,41 +678,90 @@ function foundationDrift() {
   for (const file of files) {
     const headBlob = tryGit(['rev-parse', `HEAD:${file}`]);
     const latestBlob = tryGit(['rev-parse', `${latest}:${file}`]);
-    if (headBlob && latestBlob && headBlob === latestBlob) pendingAck.push(file);
+    if (headBlob && latestBlob && headBlob === latestBlob)
+      pendingAck.push(file);
     else diverged.push(file);
   }
 
   if (pendingAck.length) {
-    console.log('\nFoundation files matching a newer upstream revision (ported update pending acknowledgement):');
+    console.log(
+      '\nFoundation files matching a newer upstream revision (ported update pending acknowledgement):',
+    );
     for (const file of pendingAck) console.log(`- ${file}`);
-    console.log("Run 'npm run boilerplate:ack -- --sha <reviewed-through-sha>' once the review is complete.");
+    console.log(
+      "Run 'pnpm boilerplate:ack --sha <reviewed-through-sha>' once the review is complete.",
+    );
   }
   if (diverged.length) {
-    console.log('\nFoundation files diverged from upstream (local change or extension):');
+    console.log(
+      '\nFoundation files diverged from upstream (local change or extension):',
+    );
     for (const file of diverged) console.log(`- ${file}`);
-    console.log('Classify each divergence: contribute reusable changes upstream with');
-    console.log("'npm run boilerplate:contribute -- --sha <full-sha>' or record why they stay product-specific.");
+    console.log(
+      'Classify each divergence: contribute reusable changes upstream with',
+    );
+    console.log(
+      "'pnpm boilerplate:contribute --sha <full-sha>' or record why they stay product-specific.",
+    );
   }
-  writeSummary(['## Foundation drift', '',
-    `Reviewed through: \`${lock.reviewedThroughSha}\`  `, `Latest upstream: \`${latest}\``, '',
-    ...(pendingAck.length ? ['### Pending acknowledgement', '', ...pendingAck.map((file) => `- \`${file}\``), ''] : []),
-    ...(diverged.length ? ['### Diverged locally', '', ...diverged.map((file) => `- \`${file}\``), '',
-      'Contribute reusable changes upstream or record why they stay product-specific.'] : [])]);
+  writeSummary([
+    '## Foundation drift',
+    '',
+    `Reviewed through: \`${lock.reviewedThroughSha}\`  `,
+    `Latest upstream: \`${latest}\``,
+    '',
+    ...(pendingAck.length
+      ? [
+          '### Pending acknowledgement',
+          '',
+          ...pendingAck.map((file) => `- \`${file}\``),
+          '',
+        ]
+      : []),
+    ...(diverged.length
+      ? [
+          '### Diverged locally',
+          '',
+          ...diverged.map((file) => `- \`${file}\``),
+          '',
+          'Contribute reusable changes upstream or record why they stay product-specific.',
+        ]
+      : []),
+  ]);
   if (process.env.GITHUB_ACTIONS && diverged.length) {
-    console.log('::warning::Foundation paths diverged from app-boilerplate; see the job summary.');
+    console.log(
+      '::warning::Foundation paths diverged from app-boilerplate; see the job summary.',
+    );
   }
   if (strict && diverged.length) {
-    throw new Error(`${diverged.length} foundation file(s) diverged from upstream.`);
+    throw new Error(
+      `${diverged.length} foundation file(s) diverged from upstream.`,
+    );
   }
 }
 
 const command = process.argv[2] || 'check';
 switch (command) {
-  case 'setup': setup(); break;
-  case 'check': check(); break;
-  case 'port': port(); break;
-  case 'acknowledge': acknowledge(); break;
-  case 'contribute': contribute(); break;
-  case 'foundation-drift': foundationDrift(); break;
-  default: throw new Error(`Unknown command '${command}'. Use setup, check, port, acknowledge, contribute, or foundation-drift.`);
+  case 'setup':
+    setup();
+    break;
+  case 'check':
+    check();
+    break;
+  case 'port':
+    port();
+    break;
+  case 'acknowledge':
+    acknowledge();
+    break;
+  case 'contribute':
+    contribute();
+    break;
+  case 'foundation-drift':
+    foundationDrift();
+    break;
+  default:
+    throw new Error(
+      `Unknown command '${command}'. Use setup, check, port, acknowledge, contribute, or foundation-drift.`,
+    );
 }

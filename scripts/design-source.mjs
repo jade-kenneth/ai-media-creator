@@ -8,9 +8,9 @@ import {
 } from './lib/design-source.mjs';
 
 const USAGE = `Usage:
-  npm run design:source                                 Print the resolved design source
-  npm run design:source -- --set spec [--brief <path>]  Build from a written product brief
-  npm run design:source -- --set claude-design          Build from the Claude Design export
+  pnpm design:source                              Print the resolved design source
+  pnpm design:source --set spec [--brief <path>]  Build from a written product brief
+  pnpm design:source --set claude-design          Build from the Claude Design export
 
 Options:
   --json         Print the resolved source as JSON
@@ -29,7 +29,7 @@ const NEXT_STEP = {
     'Next: /prepare-claude-design <project name>, or /sync-build-docs <project name> after importing a release.',
   spec: 'Next: /sync-build-docs <project name> builds the Product Specification from the brief.',
   undecided:
-    `Next: choose one with npm run design:source -- --set <${DESIGN_SOURCES.join('|')}>.`,
+    `Next: choose one with pnpm design:source --set <${DESIGN_SOURCES.join('|')}>.`,
 };
 
 try {

@@ -13,6 +13,12 @@ export type StorePurchaseRecord = {
   active: boolean;
   expiresAt: Date | null;
   webhookEventIds: string[];
+  /**
+   * Owning tenant, captured from request context when the purchase is first
+   * verified. Store webhooks carry no tenant, so reconciliation reads it from
+   * the record rather than re-deriving it.
+   */
+  organizationId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -35,6 +41,7 @@ export async function StorePurchasesRepositoryFactory(
       active: Boolean,
       expiresAt: Date,
       webhookEventIds: [String],
+      organizationId: String,
       createdAt: Date,
       updatedAt: Date,
     },
@@ -42,6 +49,7 @@ export async function StorePurchasesRepositoryFactory(
       [{ id: 1 }, { unique: true }],
       [{ store: 1, storeReference: 1 }, { unique: true }],
       [{ webhookEventIds: 1 }, { sparse: true }],
+      [{ organizationId: 1, userId: 1, createdAt: -1 }],
     ],
   );
 }

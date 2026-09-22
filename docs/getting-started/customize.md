@@ -7,7 +7,7 @@ Use this checklist immediately after creating a new application from the reposit
 After the new product repository has its own `origin`, run:
 
 ```bash
-npm run boilerplate:setup
+pnpm boilerplate:setup
 git add boilerplate.lock.json
 git commit -m "chore: record boilerplate starting revision"
 ```
@@ -22,7 +22,7 @@ remote before running setup.
 Run the guided initializer:
 
 ```bash
-npm run project:init
+pnpm project:init
 ```
 
 It asks for:
@@ -37,7 +37,7 @@ It asks for:
 For automation or CI-assisted setup, pass the values directly:
 
 ```bash
-npm run project:init -- \
+pnpm project:init -- \
   --name "Dala" \
   --slug dala \
   --scope @dala \
@@ -113,14 +113,14 @@ or environment examples, but none should leak into a production configuration.
 ## 7. Validate the workspace
 
 ```bash
-npm run test:project-init
-npm install
-npm run lint
-npm run typecheck
-npm run build
-npm test --workspaces --if-present
-npm run check-skills
-npm run boilerplate:check
+pnpm test:project-init
+pnpm install
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm -r --if-present test
+pnpm check-skills
+pnpm boilerplate:check
 ```
 
 Document any intentionally skipped check in the pull request.

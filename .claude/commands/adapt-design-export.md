@@ -10,11 +10,11 @@ Project name: $ARGUMENTS
 1. Confirm that screens already exist in the current Claude Design project or
    under `design/prototypes/`. If no design exists, stop and use
    `/prepare-claude-design <project name>`.
-2. Run `npm run design:source`; when it reports `spec`, confirm with the user
+2. Run `pnpm design:source`; when it reports `spec`, confirm with the user
    that the product is switching to Claude Design, and record
-   `npm run design:source -- --set claude-design` once the prompt is written.
+   `pnpm design:source --set claude-design` once the prompt is written.
    Then read `.skills-source/commands/adapt-design-export.md` in full. If the locked
-   snapshot is missing, run `npm run sync-skills` first.
+   snapshot is missing, run `pnpm sync-skills` first.
 3. Execute the canonical command exactly with the project name above.
 4. Write `design/CLAUDE_DESIGN_ADAPTATION_PROMPT.md`. Do not directly rewrite
    prototypes or application code.
@@ -41,6 +41,6 @@ Project name: $ARGUMENTS
 
 Paste the generated adaptation prompt into the same existing Claude Design
 project. After Claude Design audits, repairs, completes defined gaps, and exports
-the first ready batch, run `npm run design:validate`, then
+the first ready batch, run `pnpm design:validate`, then
 `/sync-build-docs <project name>`. Do not wait for later batches before
 implementing the released slice.
