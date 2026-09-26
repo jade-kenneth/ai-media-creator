@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-27-fail-unserved-jobs-and-undo-pre-job-state",
+  "title": "Fail jobs no worker is serving, and undo what the request changed before the job ran",
+  "targetSkills": ["api-app"],
+  "kind": "reliability",
+  "symptom": "A paid generation job stayed in a progress state in the client indefinitely: the job record was still queued with no attempts, no start time and no lease almost an hour after the request, its credits stayed held, and nothing surfaced an error. Every spec passed and earlier jobs of the same type had completed in about a minute.",
+  "rootCause": "The job type belongs to a queue that only a separate worker process claims, and that process was not running. The API accepted the request, held credits and enqueued the job, but nothing ever claims it and nothing fails a job that is never claimed, so a queued job is indistinguishable from a slow one and waits forever. A second gap sat behind it: one request type changes a parent record's state (a status meaning 'in progress') before its job is enqueued and relies on the handler's own catch block to put it back, so any failure that happens without the handler running (never claimed, or crash attempts exhausted) leaves that parent state stuck as well.",
+  "reusableRules": [
+    "New rule for `references/scheduled-work.md` under Rules: when a job queue is claimed by a process other than the one that accepts the request (a separate worker or deploy unit), the accepting side must run a lock-guarded, scheduler-flag-honouring sweep that fails the queue's jobs no worker is serving, with a distinct failure code the client maps to its own copy, and releases any credits or quota held for them. Decide 'unserved' from worker activity on the whole queue, not from a job's age alone: a job waiting behind a long-running one is healthy. Count as activity only writes a worker makes (claim, lease renewal, step progress, completion), so the sweep's own failures never look like a live worker. Make the grace period longer than a worker restart and longer than the lease heartbeat, measure a queued job's wait from when it was last enqueued (a retry re-queues it), and also fail running jobs whose heartbeat has stopped for that long. Fail each job with a conditional update on the status and last-update value it was listed with, so a worker that claims or renews it first wins the race. Leave queues served by the accepting process itself out of the sweep.",
+    "New rule for `references/scheduled-work.md` under Rules: when a request changes other state before its job is enqueued (for example it moves a parent record to an in-progress status), give that job's handler an explicit, optional undo hook and have the runner call it on every path where the job fails without the handler's own error handling running: the unserved sweep, crash-attempt exhaustion, and any similar runner-level failure. Do not rely on the handler's catch block alone, because it never executes for a job that was not claimed or whose worker died. Call the hook only after the conditional fail succeeded, invoke it as a method on the handler so class-based handlers keep their binding, and log and continue if it throws.",
+    "Cover both rules with specs: a queued job with no worker activity past the grace period is failed with the distinct code, its credits are released and the undo hook is called; a job queued behind a running job whose lease is being renewed is left alone; a job a worker claimed after it was listed is not failed; a running job whose heartbeat stopped is failed; and the grace period is asserted to exceed the queue's lease."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.types.ts",
+      "note": "Queue definition gains a per-queue unserved limit (null for the queue the API serves itself) and the handler interface gains the optional undo hook."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.service.ts",
+      "note": "Lists unserved jobs from worker-only activity signals and fails each with a conditional update on the listed status and last update, releasing held credits."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.runner.ts",
+      "note": "Lock-guarded sweep entry point, and the undo hook called after both the unserved fail and crash-attempt exhaustion."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.worker.ts",
+      "note": "The accepting process's 30 s interval that honours the scheduler-enabled flag and runs the sweep for the worker-served queue."
+    },
+    {
+      "path": "apps/app-api/src/modules/exports/exports.service.ts",
+      "note": "The request type that changes parent status before enqueueing registers the undo hook that restores it."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.service.spec.ts",
+      "note": "Specs for unserved failure with credit release and undo, a job behind a live one left alone, the claim race, a stopped heartbeat, the text queue excluded, and grace longer than the lease."
+    }
+  ],
+  "verification": [
+    "The stored job record showed status queued, zero attempts, no start time and no lease about 50 minutes after creation, and no worker process was running on the host; earlier jobs of the same type had started within a second and completed in about a minute.",
+    "The generation-jobs, exports and clip-job suites passed (69 tests), then the full API suite passed (55 suites, 489 tests), and API and web typecheck and lint were clean.",
+    "Live on the development stack: after the API reloaded with the sweep, the stuck job was failed with the new failure code within the first interval and its held credits were released (held balance back to zero); the worker was then started and reported running."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the job and feature names (AI clips, renders), job, project and account ids, the video provider, and database details.",
+    "Overlap check: searched `api-app/SKILL.md` and every `api-app/references/*.md` for worker, unserved, stuck, queued, lease, heartbeat, abandon, undo, compensate and restore. `scheduled-work.md` covers scheduler locks, the scheduler-enabled flag and once-only sweeps, which the sweep follows, but nothing covers jobs no worker claims or undoing state changed before a job ran. Both rules are new additions to `scheduled-work.md`; neither amends an existing rule.",
+    "Related pending proposal `2026-09-26-size-model-timeouts-and-job-leases-from-measured-latency` adds a lease-heartbeat rule to the same reference; these rules depend on a heartbeat existing but do not restate it.",
+    "The exact values (3-minute grace, 30 s sweep interval, 120 s lease) and the client failure copy stay in app source; the rules state the relationships, not the numbers.",
+    "No web-app or mobile-app target: the client side is one failure-code-to-copy mapping, which existing failure-copy conventions already cover."
+  ]
+}

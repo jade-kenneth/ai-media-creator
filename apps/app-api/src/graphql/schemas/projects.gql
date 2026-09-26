@@ -1,0 +1,568 @@
+enum ProjectStatus {
+  DRAFT
+  FACTS_REVIEW
+  SCRIPT_REVIEW
+  MEDIA_REVIEW
+  GENERATING
+  READY
+  EXPORTED
+}
+
+"The readable stage shown on project cards (Design Reference §5.3)."
+enum ProjectStage {
+  DRAFT
+  REVIEWING_FACTS
+  WRITING_SCRIPT
+  SCRIPT_APPROVED
+  CHOOSING_MEDIA
+  GENERATING
+  READY_TO_EXPORT
+  EXPORTED
+}
+
+"""
+Workflow steps in rail order. MEDIA, VOICE, EDIT and EXPORT (the video beta)
+are returned only while the video beta is enabled.
+"""
+enum ProjectStepKey {
+  "Entertainment Studio's first step: genre, premise, cast and format."
+  STORY
+  PRODUCT
+  FACTS
+  STRATEGY
+  SCRIPT
+  MEDIA
+  VOICE
+  EDIT
+  BRIEF
+  EXPORT
+}
+
+"""
+The studio a project is made in. Each studio is one definition in the studio
+registry; more studios follow on the same contract (Product Specification §3.23).
+"""
+enum StudioType {
+  "Marketing: a product video from facts the creator approves."
+  AFFILIATE
+  "Entertainment: a short story in a genre, acted or narrated."
+  ENTERTAINMENT
+}
+
+enum StoryGenre {
+  DRAMA
+  ACTION
+  COMEDY
+  ROMANCE
+  HORROR
+  MYSTERY
+  FANTASY
+  SLICE_OF_LIFE
+}
+
+"How a story is told."
+enum Storytelling {
+  "The cast acts it out: spoken lines acted as beats and the real sound."
+  ACTED
+  "A narrator tells the story over the scenes."
+  NARRATED
+}
+
+enum PremiseKind {
+  SUGGESTED
+  OWN
+}
+
+enum ProjectStepStatus {
+  DONE
+  OPEN
+  LOCKED
+}
+
+enum ProjectListFilter {
+  ALL
+  IN_PROGRESS
+  READY
+  EXPORTED
+}
+
+enum ProjectSortField {
+  LAST_EDITED
+  NAME
+}
+
+enum FieldSource {
+  IMPORTED
+  CREATOR
+  EDITED
+}
+
+enum ProductField {
+  TITLE
+  CATEGORY
+  PRICE
+  DESCRIPTION
+  FEATURES
+  AFFILIATE_URL
+}
+
+enum ImportOutcome {
+  FILLED
+  PARTIAL
+  FAILED
+  NOT_ALLOWED
+}
+
+enum Platform {
+  TIKTOK_SHOP
+  SHOPEE_VIDEO
+  OTHER
+}
+
+enum ScriptLanguage {
+  ENGLISH
+  FILIPINO
+  TAGLISH
+}
+
+enum Tone {
+  FRIENDLY
+  ENERGETIC
+  CALM
+  STRAIGHT_TALKING
+}
+
+enum ContentStyle {
+  VOICEOVER_PRODUCT_SHOTS
+  TALKING_TO_CAMERA
+  TEXT_ONLY
+  HANDS_ON_DEMO
+  "People act out a short scene: spoken lines and the scene's own sound, no narrator."
+  SKIT
+  "A narrated story (Entertainment Studio only; Strategy never offers it)."
+  NARRATION
+}
+
+enum AngleType {
+  USE_CASE
+  FEATURE_DEMO
+  PROBLEM_SOLUTION
+  ROUTINE
+  GIFT_IDEA
+}
+
+enum AngleKind {
+  SUGGESTED
+  OWN
+}
+
+enum FailureNoticeKind {
+  SCRIPT_WRITING
+  ANGLE_SUGGESTIONS
+  AUDIENCE_SUGGESTIONS
+  PREMISE_SUGGESTIONS
+}
+
+type ProductFeature {
+  id: ID!
+  text: String!
+  source: FieldSource!
+}
+
+type ProductFieldSource {
+  field: ProductField!
+  source: FieldSource!
+}
+
+type ProductImport {
+  outcome: ImportOutcome!
+  host: String!
+  filled: [ProductField!]!
+  missing: [ProductField!]!
+  at: DateTime!
+}
+
+type Product {
+  title: String
+  category: String
+  pricePhp: Float
+  description: String
+  affiliateUrl: String
+  features: [ProductFeature!]!
+  fieldSources: [ProductFieldSource!]!
+  importUrl: String
+  lastImport: ProductImport
+}
+
+type SelectedAngle {
+  kind: AngleKind!
+  suggestionId: ID
+  "The angle in words: the suggestion's title, or the creator's own angle."
+  text: String!
+}
+
+type Strategy {
+  buyer: String
+  problem: String
+  benefit: String
+  platform: Platform!
+  language: ScriptLanguage!
+  lengthSeconds: Int!
+  tone: Tone!
+  contentStyle: ContentStyle!
+  selectedAngle: SelectedAngle
+}
+
+type AngleSuggestion {
+  id: ID!
+  type: AngleType!
+  title: String!
+  pitch: String!
+  factIds: [ID!]!
+}
+
+"A buyer, their problem and what they want instead, grounded in approved facts."
+type AudienceSuggestion {
+  id: ID!
+  buyer: String!
+  problem: String!
+  benefit: String!
+  factIds: [ID!]!
+}
+
+type AudienceSuggestionSet {
+  suggestions: [AudienceSuggestion!]!
+  "True when the approved facts changed after these audiences were suggested."
+  isStale: Boolean!
+  createdAt: DateTime!
+}
+
+type AngleSuggestionSet {
+  suggestions: [AngleSuggestion!]!
+  "True when the approved facts changed after these angles were suggested."
+  isStale: Boolean!
+  createdAt: DateTime!
+}
+
+"A character in a story's cast."
+type StoryCharacter {
+  id: ID!
+  "Up to 24 characters, unique in the cast."
+  name: String!
+  "Who they are, up to 80 characters; may be empty."
+  role: String!
+  "How they look, up to 80 characters; may be empty."
+  look: String!
+}
+
+type StoryPremise {
+  kind: PremiseKind!
+  suggestionId: ID
+  "The suggestion's title; empty for the creator's own premise."
+  title: String!
+  "The premise in words: the suggestion's logline, or the creator's own text."
+  logline: String!
+}
+
+"Entertainment Studio's intake. Null for other studios."
+type Story {
+  genre: StoryGenre
+  "An optional short detail AI develops into complete premises."
+  detail: String!
+  premise: StoryPremise
+  "Up to 4, in the creator's order."
+  cast: [StoryCharacter!]!
+  storytelling: Storytelling!
+  language: ScriptLanguage!
+  "30, 45 or 60."
+  lengthSeconds: Int!
+}
+
+type PremiseSuggestion {
+  id: ID!
+  title: String!
+  logline: String!
+  cast: [StoryCharacter!]!
+}
+
+type PremiseSuggestionSet {
+  suggestions: [PremiseSuggestion!]!
+  "The genre they were suggested for."
+  genre: StoryGenre!
+  "The normalized Story detail they were suggested for."
+  detail: String!
+  "True when the story's genre or detail changed after these premises were suggested."
+  isStale: Boolean!
+  createdAt: DateTime!
+}
+
+"One episode of a story's series, for the Story step's Episodes card."
+type StoryEpisode {
+  projectId: ID!
+  episodeNumber: Int!
+  title: String!
+  stage: ProjectStage!
+}
+
+"How the previous episode ended (its approved version's last scene)."
+type StoryPreviously {
+  projectId: ID!
+  episodeNumber: Int!
+  title: String!
+  "Episode 1's premise."
+  seriesPremise: String!
+  "Acted: its lines as `Name: line`, one per line; Narrated: its narration. Empty when it has no approved version."
+  lastScene: String!
+}
+
+"""
+A story's place in its series (Product Specification §3.25). A story that
+never used Next episode is Episode 1 of a series of one (id null).
+"""
+type StorySeries {
+  id: ID
+  episodeNumber: Int!
+  episodeCount: Int!
+  "The creator marked this episode as the one that ends the story."
+  isFinal: Boolean!
+  "Every episode in order; bounded by the 50-episode cap."
+  episodes: [StoryEpisode!]!
+  "Episode 2+ only."
+  previous: StoryPreviously
+  "The previous episode has a newer approved version than the one this episode's script was written from."
+  continuityStale: Boolean!
+}
+
+"A built studio, for the New video chooser (registry order)."
+type StudioInfo {
+  type: StudioType!
+  "The brief's area, e.g. Marketing or Entertainment."
+  area: String!
+  "The New video card title, e.g. Affiliate video or Story."
+  title: String!
+  description: String!
+}
+
+type ProjectStep {
+  key: ProjectStepKey!
+  status: ProjectStepStatus!
+  lockedReason: String
+}
+
+type FailureNotice {
+  kind: FailureNoticeKind!
+}
+
+type ApprovedFact {
+  id: ID!
+  text: String!
+}
+
+type FactsSummary {
+  total: Int!
+  unreviewed: Int!
+  approved: Int!
+  rejected: Int!
+  unknown: Int!
+}
+
+type Project implements Node {
+  id: ID!
+  title: String!
+  "Every project stored before studios existed is AFFILIATE."
+  studio: StudioType!
+  status: ProjectStatus!
+  stage: ProjectStage!
+  hasApprovedScript: Boolean!
+  hasScript: Boolean!
+  productTitle: String
+  "Signed, short-lived URL of the latest export's poster, else the first photo; null when there is neither."
+  thumbnailUrl: String
+  assetCount: Int!
+  lastEditedAt: DateTime!
+  exportCount: Int!
+  latestExportAt: DateTime
+  "The latest export has been downloaded at least once."
+  latestExportDownloaded: Boolean!
+  failureNotice: FailureNotice
+  product: Product!
+  strategy: Strategy!
+  angleSuggestionSet: AngleSuggestionSet
+  audienceSuggestionSet: AudienceSuggestionSet
+  "Entertainment Studio only; null for other studios."
+  story: Story
+  premiseSuggestionSet: PremiseSuggestionSet
+  "Entertainment Studio only; null for other studios."
+  series: StorySeries
+  factsSummary: FactsSummary!
+  approvedFacts: [ApprovedFact!]!
+  steps: [ProjectStep!]!
+  currentStep: ProjectStepKey!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ProjectEdge implements Edge {
+  cursor: Cursor!
+  node: Project!
+}
+
+type ProjectConnection implements Connection {
+  totalCount: Int!
+  edges: [ProjectEdge!]!
+  pageInfo: CursorPageInfo!
+}
+
+type ProjectCounts {
+  all: Int!
+  inProgress: Int!
+  ready: Int!
+  exported: Int!
+}
+
+type ProductImportResult {
+  outcome: ImportOutcome!
+  host: String!
+  filled: [ProductField!]!
+  missing: [ProductField!]!
+  project: Project!
+}
+
+input ProjectFilterInput {
+  stage: ProjectListFilter
+}
+
+input ProjectSortInput {
+  field: ProjectSortField!
+}
+
+input RenameProjectInput {
+  id: ID!
+  title: String!
+}
+
+input ProductFeatureInput {
+  "Omit for a new feature."
+  id: ID
+  text: String!
+}
+
+"""
+Partial product update used by autosave: omitted fields are unchanged, and
+null clears an optional field.
+"""
+input UpdateProductInput {
+  projectId: ID!
+  title: String
+  category: String
+  pricePhp: Float
+  description: String
+  affiliateUrl: String
+  features: [ProductFeatureInput!]
+}
+
+input ImportProductInput {
+  projectId: ID!
+  url: String!
+}
+
+input SelectedAngleInput {
+  kind: AngleKind!
+  suggestionId: ID
+  text: String
+}
+
+"Partial strategy update used by autosave."
+input UpdateStrategyInput {
+  projectId: ID!
+  buyer: String
+  problem: String
+  benefit: String
+  platform: Platform
+  language: ScriptLanguage
+  lengthSeconds: Int
+  tone: Tone
+  contentStyle: ContentStyle
+  selectedAngle: SelectedAngleInput
+}
+
+input SuggestAnglesInput {
+  projectId: ID!
+  idempotencyKey: String!
+}
+
+input SuggestAudiencesInput {
+  projectId: ID!
+  idempotencyKey: String!
+}
+
+input CreateProjectInput {
+  "Defaults to AFFILIATE."
+  studio: StudioType
+}
+
+input StoryCharacterInput {
+  "An existing character's id, or a new client id (8–64 letters, digits, - or _)."
+  id: ID
+  name: String!
+  role: String
+  look: String
+}
+
+input StoryPremiseInput {
+  kind: PremiseKind!
+  "SUGGESTED: one of the current suggestions."
+  suggestionId: ID
+  "OWN: up to 280 characters."
+  text: String
+}
+
+"Partial story update used by autosave; cast replaces the list."
+input UpdateStoryInput {
+  projectId: ID!
+  genre: StoryGenre
+  "Optional context for premise suggestions, up to 160 characters."
+  detail: String
+  "Null clears the premise."
+  premise: StoryPremiseInput
+  cast: [StoryCharacterInput!]
+  storytelling: Storytelling
+  language: ScriptLanguage
+  "30, 45 or 60."
+  lengthSeconds: Int
+  "Episode 2+ only, while no later episode exists: the episode ends the story."
+  isFinal: Boolean
+}
+
+input SuggestPremisesInput {
+  projectId: ID!
+  idempotencyKey: String!
+}
+
+extend type Query {
+  projects(
+    filter: ProjectFilterInput
+    sort: ProjectSortInput
+    pagination: CursorPaginationInput
+  ): ProjectConnection!
+  projectCounts: ProjectCounts!
+  project(id: ID!): Project!
+  "The built studios, in registry order."
+  studios: [StudioInfo!]!
+}
+
+extend type Mutation {
+  createProject(input: CreateProjectInput): Project!
+  renameProject(input: RenameProjectInput!): Project!
+  updateProduct(input: UpdateProductInput!): Project!
+  importProduct(input: ImportProductInput!): ProductImportResult!
+  clearImportedProductValues(projectId: ID!): Project!
+  updateStrategy(input: UpdateStrategyInput!): Project!
+  suggestAngles(input: SuggestAnglesInput!): GenerationJob!
+  "Paid (1 credit): three audiences grounded in the approved facts."
+  suggestAudiences(input: SuggestAudiencesInput!): GenerationJob!
+  "Entertainment Studio: autosaves the story."
+  updateStory(input: UpdateStoryInput!): Project!
+  "Paid (1 credit): three premises for the story's genre."
+  suggestPremises(input: SuggestPremisesInput!): GenerationJob!
+}

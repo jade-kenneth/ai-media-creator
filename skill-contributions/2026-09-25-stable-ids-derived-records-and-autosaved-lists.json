@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-25-stable-ids-derived-records-and-autosaved-lists",
+  "title": "Give records derived on read deterministic ids, and let clients assign ids to new rows of an autosaved whole-list write",
+  "targetSkills": ["api-app", "web-app", "mobile-app"],
+  "kind": "reliability",
+  "symptom": "Two failure modes of an editable list that is replaced whole by an autosaved mutation. (1) For records stored before the list existed, the server derives the list on read without storing it; if each read mints fresh ids, the client's first write refers to ids from one read that the next derivation no longer has, so the write is rejected or treated as all-new rows. (2) A newly added row has no id until the server answers; when a second autosave fires before the first response (or a failed save is retried), the row is sent again without an id and is created twice or rejected as a duplicate name.",
+  "rootCause": "Identity was assigned at the wrong time and place: random ids generated during a read that is not persisted are unstable across reads, and ids assigned only by the server leave an unsaved row without identity for the whole time overlapping or retried saves can carry it.",
+  "reusableRules": [
+    "Add to `references/service-implementation.md` (new subsection “Records derived on read”): when a read derives records it does not store yet — typically a list introduced after existing documents were written, filled from other stored data until the first write — derive each record's id deterministically from a stable natural key (for example a slug of its normalized name, suffixed on collision), never from a random generator, so every read returns the same ids and a write that cites them matches the next derivation. Store the derived list on the first write that changes it, keep the stored field without a schema default so an absent value still means “not stored yet”, and test that two reads return identical ids, that the reads write nothing, and that a write using those ids is stored.",
+    "Add to `references/service-implementation.md` under Validation: a mutation that replaces a whole list accepts a client-assigned id for a new item when it is a bounded opaque string (for example `^[A-Za-z0-9_-]{8,64}$`), keeps it as the item's id, and assigns a server id only when the id is missing or malformed. Match known ids to existing items first, reject the same id twice in one input with a field error, and never let a client id select another tenant's or another parent's record — ids are only looked up inside the list being replaced.",
+    "Amends `references/forms.md` under Drafts and Save-for-Later (web): in an editor whose autosave replaces the whole list, generate a new row's id on the client when the row is created (`crypto.randomUUID()`) and send it with every save, so an overlapping or retried save updates the same row instead of creating it again. Hold a new row back from the saved list until it is valid, so one unfinished row never blocks saving the rest of the list.",
+    "Amends `references/forms.md` under Rules (mobile): the same rule applies to React Native list editors that autosave the whole list — assign the new row's id on the device at creation (`expo-crypto` `randomUUID()` or the platform equivalent), send it on every save, and hold an unfinished new row back until it is valid."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/modules/video-edits/consistent-items.ts",
+      "note": "Derives a list with ids built from slugs of normalized names (suffixed on collision) and validates a whole-list replacement that keeps bounded client ids for new items."
+    },
+    {
+      "path": "apps/app-api/src/modules/video-edits/video-edits.service.spec.ts",
+      "note": "A record stored without the list reads the same derived ids twice, the reads write nothing, and a write using those ids is stored; a new item keeps its client id."
+    },
+    {
+      "path": "apps/app-api/src/modules/video-edits/consistent-items.spec.ts",
+      "note": "Derivation dedupes names case-insensitively, keeps ids unique when two names share a slug, and keeps ids and photos by name when the source changes."
+    },
+    {
+      "path": "apps/app-web/features/keep-consistent/keep-consistent-card.tsx",
+      "note": "The editor assigns `crypto.randomUUID()` to a new row at creation, sends the whole list on every autosave, and leaves an unnamed new row out until it is valid."
+    }
+  ],
+  "verification": [
+    "The API suite passed (42 suites, 327 tests), including the derived-read and whole-list write specs above.",
+    "API and web typecheck, workspace lint and the web production build passed.",
+    "The repository tenant-scope check passed: list items are only looked up inside the tenant-scoped parent record."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the list's domain (what the items describe), the screens, the provider and the phase.",
+    "Dropped a candidate rule already covered: sending an invalid field's last valid value while the rest saves is the existing Drafts and Save-for-Later rule in `web-app/references/forms.md` and Drafts versus final submission in `api-app/references/service-implementation.md`.",
+    "Searched `api-app`, `web-app` and `mobile-app` SKILL.md and references for backfill, read fallback, derived, deterministic, legacy, randomUUID, client id and temporary id; no rule covers ids for records derived on read or client-assigned ids in whole-list writes. The pending proposal `2026-09-25-autosave-patch-merge-collections` covers routing edits through one full-collection patch and does not address row identity.",
+    "The mobile rule is by analogy: this repository has no mobile app, so it is not backed by mobile code here; promotion should confirm the device UUID API for the target Expo SDK."
+  ]
+}

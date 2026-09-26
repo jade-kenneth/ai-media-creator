@@ -59,6 +59,8 @@ export const ME_QUERY = gql`
     me {
       id
       email
+      firstName
+      lastName
       role
       organizationId
       isActive

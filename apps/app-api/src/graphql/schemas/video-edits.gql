@@ -1,0 +1,354 @@
+enum SceneMediaKind {
+  "One of the project's photos or clips."
+  ASSET
+  "The scene's on-screen text on the dark stage."
+  TEXT_CARD
+}
+
+enum PhotoMotion {
+  STILL
+  SLOW_ZOOM
+}
+
+"Why the video can't move on yet, in the order the steps fix them."
+enum VideoEditBlocker {
+  MEDIA_INCOMPLETE
+  VOICE_NOT_SETTLED
+  "The voiceover reads an older script version than the video uses."
+  VOICE_OUTDATED
+  FLAGGED_LINES
+}
+
+enum CaptionStyle {
+  CLEAN
+  BOXED
+  WORD_HIGHLIGHT
+}
+
+type PronunciationRule {
+  word: String!
+  sayAs: String!
+}
+
+type VideoEditVoice {
+  source: VoiceSource!
+  voiceId: String
+  speed: Float!
+  pronunciations: [PronunciationRule!]!
+  "The project's current narration upload."
+  recording: ProjectAsset
+  "The latest voiceover or timed recording made for this video."
+  track: VoiceTrack
+  "The track reads an older script version than the video uses."
+  outdated: Boolean!
+  "Voice, speed or pronunciations changed since the track was made."
+  settingsChanged: Boolean!
+}
+
+type CaptionWord {
+  text: String!
+  startMs: Int!
+  endMs: Int!
+}
+
+"A caption on the video's timeline (milliseconds from the video start)."
+type CaptionLine {
+  id: ID!
+  sceneId: ID!
+  startMs: Int!
+  endMs: Int!
+  "Up to two lines separated by a newline."
+  text: String!
+  edited: Boolean!
+  words: [CaptionWord!]!
+  flags: [ClaimFlag!]!
+}
+
+type VideoEditCaptions {
+  enabled: Boolean!
+  style: CaptionStyle!
+  lines: [CaptionLine!]!
+  "Captions come from the voiceover or the spoken lines and can be edited (false with No voiceover)."
+  editable: Boolean!
+}
+
+"The project's current music upload, played under the voice."
+type VideoEditMusic {
+  asset: ProjectAsset
+  levelPercent: Int!
+}
+
+"The caption the creator posts with the video (not burned in)."
+type PostCaption {
+  text: String!
+  "Starts the copied caption with #ad."
+  adTag: Boolean!
+  flags: [ClaimFlag!]!
+}
+
+"2 seconds at the end: the product name and call to action, or for a story its title and end line."
+type VideoEditEndCard {
+  enabled: Boolean!
+  durationSeconds: Int!
+  productTitle: String
+  cta: String
+  "Stories: the project title."
+  storyTitle: String
+  "Stories: an optional closing line, up to 60 characters."
+  endLine: String
+}
+
+type SceneMedia {
+  kind: SceneMediaKind!
+  "The photo or clip; null for a text card."
+  asset: ProjectAsset
+  "Photos only; clips and text cards read STILL."
+  motion: PhotoMotion!
+  "Clips only: where in the clip the scene starts, in seconds."
+  clipStartSeconds: Float!
+}
+
+"Whether a Keep consistent item is the product or a prop."
+enum ConsistentItemKind {
+  PRODUCT
+  PROP
+  "Stories: a character from the cast."
+  CHARACTER
+}
+
+"Something that must look the same in every AI clip it appears in."
+type ConsistentItem {
+  id: ID!
+  kind: ConsistentItemKind!
+  "For PRODUCT, the product's title."
+  name: String!
+  "The scenes it appears in."
+  sceneIds: [ID!]!
+  "The creator's photo of it; null until one is chosen."
+  photo: ProjectAsset
+  "CHARACTER only: the creator confirmed the person agreed to appear, or that they have the rights to the character."
+  likenessConfirmed: Boolean!
+}
+
+"Whether a clip scene plays the clip's own sound, and how loud."
+type ClipSound {
+  on: Boolean!
+  "0 to 100."
+  levelPercent: Int!
+}
+
+type VideoEditScene {
+  sceneId: ID!
+  order: Int!
+  purpose: ScenePurpose!
+  narration: String!
+  "The approved version's spoken lines (skits); empty for narrated scenes."
+  lines: [SceneLine!]!
+  "The approved version's natural sound cue (skits); null when none."
+  sound: String
+  "Used only when the scene's media is a clip. Skits start with it on."
+  clipSound: ClipSound!
+  visual: String!
+  onScreenText: String!
+  transitionIn: SceneTransition!
+  "The approved version's shot direction; null when the scene has none."
+  direction: SceneDirection
+  cta: String
+  durationSeconds: Int!
+  "Where the scene starts in the video, in seconds."
+  startSeconds: Int!
+  "Null until chosen, and when its photo or clip was removed."
+  media: SceneMedia
+  flags: [ClaimFlag!]!
+}
+
+type ScriptVersionRef {
+  id: ID!
+  number: Int!
+  approvedAt: DateTime
+}
+
+type VideoEditReadiness {
+  mediaComplete: Boolean!
+  missingMediaCount: Int!
+  voiceSettled: Boolean!
+  voiceOutdated: Boolean!
+  blocking: [VideoEditBlocker!]!
+}
+
+"What AI clip descriptions take from the script for the whole video."
+type ClipContext {
+  "The language the pinned version's lines and narration are written in."
+  language: ScriptLanguage!
+  "The project's tone, which the acting follows."
+  tone: Tone!
+  "How the pinned version's chosen hook opens the video; null when it has none."
+  openingShot: String
+  "Stories: the genre, which sets the mood; null for other studios."
+  genre: StoryGenre
+  "Stories: the cast, so descriptions can name each character with their look; empty for other studios."
+  cast: [StoryCharacter!]!
+}
+
+"""
+The video built from one approved script version. The version never changes
+underneath it: a newer approval is offered, and applies only when switched.
+"""
+type VideoEdit implements Node {
+  id: ID!
+  projectId: ID!
+  scriptVersion: ScriptVersionRef!
+  newerApprovedVersion: ScriptVersionRef
+  "The shoot plan of the version the video uses; null on versions written before shot direction existed."
+  shoot: ShootPlan
+  clipContext: ClipContext!
+  scenes: [VideoEditScene!]!
+  "Sum of scene lengths. With a voiceover, each scene lasts as long as its voice segment."
+  totalSeconds: Int!
+  voice: VideoEditVoice!
+  captions: VideoEditCaptions!
+  music: VideoEditMusic!
+  endCard: VideoEditEndCard!
+  postCaption: PostCaption!
+  readiness: VideoEditReadiness!
+  "AI scene clips can be requested (both feature flags on and the video service set up)."
+  aiClipsEnabled: Boolean!
+  "What must look the same across AI clips: the product first, then the script's props (stories: characters, then props). At most 8, so capped, not paginated."
+  consistentItems: [ConsistentItem!]!
+  "The project's studio."
+  studio: StudioType!
+  updatedAt: DateTime!
+}
+
+input SceneMediaChoiceInput {
+  kind: SceneMediaKind!
+  "Required for ASSET: a ready photo or clip of this project."
+  assetId: ID
+  "Photos only; defaults to SLOW_ZOOM."
+  motion: PhotoMotion
+  "Clips only; defaults to 0. Steps of 0.5 seconds."
+  clipStartSeconds: Float
+}
+
+input SceneMediaInput {
+  sceneId: ID!
+  "Null clears the scene."
+  media: SceneMediaChoiceInput
+}
+
+input PronunciationRuleInput {
+  word: String!
+  sayAs: String!
+}
+
+input VoiceSettingsInput {
+  source: VoiceSource
+  "One of voiceOptions; null clears the pick."
+  voiceId: String
+  "0.9, 1.0 or 1.1."
+  speed: Float
+  "Up to 20 words; replaces the whole list."
+  pronunciations: [PronunciationRuleInput!]
+}
+
+input SceneTextInput {
+  sceneId: ID!
+  "Up to 60 characters."
+  onScreenText: String!
+}
+
+input SceneTransitionInput {
+  sceneId: ID!
+  transitionIn: SceneTransition!
+}
+
+input SceneDurationInput {
+  sceneId: ID!
+  "2 to 15 seconds; only with No voiceover or Sound from your clips."
+  durationSeconds: Int!
+}
+
+input ClipSoundInput {
+  sceneId: ID!
+  on: Boolean!
+  "0 to 100 in steps of 5."
+  levelPercent: Int!
+}
+
+input CaptionLineInput {
+  id: ID!
+  "At most 2 lines of 32 characters, separated by a newline."
+  text: String!
+}
+
+input CaptionsInput {
+  enabled: Boolean
+  style: CaptionStyle
+  lines: [CaptionLineInput!]
+}
+
+input ConsistentItemInput {
+  "An existing item's id. A new item omits it or sends a new one."
+  id: ID
+  "1–60 characters. Ignored for the product, which reads the product's title."
+  name: String!
+  "Scenes of this video; the product needs at least one."
+  sceneIds: [ID!]!
+  "A ready photo the creator uploaded to this project; null clears it."
+  assetId: ID
+  "CHARACTER items: required true when the photo is set or changed."
+  likenessConfirmed: Boolean
+}
+
+input UpdateVideoEditInput {
+  projectId: ID!
+  sceneMedia: [SceneMediaInput!]
+  voice: VoiceSettingsInput
+  "Every scene id, in the new order."
+  sceneOrder: [ID!]
+  sceneText: [SceneTextInput!]
+  sceneTransitions: [SceneTransitionInput!]
+  sceneDurations: [SceneDurationInput!]
+  clipSounds: [ClipSoundInput!]
+  captions: CaptionsInput
+  "0 to 100 in steps of 5."
+  musicLevelPercent: Int
+  endCardEnabled: Boolean
+  "Up to 2,200 characters (TikTok's caption limit)."
+  postCaption: String
+  adTag: Boolean
+  "Replaces the Keep consistent list: the product stays, at most 8 items."
+  consistentItems: [ConsistentItemInput!]
+  "Stories: the end card's closing line, up to 60 characters; empty clears it."
+  endLine: String
+}
+
+input VoiceJobInput {
+  projectId: ID!
+  idempotencyKey: String!
+}
+
+input SwitchVideoEditVersionInput {
+  projectId: ID!
+  scriptVersionId: ID!
+}
+
+extend type Query {
+  "The project's video; null until it is started from an approved script."
+  videoEdit(projectId: ID!): VideoEdit
+}
+
+extend type Mutation {
+  "Starts the video from the newest approved script version; repeat calls return it."
+  startVideoEdit(projectId: ID!): VideoEdit!
+  updateVideoEdit(input: UpdateVideoEditInput!): VideoEdit!
+  "Places ready photos and clips, in upload order, into empty scenes only. Free."
+  autoFillSceneMedia(projectId: ID!): VideoEdit!
+  switchVideoEditVersion(input: SwitchVideoEditVersionInput!): VideoEdit!
+  "Paid (2 credits): reads the approved script in the chosen voice, scene by scene."
+  generateVoiceover(input: VoiceJobInput!): GenerationJob!
+  "Paid (1 credit): times the creator's recording to the script."
+  alignRecording(input: VoiceJobInput!): GenerationJob!
+  "Replaces caption edits with the voiceover's or the spoken lines' words."
+  resetCaptions(projectId: ID!): VideoEdit!
+}

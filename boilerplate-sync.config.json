@@ -18,7 +18,6 @@
     "apps/app-api/src/modules/s3/**",
     "apps/app-api/src/modules/scheduler-locks/**",
     "apps/app-api/src/modules/sessions/**",
-    "apps/app-api/src/modules/store-purchases/**",
     "apps/app-api/src/modules/users/**",
     "apps/app-web/components/**",
     "apps/app-web/lib/**",
@@ -26,11 +25,6 @@
     "apps/app-web/react-query/**",
     "apps/app-web/codegen.ts",
     "apps/app-web/proxy.ts",
-    "apps/app-mobile/components/**",
-    "apps/app-mobile/providers/**",
-    "apps/app-mobile/react-query/**",
-    "apps/app-mobile/theme/**",
-    "apps/app-mobile/codegen.ts",
     "packages/**",
     "scripts/**"
   ],
@@ -38,8 +32,6 @@
     "apps/app-api/src/modules/**",
     "apps/app-api/src/scripts/**",
     "apps/app-web/app/**",
-    "apps/app-web/features/**",
-    "apps/app-mobile/app/**",
-    "apps/app-mobile/features/**"
+    "apps/app-web/features/**"
   ]
 }

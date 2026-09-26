@@ -7,11 +7,9 @@ Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 
 | Variable | Type | Required | Default |
 | --- | --- | --- | --- |
-| `APPLE_IAP_APP_ID` | number | no | — |
-| `APPLE_IAP_BUNDLE_ID` | string | no | — |
-| `APPLE_IAP_ENABLED` | boolean | no | `false` |
-| `APPLE_IAP_ENVIRONMENT` | enum(SANDBOX, PRODUCTION) | no | — |
-| `APPLE_IAP_ROOT_CA_BASE64` | string | no | — |
+| `AI_CLIPS_ENABLED` | boolean | no | `false` |
+| `ANTHROPIC_API_KEY` | string | no | — |
+| `ANTHROPIC_TEXT_MODEL` | string | no | `claude-opus-5` |
 | `AWS_ACCESS_KEY_ID` | string | **yes** | — |
 | `AWS_REGION` | string | **yes** | — |
 | `AWS_S3_BUCKET` | string | **yes** | — |
@@ -26,54 +24,45 @@ Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 | `CORS_MAX_AGE_SECONDS` | number | no | `86400` |
 | `CORS_METHODS` | string | no | `DEFAULT_CORS_METHODS` |
 | `CORS_ORIGINS` | string | no | `DEFAULT_CORS_ORIGINS` |
-| `EXPO_PUSH_ACCESS_TOKEN` | string | no | — |
-| `EXPO_PUSH_ENABLED` | boolean | no | `true` |
+| `DEEPSEEK_API_KEY` | string | no | — |
+| `DEEPSEEK_TEXT_MODEL` | string | no | `deepseek-v4-pro` |
+| `ELEVENLABS_API_KEY` | string | no | — |
+| `ELEVENLABS_MODEL_ID` | string | no | — |
+| `ELEVENLABS_VOICE_IDS` | string | no | `[]` |
+| `FFMPEG_PATH` | string | no | `ffmpeg` |
+| `FFPROBE_PATH` | string | no | `ffprobe` |
 | `GOOGLE_OAUTH_CLIENT_IDS` | string | no | `[]` |
 | `GOOGLE_OAUTH_ENABLED` | boolean | no | `false` |
-| `GOOGLE_PLAY_PACKAGE_NAME` | string | no | — |
-| `GOOGLE_PLAY_PUBSUB_AUDIENCE` | string | no | — |
-| `GOOGLE_PLAY_PUBSUB_SERVICE_ACCOUNT_EMAIL` | string | no | — |
-| `GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64` | string | no | — |
 | `HSTS_MAX_AGE_SECONDS` | number | no | `31536000` |
 | `JWT_EXPIRATION` | string | **yes** | — |
 | `JWT_REFRESH_EXPIRATION` | string | **yes** | — |
 | `JWT_SECRET` | string | **yes** | — |
+| `MINIMAX_API_KEY` | string | no | — |
+| `MINIMAX_TEXT_API_KEY` | string | no | — |
+| `MINIMAX_TEXT_MODEL` | string | no | `MiniMax-M3` |
+| `MINIMAX_VIDEO_MODEL` | string | no | `MiniMax-H3-Max` |
 | `MONGODB_URI` | string | **yes** | — |
 | `NODE_ENV` | string | no | `development` |
-| `PAYMENTS_COUNTRY` | string | no | `PH` |
-| `PAYMENTS_CURRENCY` | string | no | `PHP` |
-| `PAYMENTS_FAILURE_RETURN_URL` | string | no | — |
-| `PAYMENTS_SUCCESS_RETURN_URL` | string | no | — |
+| `OPENAI_API_KEY` | string | no | — |
+| `OPENAI_TEXT_MODEL` | string | no | — |
 | `PORT` | number | no | `3001` |
+| `PRODUCT_IMPORT_ALLOWED_HOSTS` | string | no | `[]` |
 | `RATE_LIMIT_ENABLED` | boolean | no | `true` |
 | `RATE_LIMIT_MAX_REQUESTS` | number | no | `100` |
 | `RATE_LIMIT_WINDOW_SECONDS` | number | no | `60` |
+| `RENDER_TMP_DIR` | string | no | — |
 | `REQUEST_LOGGING_ENABLED` | boolean | no | `true` |
 | `REQUEST_LOGGING_INCLUDE_HEALTH` | boolean | no | `false` |
 | `SCHEDULER_ENABLED` | boolean | no | `true` |
 | `SECURITY_HEADERS_ENABLED` | boolean | no | `true` |
 | `SLOW_REQUEST_WARN_THRESHOLD_MS` | string | no | `1000` |
-| `STORE_IAP_ENABLED` | boolean | no | `false` |
+| `STARTER_CREDITS` | number | no | `50` |
+| `TEXT_FALLBACK_PROVIDER` | enum(openai, anthropic, deepseek, minimax) | no | — |
+| `TEXT_FALLBACK_PROVIDERS` | enum(openai, anthropic, deepseek, minimax) | no | `[]` |
+| `TEXT_PROVIDER` | enum(openai, anthropic, deepseek, minimax) | no | — |
 | `TRUST_PROXY` | boolean | no | `false` |
 | `TURNSTILE_ENABLED` | boolean | no | `false` |
-| `XENDIT_CALLBACK_TOKEN` | string | no | — |
-| `XENDIT_ENABLED` | boolean | no | `false` |
-| `XENDIT_SECRET_KEY` | string | no | — |
-
-## Validated but absent from `.env.example`
-
-A new environment cannot be configured from the example file alone.
-
-- `APPLE_IAP_APP_ID`
-- `APPLE_IAP_BUNDLE_ID`
-- `APPLE_IAP_ENABLED`
-- `APPLE_IAP_ENVIRONMENT`
-- `APPLE_IAP_ROOT_CA_BASE64`
-- `GOOGLE_PLAY_PACKAGE_NAME`
-- `GOOGLE_PLAY_PUBSUB_AUDIENCE`
-- `GOOGLE_PLAY_PUBSUB_SERVICE_ACCOUNT_EMAIL`
-- `GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64`
-- `STORE_IAP_ENABLED`
+| `VIDEO_BETA_ENABLED` | boolean | no | `false` |
 
 ## In `.env.example` but not validated
 

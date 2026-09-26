@@ -1,6 +1,3 @@
-import createNextIntlPlugin from 'next-intl/plugin';
-
-const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 const s3Hostname = process.env.NEXT_PUBLIC_S3_HOSTNAME;
 const remotePatterns = [];
 
@@ -26,4 +23,4 @@ const nextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;

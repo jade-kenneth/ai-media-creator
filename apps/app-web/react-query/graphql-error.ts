@@ -1,5 +1,9 @@
 import { store } from '@/providers/AuthProvider/store';
-import { GraphqlRequestError, GraphqlRequestErrorName } from './graphql-client';
+import type {
+  GraphqlRequestError,
+  GraphqlRequestErrorName,
+  GraphqlRequestResult,
+} from './graphql-client';
 import { AuthRedirectReason, redirectToLogin } from './session';
 
 const errorRedirect: Partial<
@@ -40,4 +44,20 @@ export function handleUnauthenticatedError(
   redirectToLogin(errorRedirect[error.name] ?? 'login', redirectPath);
 
   return true;
+}
+
+/**
+ * Returns a GraphQL result's data or throws an Error whose `name` is the
+ * mapped error name (for example `NotFoundError`, `ConflictError`) and whose
+ * `message` is the API's user-safe message.
+ */
+export function unwrapGraphqlResult<Data extends Record<string, unknown>>(
+  result: GraphqlRequestResult<Data>,
+): Data {
+  if (result.ok) return result.data;
+
+  const error = new Error(result.error.message);
+  error.name = result.error.name;
+
+  throw error;
 }

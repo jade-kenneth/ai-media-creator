@@ -21,9 +21,19 @@ const ReactQueryDevtools = dynamic(
   },
 );
 
-export const queryCache = new QueryCache();
+// Session loss redirects to sign-in from any query or mutation, including
+// ones that set their own retry policy.
+export const queryCache = new QueryCache({
+  onError: (error) => {
+    handleUnauthenticatedError(error as GraphqlRequestError);
+  },
+});
 
-export const mutationCache = new MutationCache();
+export const mutationCache = new MutationCache({
+  onError: (error) => {
+    handleUnauthenticatedError(error as GraphqlRequestError);
+  },
+});
 
 export const queryClient = new QueryClient({
   defaultOptions: {

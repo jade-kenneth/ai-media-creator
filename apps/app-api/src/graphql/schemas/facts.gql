@@ -1,0 +1,80 @@
+enum FactSource {
+  LISTING
+  CREATOR
+  EDITED
+  NOT_STATED
+}
+
+enum FactStatus {
+  UNREVIEWED
+  APPROVED
+  REJECTED
+  UNKNOWN
+}
+
+enum ClaimFlagCategory {
+  PERFORMANCE
+  HEALTH
+  GUARANTEE
+  SUPERLATIVE
+  PRICE_STOCK
+  TESTIMONIAL
+  NOT_APPROVED_FACT
+}
+
+"A prompt, not a verdict: why a line may need proof."
+type ClaimFlag {
+  category: ClaimFlagCategory!
+  lead: String!
+  reason: String!
+  claim: String!
+}
+
+type ProductFact implements Node {
+  id: ID!
+  projectId: ID!
+  text: String!
+  source: FactSource!
+  "The listing the fact came from, for listing facts."
+  sourceUrl: String
+  "Where the creator confirmed it, for facts they added."
+  sourceNote: String
+  status: FactStatus!
+  note: String
+  flag: ClaimFlag
+  "Only facts the creator added can be removed; listing facts are rejected."
+  removable: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input AddProductFactInput {
+  projectId: ID!
+  text: String!
+  sourceNote: String
+  approve: Boolean
+}
+
+input UpdateProductFactTextInput {
+  id: ID!
+  text: String!
+}
+
+input SetProductFactStatusInput {
+  id: ID!
+  status: FactStatus!
+}
+
+extend type Query {
+  "A project's facts in the order they were added (capped at 50 per project)."
+  productFacts(projectId: ID!): [ProductFact!]!
+}
+
+extend type Mutation {
+  "Saves the product step and turns new key features into facts to review."
+  continueToFacts(projectId: ID!): Project!
+  addProductFact(input: AddProductFactInput!): ProductFact!
+  updateProductFactText(input: UpdateProductFactTextInput!): ProductFact!
+  setProductFactStatus(input: SetProductFactStatusInput!): ProductFact!
+  removeProductFact(id: ID!): Boolean!
+}

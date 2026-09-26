@@ -1,4 +1,7 @@
+import type { ConfigService } from '@nestjs/config';
 import { UserRole } from '../../graphql/generated/graphql';
+import type { CreditsService } from '../credits/credits.service';
+import type { OrganizationsService } from '../organizations/organizations.service';
 import type { SessionsService } from '../sessions/sessions.service';
 import type { UsersService } from '../users/users.service';
 import type { AuthService } from './auth.service';
@@ -10,6 +13,48 @@ import type {
 import type { AuthenticatedUser } from './types/auth-context';
 
 describe('GoogleAuthService', () => {
+  it('provisions a creator, a personal workspace and starter credits for a new verified identity', async () => {
+    const created = userRecord({ id: 'user-new' });
+    const fixture = createService({ createdRecord: created });
+
+    await expect(fixture.service.loginWithGoogle('id-token')).resolves.toEqual({
+      accessToken: 'access',
+    });
+    expect(
+      fixture.organizationsService.createPersonalWorkspace,
+    ).toHaveBeenCalledWith("Ada's workspace");
+    expect(fixture.usersService.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'user@example.com',
+        role: UserRole.USER,
+        organizationId: 'workspace-1',
+      }),
+    );
+    expect(fixture.usersService.linkGoogleSub).toHaveBeenCalledWith(
+      'user-new',
+      'google-sub-1',
+    );
+    expect(fixture.creditsService.grant).toHaveBeenCalledWith(
+      { ownerId: 'user-new', organizationId: 'workspace-1' },
+      50,
+      'Starter credits',
+    );
+  });
+
+  it('never provisions an account for an unverified Google email', async () => {
+    const fixture = createService({
+      identity: identity({ emailVerified: false }),
+    });
+
+    await expect(
+      fixture.service.loginWithGoogle('id-token'),
+    ).rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' });
+    expect(fixture.usersService.createUser).not.toHaveBeenCalled();
+    expect(
+      fixture.organizationsService.createPersonalWorkspace,
+    ).not.toHaveBeenCalled();
+  });
+
   it('refuses to sign in when no account owns the Google subject', async () => {
     const fixture = createService({ identity: identity({ email: null }) });
 
@@ -62,6 +107,7 @@ describe('GoogleAuthService', () => {
       fixture.service.loginWithGoogle('id-token'),
     ).rejects.toMatchObject({ code: 'INVALID_CREDENTIALS' });
     expect(fixture.usersService.linkGoogleSub).not.toHaveBeenCalled();
+    expect(fixture.usersService.createUser).not.toHaveBeenCalled();
   });
 
   it('refuses to sign in an inactive account', async () => {
@@ -105,11 +151,13 @@ function createService({
   byEmail = null,
   identity: googleIdentity = identity(),
   linkGoogleSub = true,
+  createdRecord = null,
 }: {
   bySub?: ReturnType<typeof userRecord> | null;
   byEmail?: ReturnType<typeof userRecord> | null;
   identity?: GoogleIdentity;
   linkGoogleSub?: boolean;
+  createdRecord?: ReturnType<typeof userRecord> | null;
 } = {}) {
   const googleIdentityService = {
     verifyIdToken: jest.fn().mockResolvedValue(googleIdentity),
@@ -117,7 +165,14 @@ function createService({
 
   const usersService = {
     findRecordByGoogleSub: jest.fn().mockResolvedValue(bySub),
-    findRecordByEmail: jest.fn().mockResolvedValue(byEmail),
+    findRecordByEmail: createdRecord
+      ? jest
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValueOnce(null)
+          .mockResolvedValue(createdRecord)
+      : jest.fn().mockResolvedValue(byEmail),
+    createUser: jest.fn().mockResolvedValue({ id: createdRecord?.id }),
     findById: jest.fn().mockResolvedValue({ id: 'user-1' }),
     linkGoogleSub: jest.fn().mockResolvedValue(linkGoogleSub),
     unlinkGoogleSub: jest.fn().mockResolvedValue(true),
@@ -133,16 +188,34 @@ function createService({
     }),
   } as unknown as jest.Mocked<AuthService>;
 
+  const organizationsService = {
+    createPersonalWorkspace: jest.fn().mockResolvedValue({ id: 'workspace-1' }),
+    deactivate: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<OrganizationsService>;
+
+  const creditsService = {
+    grant: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.Mocked<CreditsService>;
+
+  const configService = {
+    get: jest.fn((key: string) => (key === 'STARTER_CREDITS' ? 50 : undefined)),
+  } as unknown as ConfigService;
+
   return {
     service: new GoogleAuthService(
       googleIdentityService,
       usersService,
       sessionsService,
       authService,
+      organizationsService,
+      creditsService,
+      configService,
     ),
     usersService,
     sessionsService,
     authService,
+    organizationsService,
+    creditsService,
   };
 }
 

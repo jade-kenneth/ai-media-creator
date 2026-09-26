@@ -1,0 +1,286 @@
+enum ScriptVersionStatus {
+  DRAFT
+  APPROVED
+  "Approved, but a fact it uses has changed since approval."
+  NEEDS_REVIEW
+}
+
+enum ScriptOriginKind {
+  WRITTEN
+  RESTORED
+  EDITED
+  COPIED
+}
+
+enum HookType {
+  PROBLEM_FIRST
+  QUESTION
+  SHOW_DONT_TELL
+  RELATABLE_MOMENT
+  DIRECT_PITCH
+  "Stories: opens in the middle of the action."
+  COLD_OPEN
+  "Stories: shows a moment from the end first."
+  FLASH_FORWARD
+  "Stories: opens on something the viewer needs explained."
+  MYSTERY
+}
+
+enum ScenePurpose {
+  HOOK
+  PROBLEM
+  DEMO
+  FEATURE
+  PROOF
+  CALL_TO_ACTION
+  "Stories: who, where and what they want."
+  SETUP
+  "Stories: the trouble grows."
+  BUILD
+  "Stories: the surprise or the choice."
+  TURN
+  "Stories: the last scene, labelled Cliffhanger. It lands the moment the story built to, then ends on a cliffhanger (R29)."
+  PAYOFF
+}
+
+enum SceneTransition {
+  CUT
+  PUNCH_IN
+  WHIP
+  DISSOLVE
+}
+
+"Who or what the camera shows in a scene."
+enum ShotSubject {
+  "The creator on camera."
+  CREATOR
+  "The creator's hands with the product; no face."
+  HANDS
+  "The product alone, or with props."
+  PRODUCT_ONLY
+}
+
+enum ShotFraming {
+  CLOSE_UP
+  MEDIUM
+  WIDE
+  OVERHEAD
+  POV
+}
+
+enum ScriptCopyReason {
+  RESTORE
+  EDIT
+}
+
+type ScriptOrigin {
+  kind: ScriptOriginKind!
+  fromNumber: Int
+}
+
+type ScriptHook {
+  id: ID!
+  type: HookType!
+  text: String!
+  openingShot: String!
+  flags: [ClaimFlag!]!
+}
+
+"How to film a scene. Null on versions written before shot direction existed."
+type SceneDirection {
+  inFrame: ShotSubject!
+  framing: ShotFraming!
+  "Where it is filmed, e.g. a bus stop in the morning."
+  setting: String!
+  "Comma-separated things to have on hand; may be empty."
+  props: String!
+}
+
+"The premise and on-camera person for the whole video."
+type ShootPlan {
+  scenario: String!
+  "Who appears on camera and how they look; null when nobody does."
+  presenter: String
+}
+
+"""
+A line someone says on camera in a skit, acted as a beat: the camera finds
+the speaker, they react for a moment, then say the line in a way that fits it.
+Lines written before beats existed read with empty directions and no pause.
+"""
+type SceneLine {
+  "A first name from the cast; may be empty."
+  speaker: String!
+  text: String!
+  "Where the camera is for this beat, e.g. close-up on Ben; empty keeps the scene's framing."
+  shot: String!
+  "What the speaker does silently just before the line, e.g. looks down at the sandals, then back up; may be empty."
+  reaction: String!
+  "How long that reaction holds before the first word: 0 to 3 seconds in steps of 0.5."
+  pauseSeconds: Float!
+  "The speaker's face and voice while saying the line, e.g. half laughing, eyebrows up; may be empty."
+  delivery: String!
+}
+
+type ScriptScene {
+  id: ID!
+  order: Int!
+  purpose: ScenePurpose!
+  durationSeconds: Int!
+  "Empty in skits, which have no narrator."
+  narration: String!
+  "What people say on camera (skits); empty for narrated scenes."
+  lines: [SceneLine!]!
+  "The natural sound the scene's action makes (skits); null when none."
+  sound: String
+  onScreenText: String!
+  visual: String!
+  direction: SceneDirection
+  "How the scene comes in. Versions written before scene transitions existed read CUT."
+  transitionIn: SceneTransition
+  "Only the call-to-action scene has one."
+  cta: String
+  factIds: [ID!]!
+  flags: [ClaimFlag!]!
+}
+
+type ScriptVersion implements Node {
+  id: ID!
+  projectId: ID!
+  number: Int!
+  status: ScriptVersionStatus!
+  origin: ScriptOrigin!
+  angleTitle: String
+  language: ScriptLanguage!
+  lengthSeconds: Int!
+  "The style it was written in; null on versions written before skits existed, which are narrated."
+  contentStyle: ContentStyle
+  "The studio it was written for; versions written before studios existed read AFFILIATE."
+  studio: StudioType!
+  "Written as a series' final episode: its last scene ends the story instead of a cliffhanger."
+  endsSeries: Boolean!
+  hooks: [ScriptHook!]!
+  selectedHookId: ID
+  scenes: [ScriptScene!]!
+  "Null on versions written before shot direction existed."
+  shoot: ShootPlan
+  caption: String!
+  captionFlags: [ClaimFlag!]!
+  "Estimated spoken length at about 2.5 words per second."
+  spokenSeconds: Int!
+  "Sum of scene durations."
+  totalSeconds: Int!
+  usedFactIds: [ID!]!
+  createdAt: DateTime!
+  approvedAt: DateTime
+}
+
+type NewerDraft {
+  number: Int!
+  hasNewClaim: Boolean!
+}
+
+type CreatorBrief {
+  text: String!
+  fileName: String!
+  versionNumber: Int!
+  approvedAt: DateTime!
+  newerDraft: NewerDraft
+}
+
+input ScriptHookInput {
+  id: ID!
+  text: String
+  openingShot: String
+}
+
+input SceneDirectionInput {
+  inFrame: ShotSubject
+  framing: ShotFraming
+  setting: String
+  props: String
+}
+
+input SceneLineInput {
+  "Up to 24 characters; may be empty."
+  speaker: String!
+  "Up to 160 characters (a hook's length); a line with no text isn't kept."
+  text: String!
+  "Up to 60 characters; omitted or empty keeps the scene's framing."
+  shot: String
+  "Up to 80 characters; omitted or empty means the line comes straight in."
+  reaction: String
+  "0 to 3 in steps of 0.5; omitted reads 0."
+  pauseSeconds: Float
+  "Up to 60 characters; may be empty."
+  delivery: String
+}
+
+input ScriptSceneInput {
+  id: ID!
+  durationSeconds: Int
+  narration: String
+  "Replaces the scene's spoken lines; at most 3."
+  lines: [SceneLineInput!]
+  "Up to 80 characters; an empty string clears it."
+  sound: String
+  onScreenText: String
+  visual: String
+  direction: SceneDirectionInput
+  transitionIn: SceneTransition
+  cta: String
+}
+
+input ShootPlanInput {
+  scenario: String
+  "An empty string clears it (nobody on camera)."
+  presenter: String
+}
+
+"Partial update of a draft version (autosave); items are matched by id."
+input UpdateScriptVersionInput {
+  id: ID!
+  selectedHookId: ID
+  hooks: [ScriptHookInput!]
+  scenes: [ScriptSceneInput!]
+  shoot: ShootPlanInput
+  caption: String
+}
+
+input WriteScriptInput {
+  projectId: ID!
+  idempotencyKey: String!
+}
+
+input RewriteHookInput {
+  versionId: ID!
+  hookId: ID!
+  idempotencyKey: String!
+}
+
+input RewriteSceneInput {
+  versionId: ID!
+  sceneId: ID!
+  idempotencyKey: String!
+}
+
+input CopyScriptVersionInput {
+  id: ID!
+  reason: ScriptCopyReason!
+}
+
+extend type Query {
+  "A project's script versions, newest first (capped at 50)."
+  scriptVersions(projectId: ID!): [ScriptVersion!]!
+  creatorBrief(projectId: ID!): CreatorBrief!
+}
+
+extend type Mutation {
+  writeScript(input: WriteScriptInput!): GenerationJob!
+  rewriteHook(input: RewriteHookInput!): GenerationJob!
+  rewriteScene(input: RewriteSceneInput!): GenerationJob!
+  updateScriptVersion(input: UpdateScriptVersionInput!): ScriptVersion!
+  approveScriptVersion(id: ID!): ScriptVersion!
+  "Copies a version into a new draft; nothing is overwritten."
+  copyScriptVersion(input: CopyScriptVersionInput!): ScriptVersion!
+}

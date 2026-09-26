@@ -1,0 +1,31 @@
+enum CreditEntryKind {
+  GRANT
+  HOLD
+  CAPTURE
+  RELEASE
+}
+
+"""
+One change to the creator's balance: a grant, a hold when a paid job starts,
+or a release when a failed job gives its credits back. Captures move held
+credits to spent without changing the balance, so they are not listed.
+"""
+type CreditUsage {
+  id: ID!
+  label: String!
+  projectTitle: String
+  amount: Int!
+  kind: CreditEntryKind!
+  createdAt: DateTime!
+}
+
+type CreditSummary {
+  balance: Int!
+  held: Int!
+  "The five most recent balance changes, newest first (capped)."
+  recentUsage: [CreditUsage!]!
+}
+
+extend type Query {
+  myCredits: CreditSummary!
+}

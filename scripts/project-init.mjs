@@ -284,66 +284,69 @@ function planChanges(root, identity, force) {
   );
   planned.set(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
 
+  // A product may remove the mobile app entirely; only rewrite it when present.
   const mobilePath = 'apps/app-mobile/app.json';
-  const mobileJson = parseJson(readText(root, mobilePath), mobilePath);
-  const expo = mobileJson.expo;
-  if (!expo?.ios || !expo?.android)
-    throw new Error(`${mobilePath}: expected Expo iOS and Android config.`);
-  setJsonValue(
-    mobilePath,
-    'expo.name',
-    expo,
-    'name',
-    PLACEHOLDERS.mobileName,
-    identity.name,
-    force,
-  );
-  setJsonValue(
-    mobilePath,
-    'expo.slug',
-    expo,
-    'slug',
-    PLACEHOLDERS.mobileSlug,
-    identity.slug,
-    force,
-  );
-  setJsonValue(
-    mobilePath,
-    'expo.description',
-    expo,
-    'description',
-    PLACEHOLDERS.mobileDescription,
-    `${identity.name} mobile application.`,
-    force,
-  );
-  setJsonValue(
-    mobilePath,
-    'expo.scheme',
-    expo,
-    'scheme',
-    PLACEHOLDERS.mobileScheme,
-    identity.mobileScheme,
-    force,
-  );
-  setJsonValue(
-    mobilePath,
-    'expo.ios.bundleIdentifier',
-    expo.ios,
-    'bundleIdentifier',
-    PLACEHOLDERS.mobileId,
-    identity.mobileId,
-    force,
-  );
-  setJsonValue(
-    mobilePath,
-    'expo.android.package',
-    expo.android,
-    'package',
-    PLACEHOLDERS.mobileId,
-    identity.mobileId,
-    force,
-  );
-  planned.set(mobilePath, `${JSON.stringify(mobileJson, null, 2)}\n`);
+  if (fs.existsSync(path.join(root, mobilePath))) {
+    const mobileJson = parseJson(readText(root, mobilePath), mobilePath);
+    const expo = mobileJson.expo;
+    if (!expo?.ios || !expo?.android)
+      throw new Error(`${mobilePath}: expected Expo iOS and Android config.`);
+    setJsonValue(
+      mobilePath,
+      'expo.name',
+      expo,
+      'name',
+      PLACEHOLDERS.mobileName,
+      identity.name,
+      force,
+    );
+    setJsonValue(
+      mobilePath,
+      'expo.slug',
+      expo,
+      'slug',
+      PLACEHOLDERS.mobileSlug,
+      identity.slug,
+      force,
+    );
+    setJsonValue(
+      mobilePath,
+      'expo.description',
+      expo,
+      'description',
+      PLACEHOLDERS.mobileDescription,
+      `${identity.name} mobile application.`,
+      force,
+    );
+    setJsonValue(
+      mobilePath,
+      'expo.scheme',
+      expo,
+      'scheme',
+      PLACEHOLDERS.mobileScheme,
+      identity.mobileScheme,
+      force,
+    );
+    setJsonValue(
+      mobilePath,
+      'expo.ios.bundleIdentifier',
+      expo.ios,
+      'bundleIdentifier',
+      PLACEHOLDERS.mobileId,
+      identity.mobileId,
+      force,
+    );
+    setJsonValue(
+      mobilePath,
+      'expo.android.package',
+      expo.android,
+      'package',
+      PLACEHOLDERS.mobileId,
+      identity.mobileId,
+      force,
+    );
+    planned.set(mobilePath, `${JSON.stringify(mobileJson, null, 2)}\n`);
+  }
 
   const rootEnvPath = '.env.example';
   let rootEnv = readText(root, rootEnvPath);

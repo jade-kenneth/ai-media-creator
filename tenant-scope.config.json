@@ -24,33 +24,45 @@
       "scope": "global",
       "reason": "Super-admin surface that manages admin accounts across every tenant; scoping it would make cross-tenant administration impossible."
     },
+    "assets": {
+      "scope": "tenant-scoped",
+      "collection": "Assets"
+    },
     "auth": {
       "scope": "global",
       "reason": "Authentication precedes tenant resolution. Credential lookup and login-attempt records are keyed by email before a tenant is known, so the tenant middleware cannot have run yet."
+    },
+    "credits": {
+      "scope": "tenant-scoped",
+      "collection": "CreditAccounts, CreditEntries"
+    },
+    "exports": {
+      "scope": "tenant-scoped",
+      "collection": "Exports"
+    },
+    "facts": {
+      "scope": "tenant-scoped",
+      "collection": "ProductFacts"
+    },
+    "generation-jobs": {
+      "scope": "tenant-scoped",
+      "collection": "GenerationJobs"
     },
     "mail": {
       "scope": "no-persistence",
       "reason": "Transactional send only; owns no repository."
     },
-    "notifications": {
-      "scope": "tenant-scoped",
-      "collection": "Notifications"
-    },
     "organizations": {
       "scope": "global",
       "reason": "This is the tenant registry itself. findBySlug is called by TenantMiddleware to establish tenant context, so it must resolve before any tenant scope exists."
     },
-    "payments": {
-      "scope": "tenant-scoped",
-      "collection": "Payments"
-    },
-    "push-notifications": {
+    "project-duplicates": {
       "scope": "no-persistence",
-      "reason": "Dispatch service; reads through the push-tokens repository, which carries the tenant scope."
+      "reason": "Orchestrates copying through the projects, facts, assets and scripts services, each of which scopes its own reads and writes to the caller's tenant."
     },
-    "push-tokens": {
+    "projects": {
       "scope": "tenant-scoped",
-      "collection": "PushTokens"
+      "collection": "Projects"
     },
     "s3": {
       "scope": "no-persistence",
@@ -60,21 +72,45 @@
       "scope": "global",
       "reason": "Cross-replica mutual-exclusion primitive. Locks are named singletons across the whole deployment; scoping them per tenant would let one lock be acquired concurrently by every tenant and break the guarantee it exists to provide."
     },
+    "scripts": {
+      "scope": "tenant-scoped",
+      "collection": "ScriptVersions"
+    },
     "sessions": {
       "scope": "tenant-scoped",
       "collection": "Sessions"
     },
-    "store-purchases": {
-      "scope": "tenant-scoped",
-      "collection": "StorePurchases",
-      "unscopedReads": {
-        "allReads": true,
-        "reason": "Lookups are keyed by the store-issued (store, storeReference) pair, which is uniquely indexed across the collection, and every read path is a store webhook carrying no session and therefore no tenant. Ownership is enforced by the userId check in savePurchase; organizationId is persisted for reporting and is read from the record rather than supplied by a caller."
-      }
+    "ai-clips": {
+      "scope": "no-persistence",
+      "reason": "AI scene clip requests, checks and the media-worker handler; clips are stored as tenant-scoped Assets and jobs as tenant-scoped GenerationJobs through their own services."
+    },
+    "video": {
+      "scope": "no-persistence",
+      "reason": "MiniMax image-to-video provider adapter; stores nothing and runs only inside tenant-scoped clip jobs."
+    },
+    "render": {
+      "scope": "no-persistence",
+      "reason": "FFmpeg toolchain and render pipeline for the media worker; it stores nothing itself and only runs inside tenant-scoped render jobs."
+    },
+    "text-generation": {
+      "scope": "no-persistence",
+      "reason": "Stateless adapter to the text-writing provider; it stores nothing and is only called by job handlers that already hold a tenant-scoped job."
     },
     "turnstile": {
       "scope": "no-persistence",
       "reason": "Stateless bot-protection verification against an external API."
+    },
+    "video-edits": {
+      "scope": "tenant-scoped",
+      "collection": "VideoEdits"
+    },
+    "voice": {
+      "scope": "no-persistence",
+      "reason": "Stateless adapter to the voice provider; it stores nothing and is only called by job handlers and resolvers that already hold a tenant-scoped video."
+    },
+    "voice-tracks": {
+      "scope": "tenant-scoped",
+      "collection": "VoiceTracks"
     },
     "users": {
       "scope": "tenant-scoped",
@@ -88,6 +124,10 @@
           "existsByEmail"
         ]
       }
+    },
+    "studios": {
+      "scope": "no-persistence",
+      "reason": "The studio registry (Product Specification §3.23): typed, code-only studio definitions and story wording read by other modules; it owns no repository and stores nothing."
     }
   }
 }

@@ -1,0 +1,48 @@
+enum VoiceSource {
+  "A voice from the allowlist reads the approved script."
+  AI
+  "The creator's own narration, timed to the script."
+  RECORDING
+  "Music and on-screen text only; scenes keep the script's timing."
+  NONE
+  "No voiceover: each clip plays its own sound; captions follow the spoken lines."
+  SCENE
+}
+
+type VoiceOption {
+  id: ID!
+  name: String!
+  descriptor: String!
+  "The provider's free preview clip."
+  sampleUrl: String
+}
+
+type VoiceSegment {
+  sceneId: ID!
+  "Signed, short-lived URL of the audio file this scene plays from."
+  audioUrl: String
+  "Where the scene starts within that file."
+  offsetMs: Int!
+  durationMs: Int!
+}
+
+"""
+A voiceover made for one approved script version: one segment per scene, so
+scenes can be reordered without a new voiceover. Never changes once made.
+"""
+type VoiceTrack implements Node {
+  id: ID!
+  source: VoiceSource!
+  voiceName: String
+  speed: Float!
+  scriptVersionNumber: Int!
+  recordingFileName: String
+  durationMs: Int!
+  segments: [VoiceSegment!]!
+  createdAt: DateTime!
+}
+
+extend type Query {
+  "The allowlisted voices with free samples; empty until the voice service is set up."
+  voiceOptions: [VoiceOption!]!
+}

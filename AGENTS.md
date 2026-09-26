@@ -1,9 +1,11 @@
 # AGENTS.md — execution contract (generated from skills-source; do not edit)
 
-Source revision: `jade-kenneth/skills-source@6154c0ed01d052a88a2249600212d0e0b48a712b`
+Source revision: `jade-kenneth/skills-source@25fdc47b6466f5bf1134446b96dc0c54e486b2f1`
 
-You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff;
-Claude Code reconciled it with this repository. Your job is to build faithfully.
+You are the EXECUTOR on this project. Claude Design produced the UI/UX handoff —
+or, in prompt-only design mode, Claude Code specified it directly in the Design
+Reference — and Claude Code reconciled it with this repository. Your job is to
+build faithfully.
 
 ## Automatic project context — no repeated user instruction required
 Before planning, editing, reviewing, or implementing application code:
@@ -15,7 +17,11 @@ Before planning, editing, reviewing, or implementing application code:
    Plan owns dependency order, scope, phase status, and Fidelity QA.
 3. Read this AGENTS.md for code structure, naming, stack patterns, and skills.
 4. If either canonical root document is missing, stop and ask for
-   `/finalize-build-docs <project name>` instead of guessing or using a legacy file.
+   `/finalize-build-docs <project name>` — or, for a prompt-only project,
+   `/prepare-claude-design <project name> --prompt-only` — instead of guessing
+   or using a legacy file.
+5. If a task is blocked on a missing screen, state, or design decision, stop and
+   ask for `/generate-design-request <project name>`; never design it yourself.
 
 The user does not need to repeat “read AGENTS.md, Product Specification.md, and
 Implementation Plan.md.” Treat that context load as the default start of every
@@ -27,10 +33,13 @@ progress. Check `[ ]` → `[~]` → `[x]` only after the phase's QA rows pass.
 ## Non-negotiables
 - Conflict order: design/prototypes > design/system > design/planning >
   this file (code structure ONLY) > boilerplate UI (never wins, always discarded).
+  A prompt-only project has no prototypes; its Design Reference per-screen spec
+  takes the prototypes' place at the top of that order.
 - Fidelity: a screen is done only when it passes every row of the Fidelity QA
   checklist at the end of the Implementation Plan. "Close enough" is a failure.
-- Prototype boundary: implement only `data-app-root`; never ship device frames,
-  preview shells, presentation canvases, annotations, or presentation-only content.
+- Prototype boundary (when prototypes exist): implement only `data-app-root`;
+  never ship device frames, preview shells, presentation canvases, annotations,
+  or presentation-only content.
 - Platform-native conversion: web may reuse compatible markup; Expo/React Native
   must use native primitives and must not ship prototype HTML in a WebView or copy
   fixed preview dimensions into a production container.
@@ -350,7 +359,12 @@ inline handlers, manual submit checks, fake delays, hard-coded permissions,
 browser storage, and mock network behavior exist only to demonstrate the design;
 never copy them into production merely because they make the prototype work.
 
-Before implementing a prototype-backed screen, add a `Production mapping` under
+A prompt-only project has no prototypes. There, the Design Reference's per-screen
+spec and `design/system/` are authoritative for the same visible outcomes,
+interaction intent, copy, and states, and every rule below applies to
+spec-backed screens exactly as it does to prototype-backed ones.
+
+Before implementing a prototype-backed or spec-backed screen, add a `Production mapping` under
 the active task's pattern scan. Resolve architecture in this order: explicit
 project configuration and the approved Implementation Plan; protected foundations
 that actually exist in the current repository; the nearest end-to-end exemplars;
@@ -418,6 +432,28 @@ For an enhancement:
 ### 5. Plan and implement the smallest coherent change
 
 For full-project execution after the canonical Product Specification and Implementation Plan exist, generate or reconcile the root `TASK_<project-slug>.md`. In Claude Code, use `/generate-project-tasks <project name>`. In Codex or any agent without slash-command support, read `.skills-source/commands/generate-project-tasks.md` in full and execute it directly; if `.skills-source/` is missing, run `npm run sync-skills` first. For a small standalone change outside that project tracker, use a scoped `task.md`. Keep either task file aligned with reality.
+
+#### Required web DataTable routing
+
+When a compatible web surface under `apps/*-admin` or `apps/*-web` requires a
+table or tabular data display, invoke and follow the `datatable-builder` skill
+before writing table code. Reuse the application's canonical `DataTable`
+foundation; if it does not exist, use the skill to port `DataTableReference`
+into the supported web dependency set. Do not create a custom, one-off, or
+alternative web table unless the user explicitly requests a custom table.
+
+Do not invoke `datatable-builder` for `apps/*-mobile` Expo/React Native
+screens. Route native tabular displays through the `mobile-app` skill and its
+native UI guidance, using established native list, grid, and collection patterns
+instead of DOM table primitives or browser storage.
+
+Approved product design remains authoritative for visible outcomes and
+interactions on every surface. On compatible web surfaces, `datatable-builder`
+owns reusable table architecture and adapts its presentation to the approved
+design; the existing DataTable presentation is only the fallback where the
+design is silent. If the web skill or its required references are unavailable or
+cannot satisfy the approved architecture, stop and ask the user instead of
+silently falling back to a custom web table.
 
 - Follow the nearest established structure, naming, data flow, hooks, modules, repositories, and error-handling patterns.
 - Keep the diff focused and avoid unrelated cleanup or broad refactors.
@@ -655,7 +691,7 @@ Use the following compact structure for a small scoped `task.md`; `.skills-sourc
 
 ## Production mapping
 
-Complete when the change implements a prototype-backed or data-backed surface; otherwise write `Not applicable` and delete the fields below.
+Complete when the change implements a prototype-backed, spec-backed, or data-backed surface; otherwise write `Not applicable` and delete the fields below.
 
 - State ownership: <server/cache, persisted client/session, form, ephemeral UI>
 - Architecture source: <project config/plan → protected foundation → exemplar → routed skill>
@@ -663,7 +699,7 @@ Complete when the change implements a prototype-backed or data-backed surface; o
 - Write path: <configured form validation → write operation → server/application layers → persistence → cache update>
 - Validation and errors: <client feedback validation + server validation/auth/error contract>
 - Async states: <loading, empty, error, success, offline, optimistic rollback>
-- Prototype-only mechanics rejected: <mock/local/manual mechanisms not carried over>
+- Prototype-only mechanics rejected: <mock/local/manual mechanisms not carried over, or `None — no prototype` for a spec-backed screen>
 
 ## Phases
 
@@ -794,7 +830,7 @@ _API implementation standards for apps/*-api (NestJS + Apollo GraphQL schema-fir
 Full instructions: `.skills-source/skills/api-app/SKILL.md`
 
 ### datatable-builder
-_Build or rebuild a DataTable component by porting DataTableReference to the current app's dependency set. Use this skill whenever the user asks to create, rebuild, port, or fix a DataTable component. Trigger on requests like "build the DataTable", "rebuild DataTable", "port DataTableReference", "fix the DataTable", or "create a data table component"._
+_Enforce the canonical DataTable for compatible web surfaces under apps/*-admin or apps/*-web, and build or rebuild it by porting DataTableReference when the web app does not already provide it. Use whenever a web build, fix, enhancement, or approved design includes a table, even when the user does not explicitly ask for a DataTable. Do not use for apps/*-mobile Expo/React Native screens; route native tabular displays through the mobile-app skill. Do not create a custom or one-off web table unless the user explicitly requests one._
 
 Full instructions: `.skills-source/skills/datatable-builder/SKILL.md`
 
@@ -808,10 +844,20 @@ _Explains code with visual diagrams and analogies. Use when explaining how code 
 
 Full instructions: `.skills-source/skills/explain-code/SKILL.md`
 
+### feature-rationale
+_Write a plain-language HTML guide that explains why a built feature looks and behaves the way it does, covering every field, dropdown, toggle, required mark, check, message and export section, including the parts that were not in the original objective but that the feature needs. Each choice gets a short answer, the reason in everyday words, what would go wrong the other way, and an honest label for how solid the reason is (outside rule checked, outside rule not yet checked, project safety rule, design choice, decided early and waiting on someone, or no recorded reason). Saved as a standalone house-style page under docs/feature-rationale/ by topic and run through the humanizer. Use after a feature lands (not a bug fix) and whenever someone asks "why was it built this way", "why a dropdown instead of a text box", "why is there an X", "why are there fields that weren't in the brief", or "explain the design decisions to a non-technical person"._
+
+Full instructions: `.skills-source/skills/feature-rationale/SKILL.md`
+
 ### fix-and-enhance
 _Repository-agnostic coordinator for bug fixes and enhancements. Uses the project's generated workflow instructions, coordinates tracked work, delegates implementation standards to the matching app skills, and routes verified reusable lessons through `project-learning-contributor`. Use whenever a user asks to fix broken behavior, improve or polish an existing feature, add or change functionality, or implement a scoped feature._
 
 Full instructions: `.skills-source/skills/fix-and-enhance/SKILL.md`
+
+### learn
+_Builds teaching material for a general engineering or system-design concept (a load balancer, a message queue, sharding, CQRS, idempotency, a circuit breaker) or a tool the project runs on (its data platform, identity service or host), as a document in docs/learn/TOPIC/ with a runnable lab and four generated diagrams. Always asks first whether the lesson is based on this repo's current implementation (then it audits the code, grades on a fit map where the subject could serve the project's features, and ends with audit task cards) or is a standalone lesson on the topic. Use when the user asks to learn, understand or be taught a concept ("teach me sharding", "what is a circuit breaker and when do I need one", "teach me our data platform and where we could use more of it"). Enforces the four-state provenance rule, the lab every number is measured from, the beginner-first section order and the house-style one-pager. Not for how a feature in this repo works; that is the how-it-works tier of root-docs._
+
+Full instructions: `.skills-source/skills/learn/SKILL.md`
 
 ### mobile-app
 _Mobile app implementation standards for apps/*-mobile (React Native + Expo + TypeScript + TanStack Query + NativeWind). USE when writing, reviewing, or refactoring any code in apps/*-mobile. TRIGGERS: creating components, screens, hooks, providers, features, data fetching, forms, navigation, performance work, accessibility, analytics, caching, state management, keyboard handling, safe areas, folder structure decisions. EXAMPLES: 'add a feature', 'build a screen', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix keyboard hiding input', 'improve startup time', 'add safe area handling', 'handle Android back button'._
@@ -823,6 +869,11 @@ _Design and review production-grade mobile interfaces for iOS and Android, inclu
 
 Full instructions: `.skills-source/skills/mobile-native-ui-design/SKILL.md`
 
+### plain-report
+_Write a short, plain-language, Slack-ready progress report for non-technical readers (client, manager, stakeholders) from the documents in `docs/bug-fixed/` and `docs/unresolved/`. It first asks where the report will be posted and who did the work, so the voice fits (by default the client reads it in the group chat and one developer did the work). Each item shows a plain before-and-after comparison and, when the reader can see the change for themselves, short numbered steps to check it. It says what problem was solved, what it means for them, and what to expect next, then tags each reported document so the next report skips it. Use when asked to "report what we fixed", "write a status update for the client", "explain this to a non-techy person", "what's new since the last report", or "make a plain report"._
+
+Full instructions: `.skills-source/skills/plain-report/SKILL.md`
+
 ### project-learning-auditor
 _Scan a project read-only and generate a self-contained HTML learning guide at reference/project-learning-audit/index.html. Use when a user wants repository onboarding, a mental model, architecture and full-stack flow explanations, frontend/backend/database pattern analysis, optimization or accessibility risks, prioritized audit cards, diagrams, comprehension tests, a learning path, or an appended topic deep dive. Produces documentation only and never edits app source, runs builds or tests, deploys, or commits._
 
@@ -832,6 +883,11 @@ Full instructions: `.skills-source/skills/project-learning-auditor/SKILL.md`
 _Capture verified, reusable engineering lessons from a product repository and route them to the correct canonical skill in skills-source. Use after a bug fix, incident, integration discovery, performance improvement, security correction, or durable architecture lesson should benefit other projects; also use when promoting a reviewed project-learning issue into one or more skills. Produces review-gated proposals and never auto-merges canonical skill changes._
 
 Full instructions: `.skills-source/skills/project-learning-contributor/SKILL.md`
+
+### project-story
+_Write the whole-project story in plain, non-technical language, from the first commit to today, by reading every document in `docs/`. Explains what the project is, why it exists, the problem it solves, then walks the work in chronological order (problem found → plan → fix → what it means), and ends on what is still open and who it waits on. Unlike `plain-report`, which is a short update covering only unreported items, this is the full account for someone arriving cold. Use when asked to "explain the whole project", "what is this project about", "summarise the docs", "write a report of the work from start to finish", "onboard someone", "give me the story so far", "explain this to a non-techy person end to end", or "walk me through what we've done"._
+
+Full instructions: `.skills-source/skills/project-story/SKILL.md`
 
 ### prose-builder
 _Build or rebuild a Prose component by porting ProseReference to the current app's dependency set — for both web (Next.js/shadcn) and mobile (React Native/NativeWind) targets. Use this skill whenever the user asks to create, rebuild, port, or fix a Prose or typography display component. Trigger on requests like "build the Prose component", "rebuild Prose", "port ProseReference", "fix the Prose component", "create a prose component", or "add a Prose display component"._
@@ -843,6 +899,11 @@ _Build or rebuild a RichText (Wysiwyg) component by porting WysiwygReference to 
 
 Full instructions: `.skills-source/skills/richtext-builder/SKILL.md`
 
+### root-docs
+_The documentation system for a project's untracked root docs/ folder and the documentation rules in its root CLAUDE.md, for a single repository or a multi-repo estate. Use BEFORE answering "how does X work" or changing a feature (there is a mandatory reading order), and AFTER any fix, feature, or behaviour change, because each one owes a document. Covers routing a new document to the right tier (how-it-works, bug-fixed, unresolved, general or per-repo docs), the required sections of each, the task cards at the bottom of every unresolved document, the sendable HTML one-pager and its house style, generated diagrams and their assertions, the supersession banner and inline tags, the Ask-this-page doc-assistant rebuild, and the rule that no committed file may name a docs/ path. Triggers on writing or updating documentation, documenting a bug fix, a feature landing, diagnosing a fault, marking something superseded or stale, building or sending a one-pager, regenerating a diagram, or registering a doc in the index._
+
+Full instructions: `.skills-source/skills/root-docs/SKILL.md`
+
 ### shadcn
 _Manages shadcn components and projects — adding, searching, fixing, debugging, styling, and composing UI. Provides project context, component docs, and usage examples. Applies when working with shadcn/ui, component registries, presets, --preset codes, or any project with a components.json file. Also triggers for "shadcn init", "create an app with --preset", or "switch to --preset"._
 
@@ -852,6 +913,11 @@ Full instructions: `.skills-source/skills/shadcn/SKILL.md`
 _Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy._
 
 Full instructions: `.skills-source/skills/skill-creator/SKILL.md`
+
+### task-phase
+_Turn a project objective, feature, or documented problem into a detailed, phased, step-by-step implementation plan written to a task_NAME.md file. Use when asked to "create a task phase", "break this down into tasks", "make an implementation plan from the docs", "plan this feature", or "write a task file", especially when the source is a document under docs/ (how-it-works, unresolved, architecture, launch plan). Reads the source docs and the code they name first, then writes phases with ordered, checkable steps, files touched, checks owed, acceptance criteria and risks, followed by ASCII UI mockups for every affected screen. Not for a whole-product task file built from the product specification; that is /generate-project-tasks._
+
+Full instructions: `.skills-source/skills/task-phase/SKILL.md`
 
 ### web-app
 _Web app implementation standards for apps/*-admin (Next.js App Router + React + TypeScript + TanStack Query + Tailwind + shadcn/ui). USE when writing, reviewing, or refactoring any code in apps/*-admin. TRIGGERS: creating components, hooks, providers, features, data fetching, forms, routing, SSR/SSG, performance work, SEO, accessibility, analytics, caching, state management, folder structure decisions. EXAMPLES: 'add a feature', 'build a page', 'create a hook', 'audit this component', 'where should this go?', 'set up a query', 'add a mutation', 'fix a hydration error', 'improve LCP', 'add SEO metadata'._

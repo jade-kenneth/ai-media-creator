@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-const DEFAULT_CORS_ORIGINS = [
-  'http://localhost:4302',
-  'http://127.0.0.1:4302',
-  'http://localhost:8081',
-  'http://127.0.0.1:8081',
-];
+const DEFAULT_CORS_ORIGINS = ['http://localhost:4302', 'http://127.0.0.1:4302'];
 const DEFAULT_CORS_METHODS = [
   'GET',
   'HEAD',
@@ -49,31 +44,10 @@ export const envSchema = z
       .min(1, 'AWS_SECRET_ACCESS_KEY is required.'),
     AWS_S3_BUCKET: z.string().trim().min(1, 'AWS_S3_BUCKET is required.'),
     AWS_S3_PUBLIC_BASE_URL: z.string().trim().url().optional(),
-    EXPO_PUSH_ENABLED: z.preprocess(
-      normalizeBooleanEnv,
-      z.boolean().default(true),
-    ),
     SCHEDULER_ENABLED: z.preprocess(
       normalizeBooleanEnv,
       z.boolean().default(true),
     ),
-    EXPO_PUSH_ACCESS_TOKEN: z.string().trim().optional(),
-    STORE_IAP_ENABLED: z.preprocess(
-      normalizeBooleanEnv,
-      z.boolean().default(false),
-    ),
-    APPLE_IAP_ENABLED: z.preprocess(
-      normalizeBooleanEnv,
-      z.boolean().default(false),
-    ),
-    APPLE_IAP_ENVIRONMENT: z.enum(['SANDBOX', 'PRODUCTION']).optional(),
-    APPLE_IAP_BUNDLE_ID: z.string().trim().min(1).optional(),
-    APPLE_IAP_APP_ID: z.coerce.number().int().positive().optional(),
-    APPLE_IAP_ROOT_CA_BASE64: z.string().trim().min(1).optional(),
-    GOOGLE_PLAY_PACKAGE_NAME: z.string().trim().min(1).optional(),
-    GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64: z.string().trim().min(1).optional(),
-    GOOGLE_PLAY_PUBSUB_AUDIENCE: z.url().trim().optional(),
-    GOOGLE_PLAY_PUBSUB_SERVICE_ACCOUNT_EMAIL: z.email().trim().optional(),
     CORS_ORIGINS: z.preprocess(
       normalizeCorsOriginsEnv,
       z.array(z.url()).default(DEFAULT_CORS_ORIGINS),
@@ -135,25 +109,108 @@ export const envSchema = z
       normalizeCommaSeparatedEnv,
       z.array(z.string().trim().min(1)).default([]),
     ),
-    XENDIT_ENABLED: z.preprocess(
+    OPENAI_API_KEY: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    OPENAI_TEXT_MODEL: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    ANTHROPIC_API_KEY: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    ANTHROPIC_TEXT_MODEL: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).default('claude-opus-5'),
+    ),
+    DEEPSEEK_API_KEY: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    DEEPSEEK_TEXT_MODEL: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).default('deepseek-v4-pro'),
+    ),
+    MINIMAX_TEXT_API_KEY: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    MINIMAX_TEXT_MODEL: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).default('MiniMax-M3'),
+    ),
+    TEXT_PROVIDER: z.preprocess(
+      normalizeBlankEnv,
+      z.enum(['openai', 'anthropic', 'deepseek', 'minimax']).optional(),
+    ),
+    TEXT_FALLBACK_PROVIDER: z.preprocess(
+      normalizeBlankEnv,
+      z.enum(['openai', 'anthropic', 'deepseek', 'minimax']).optional(),
+    ),
+    TEXT_FALLBACK_PROVIDERS: z.preprocess(
+      normalizeCommaSeparatedEnv,
+      z
+        .array(z.enum(['openai', 'anthropic', 'deepseek', 'minimax']))
+        .default([]),
+    ),
+    STARTER_CREDITS: z.coerce.number().int().min(0).default(50),
+    PRODUCT_IMPORT_ALLOWED_HOSTS: z.preprocess(
+      normalizeCommaSeparatedEnv,
+      z.array(z.string().trim().toLowerCase().min(1)).default([]),
+    ),
+    // Video beta (Batch 2). The voice provider is optional until configured;
+    // without it voice jobs fail with the designed "isn't set up" copy.
+    ELEVENLABS_API_KEY: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    ELEVENLABS_MODEL_ID: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    ELEVENLABS_VOICE_IDS: z.preprocess(
+      normalizeCommaSeparatedEnv,
+      z
+        .array(z.string().trim().min(1))
+        .max(6, 'ELEVENLABS_VOICE_IDS allows at most 6 voices.')
+        .default([]),
+    ),
+    FFMPEG_PATH: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).default('ffmpeg'),
+    ),
+    FFPROBE_PATH: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).default('ffprobe'),
+    ),
+    RENDER_TMP_DIR: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    VIDEO_BETA_ENABLED: z.preprocess(
       normalizeBooleanEnv,
       z.boolean().default(false),
     ),
-    XENDIT_SECRET_KEY: z.string().trim().min(1).optional(),
-    XENDIT_CALLBACK_TOKEN: z.string().trim().min(1).optional(),
-    PAYMENTS_CURRENCY: z.string().trim().length(3).default('PHP'),
-    PAYMENTS_COUNTRY: z.string().trim().length(2).default('PH'),
-    PAYMENTS_SUCCESS_RETURN_URL: z.string().trim().url().optional(),
-    PAYMENTS_FAILURE_RETURN_URL: z.string().trim().url().optional(),
+    // AI scene clips (MiniMax image-to-video). Optional until configured;
+    // without a key the feature stays hidden and its jobs fail as "not set up".
+    AI_CLIPS_ENABLED: z.preprocess(
+      normalizeBooleanEnv,
+      z.boolean().default(false),
+    ),
+    MINIMAX_API_KEY: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).optional(),
+    ),
+    MINIMAX_VIDEO_MODEL: z.preprocess(
+      normalizeBlankEnv,
+      z.string().trim().min(1).default('MiniMax-H3-Max'),
+    ),
   })
   .superRefine((config, context) => {
     const requireConfig = (
-      flag:
-        | 'APPLE_IAP_ENABLED'
-        | 'STORE_IAP_ENABLED'
-        | 'TURNSTILE_ENABLED'
-        | 'GOOGLE_OAUTH_ENABLED'
-        | 'XENDIT_ENABLED',
+      flag: 'TURNSTILE_ENABLED' | 'GOOGLE_OAUTH_ENABLED',
       keys: Array<keyof typeof config>,
     ) => {
       for (const key of keys) {
@@ -172,27 +229,6 @@ export const envSchema = z
       }
     };
 
-    if (config.APPLE_IAP_ENABLED) {
-      const appleRequired: Array<keyof typeof config> = [
-        'APPLE_IAP_ENVIRONMENT',
-        'APPLE_IAP_BUNDLE_ID',
-        'APPLE_IAP_ROOT_CA_BASE64',
-      ];
-      if (config.APPLE_IAP_ENVIRONMENT === 'PRODUCTION') {
-        appleRequired.push('APPLE_IAP_APP_ID');
-      }
-      requireConfig('APPLE_IAP_ENABLED', appleRequired);
-    }
-
-    if (config.STORE_IAP_ENABLED) {
-      requireConfig('STORE_IAP_ENABLED', [
-        'GOOGLE_PLAY_PACKAGE_NAME',
-        'GOOGLE_PLAY_SERVICE_ACCOUNT_BASE64',
-        'GOOGLE_PLAY_PUBSUB_AUDIENCE',
-        'GOOGLE_PLAY_PUBSUB_SERVICE_ACCOUNT_EMAIL',
-      ]);
-    }
-
     if (config.TURNSTILE_ENABLED) {
       requireConfig('TURNSTILE_ENABLED', ['CLOUDFLARE_TURNSTILE_SECRET_KEY']);
     }
@@ -201,13 +237,22 @@ export const envSchema = z
       requireConfig('GOOGLE_OAUTH_ENABLED', ['GOOGLE_OAUTH_CLIENT_IDS']);
     }
 
-    if (config.XENDIT_ENABLED) {
-      requireConfig('XENDIT_ENABLED', [
-        'XENDIT_SECRET_KEY',
-        'XENDIT_CALLBACK_TOKEN',
-        'PAYMENTS_SUCCESS_RETURN_URL',
-        'PAYMENTS_FAILURE_RETURN_URL',
-      ]);
+    // A voice key without a model or allowlist would offer no usable voice.
+    if (config.ELEVENLABS_API_KEY) {
+      for (const key of [
+        'ELEVENLABS_MODEL_ID',
+        'ELEVENLABS_VOICE_IDS',
+      ] as const) {
+        const value = config[key];
+
+        if (value === undefined || (Array.isArray(value) && !value.length)) {
+          context.addIssue({
+            code: 'custom',
+            path: [key],
+            message: `${key} is required when ELEVENLABS_API_KEY is set.`,
+          });
+        }
+      }
     }
   });
 
@@ -225,6 +270,11 @@ export function validateEnv(config: Record<string, unknown>) {
 
 function normalizeCorsOriginsEnv(value: unknown): unknown {
   return normalizeCommaSeparatedEnv(value);
+}
+
+/** Treats `KEY=` (blank) in an env file as unset. */
+function normalizeBlankEnv(value: unknown): unknown {
+  return typeof value === 'string' && value.trim() === '' ? undefined : value;
 }
 
 function normalizeCommaSeparatedEnv(value: unknown): unknown {

@@ -8,16 +8,36 @@ export type AuthRedirectReason =
   | 'not-found'
   | 'login';
 
-export const DEFAULT_AUTHENTICATED_REDIRECT_PATH = '/admin/dashboard';
+/** The sign-in banner a redirect reason maps to (Design Reference §5.2). */
+export type SignInReason = 'expired' | 'signed-out';
+
+export const SIGN_IN_PATH = '/sign-in';
+export const DEFAULT_AUTHENTICATED_REDIRECT_PATH = '/projects';
 
 type SearchParamsReader = Pick<URLSearchParams, 'get'>;
 type SearchParamsStringifier = Pick<URLSearchParams, 'toString'>;
 
+/**
+ * Only same-origin paths are allowed as a return target: a single leading
+ * slash, never `//host` or `/\host`, which browsers treat as another origin.
+ */
 export function getSafeRedirectPath(path?: string | null) {
   if (!path) return null;
   if (!path.startsWith('/')) return null;
+  if (path.startsWith('//') || path.startsWith('/\\')) return null;
+  if (path.startsWith(SIGN_IN_PATH)) return null;
 
   return path;
+}
+
+function toSignInReason(reason: AuthRedirectReason): SignInReason | null {
+  if (reason === 'session-expired' || reason === 'duplicate_session') {
+    return 'expired';
+  }
+
+  if (reason === 'signed-out') return 'signed-out';
+
+  return null;
 }
 
 export function buildLoginRedirectUrl(
@@ -25,27 +45,22 @@ export function buildLoginRedirectUrl(
   nextPath?: string | null,
 ) {
   const searchParams = new URLSearchParams();
+  const signInReason = toSignInReason(reason);
+  const returnTo = getSafeRedirectPath(nextPath);
 
-  searchParams.set('reason', reason);
+  if (returnTo) searchParams.set('returnTo', returnTo);
+  if (signInReason) searchParams.set('reason', signInReason);
 
-  const callback = getSafeRedirectPath(nextPath);
+  const query = searchParams.toString();
 
-  if (callback) searchParams.set('callback', callback);
-
-  return `/login?${searchParams.toString()}`;
+  return query ? `${SIGN_IN_PATH}?${query}` : SIGN_IN_PATH;
 }
 
 export function getPostLoginRedirectPath(
   searchParams: SearchParamsReader,
   fallback = DEFAULT_AUTHENTICATED_REDIRECT_PATH,
 ) {
-  const callback = searchParams.get('callback');
-  const next = searchParams.get('next');
-
-  const safePath = getSafeRedirectPath(callback) ?? getSafeRedirectPath(next);
-  if (safePath) return safePath;
-
-  return fallback;
+  return getSafeRedirectPath(searchParams.get('returnTo')) ?? fallback;
 }
 
 export function buildCurrentPath(
@@ -73,11 +88,7 @@ export function redirectToLogin(
 }
 
 export function redirectAfterLogin(nextPath?: string | null) {
-  const safePath = getSafeRedirectPath(nextPath);
-  if (safePath) {
-    redirectToPath(safePath);
-    return;
-  }
-
-  redirectToPath(DEFAULT_AUTHENTICATED_REDIRECT_PATH);
+  redirectToPath(
+    getSafeRedirectPath(nextPath) ?? DEFAULT_AUTHENTICATED_REDIRECT_PATH,
+  );
 }

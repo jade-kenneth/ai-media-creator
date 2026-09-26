@@ -4,34 +4,37 @@ import { Slot } from '@radix-ui/react-slot';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Buttons per design/system/components-states.md: 40px (44px below 1024px),
+ * small 32px (36px), 10px radius, press scale 0.97. Disabled buttons use the
+ * sunken fill so the reason beside them stays the focus.
+ */
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "press group/button inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent text-sm leading-5 font-medium whitespace-nowrap select-none disabled:cursor-not-allowed aria-disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
-        outline:
-          'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
+        default:
+          'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-pressed disabled:border-transparent disabled:bg-surface-sunken disabled:text-ink-3 aria-disabled:bg-surface-sunken aria-disabled:text-ink-3',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
+          'border-border-strong bg-surface text-ink hover:bg-surface-hover active:bg-surface-sunken aria-expanded:bg-surface-hover disabled:bg-surface-sunken disabled:text-ink-3 aria-disabled:bg-surface-sunken aria-disabled:text-ink-3',
+        outline:
+          'border-border-strong bg-surface text-ink hover:bg-surface-hover active:bg-surface-sunken aria-expanded:bg-surface-hover disabled:bg-surface-sunken disabled:text-ink-3',
         ghost:
-          'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
+          'bg-transparent text-ink hover:bg-surface-hover aria-expanded:bg-surface-hover disabled:text-ink-3 disabled:hover:bg-transparent',
         destructive:
-          'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'bg-danger text-white hover:bg-danger-hover disabled:bg-surface-sunken disabled:text-ink-3',
+        link: 'h-auto! border-0 p-0! text-flare-text underline underline-offset-2 hover:no-underline',
       },
       size: {
         default:
-          'h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-        xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: 'h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-        icon: 'size-8',
-        'icon-xs':
-          "size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
-        'icon-sm':
-          'size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
-        'icon-lg': 'size-9',
+          'h-11 px-4 has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5 lg:h-10',
+        sm: 'h-9 gap-1.5 rounded-sm px-3 text-small lg:h-8',
+        lg: 'h-12 px-5 text-body',
+        xs: 'h-8 gap-1 rounded-sm px-2 text-xs lg:h-7',
+        icon: 'size-10 lg:size-8',
+        'icon-sm': 'size-9 rounded-sm lg:size-7',
+        'icon-lg': 'size-11 lg:size-10',
       },
     },
     defaultVariants: {
@@ -64,4 +67,21 @@ function Button({
   );
 }
 
-export { Button, buttonVariants };
+/**
+ * The cost segment on a paid button: a 1px divider, then the mono estimate.
+ * The estimate is always visible before the click.
+ */
+function ButtonCost({ className, ...props }: React.ComponentProps<'span'>) {
+  return (
+    <span
+      data-slot="button-cost"
+      className={cn(
+        'ml-1 flex items-center gap-2 self-stretch border-l border-current/25 pl-2.5 font-mono text-small tabular-nums opacity-90',
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export { Button, ButtonCost, buttonVariants };

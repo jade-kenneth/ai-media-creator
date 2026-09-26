@@ -1,6 +1,5 @@
 'use client';
 
-import { ThemeProvider } from 'next-themes';
 import type { ReactNode } from 'react';
 
 import { Toaster } from '@/components/ui/sonner';
@@ -15,18 +14,11 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <QueryProvider>
-        <TooltipProvider delayDuration={150}>
-          <AuthProvider>{children}</AuthProvider>
-          <Toaster closeButton position="top-right" />
-        </TooltipProvider>
-      </QueryProvider>
-    </ThemeProvider>
+    <QueryProvider>
+      <TooltipProvider delayDuration={150}>
+        <AuthProvider>{children}</AuthProvider>
+        <Toaster />
+      </TooltipProvider>
+    </QueryProvider>
   );
 }

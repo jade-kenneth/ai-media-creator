@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "web": "nx run app-web:dev",
-    "mobile": "nx run app-mobile:start",
     "api": "nx run app-api:start:dev",
+    "worker": "nx run app-api:worker",
     "build": "nx run-many -t build --all",
     "lint": "nx run-many -t lint --all",
     "typecheck": "nx run-many -t typecheck --all",
@@ -42,7 +42,6 @@
     "@nestjs/cli": "^11.0.21",
     "@nx/eslint": "22.7.6",
     "@nx/eslint-plugin": "22.7.6",
-    "@nx/expo": "22.7.6",
     "@nx/js": "22.7.6",
     "@nx/next": "22.7.6",
     "@nx/webpack": "22.7.6",

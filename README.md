@@ -1,18 +1,18 @@
 # Full-Stack Application Boilerplate
 
-Project-agnostic Nx monorepo for a multi-tenant product with a web admin,
-Expo mobile app, and NestJS GraphQL API.
+Nx monorepo for **AI Creation Platform**, a web studio that turns one product
+into a short vertical affiliate video script, backed by a NestJS GraphQL API.
+The product spec lives in `Product Specification.md` and the build order in
+`Implementation Plan.md`; the Expo mobile app was removed for this product.
 
 ## Included platform capabilities
 
 - JWT authentication with refresh-token sessions and role-based access
 - Multi-tenant organizations and tenant-aware request handling
-- Super-admin organization and tenant-admin account management
 - MongoDB repositories, cursor pagination, and request-scoped batching
 - S3 uploads with presigned URLs
-- In-app notifications, Expo push tokens, and test push delivery
-- Account-deletion request workflow
-- Internationalization, theming, responsive admin UI, and mobile navigation
+- Google sign-in with first-time creator provisioning and starter credits
+- Credit holds and Mongo-backed generation jobs with an in-API worker
 - Rate limiting, CORS/security headers, structured logging, and health checks
 
 Business-specific examples, content, branding, and assets are intentionally not
@@ -24,8 +24,7 @@ shared contracts or pure logic in `packages/`.
 | Project                     | Stack                          | Purpose                            |
 | --------------------------- | ------------------------------ | ---------------------------------- |
 | `apps/app-api`              | NestJS, GraphQL, MongoDB       | API and reusable platform services |
-| `apps/app-web`              | Next.js, shadcn/ui             | Tenant and super-admin web app     |
-| `apps/app-mobile`           | Expo, React Native, NativeWind | Tenant-aware mobile starter app    |
+| `apps/app-web`              | Next.js, shadcn/ui             | Creator web studio                 |
 | `packages/shared-constants` | TypeScript                     | Cross-app constants and contracts  |
 
 ## Getting started
@@ -63,12 +62,42 @@ pnpm install
 cp .env.example .env
 pnpm api
 pnpm web
-pnpm mobile
+pnpm worker   # media worker: voice and render jobs (video beta)
 ```
 
-Configure MongoDB, JWT, S3, email, Expo/EAS, and deployment credentials before
-using those integrations. App-specific public environment variables are
-documented in each app's `.env.example`.
+The media worker (`apps/app-api/src/worker.ts`) is a second API process with no
+HTTP server. It claims only voice and render jobs; text jobs stay in the API
+process. It refuses to start unless FFmpeg and ffprobe run and FFmpeg includes
+`libx264`, `aac`, `drawtext` (freetype) and `ass` (libass). Deploy it as its own
+process with the same environment as the API, and run `node dist/worker` in
+production.
+
+Configure MongoDB (`MONGODB_URI`), JWT, S3, Google OAuth, a text provider (OpenAI or
+Anthropic), and deployment credentials before using those integrations.
+App-specific public environment variables are documented in each app's
+`.env.example`.
+
+### S3 bucket CORS
+
+Browsers upload straight to S3 with a presigned `PUT`, so the bucket needs a
+CORS rule for every web origin. Without one, S3 rejects the preflight with
+`403` and every upload fails in the browser even though server-side calls work.
+List the same origins as the API's `CORS_ORIGINS`:
+
+```json
+[
+  {
+    "AllowedOrigins": ["http://localhost:4302", "http://127.0.0.1:4302"],
+    "AllowedMethods": ["PUT", "GET", "HEAD"],
+    "AllowedHeaders": ["content-type"],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]
+```
+
+Add each deployed web origin to `AllowedOrigins`. Previews and thumbnails use
+signed `GET` URLs in `<img>`/`<video>` elements, which do not need CORS.
 
 ## Design source
 
@@ -203,7 +232,6 @@ GraphQL client types are generated from the local API schema:
 
 ```bash
 pnpm --filter app-web codegen
-pnpm --filter app-mobile codegen
 ```
 
 ## Engineering conventions

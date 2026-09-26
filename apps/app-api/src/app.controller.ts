@@ -7,7 +7,7 @@ const HOME_HTML = `<!doctype html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>App Boilerplate API</title>
+<title>AI Creation Platform API</title>
 <style>
   :root { color-scheme: light dark; }
   * { box-sizing: border-box; }
@@ -37,10 +37,10 @@ const HOME_HTML = `<!doctype html>
 </head>
 <body>
   <div class="card">
-    <span class="badge">Boilerplate</span>
-    <h1>App Boilerplate API</h1>
-    <p>NestJS · GraphQL (Apollo) · MongoDB. Auth, multi-tenancy, notifications,
-    push, mail and file uploads are wired up. Edit
+    <span class="badge">API</span>
+    <h1>AI Creation Platform API</h1>
+    <p>NestJS · GraphQL (Apollo) · MongoDB. Google sign-in, projects, facts,
+    scripts, generation jobs and file uploads. Edit
     <code>src/app.controller.ts</code> to customize this page.</p>
     <div class="links">
       <a class="primary" href="/graphql">GraphQL Playground</a>

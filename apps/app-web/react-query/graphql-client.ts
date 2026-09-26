@@ -301,7 +301,20 @@ export class GraphQLClient {
         };
       }
 
-      if (error?.extensions?.code === 'CONFLICT') {
+      if (error?.extensions?.code === 'NOT_FOUND') {
+        return {
+          ok: false,
+          error: {
+            name: 'NotFoundError',
+            message: error?.message ?? 'Not Found',
+          },
+        };
+      }
+
+      if (
+        error?.extensions?.code === 'CONFLICT' ||
+        error?.extensions?.code === 'INVALID_STATUS_TRANSITION'
+      ) {
         return {
           ok: false,
           error: {

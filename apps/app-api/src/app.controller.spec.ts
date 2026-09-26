@@ -32,7 +32,7 @@ describe('AppController', () => {
 
   describe('home', () => {
     it('should return the boilerplate landing HTML', () => {
-      expect(appController.getHome()).toContain('App Boilerplate API');
+      expect(appController.getHome()).toContain('AI Creation Platform API');
     });
   });
 

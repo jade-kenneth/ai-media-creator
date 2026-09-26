@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { MailModule } from '../mail/mail.module';
+import { CreditsModule } from '../credits/credits.module';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { SessionsController } from '../sessions/sessions.controller';
 import { SessionsModule } from '../sessions/sessions.module';
@@ -49,6 +50,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       },
     }),
     AuthSecurityRepositoryModule,
+    CreditsModule,
     MailModule,
     OrganizationsModule,
     UsersModule,

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-25-storage-key-allowlist-contract",
+  "title": "Contract-test generated storage keys against the central allowlist",
+  "targetSkills": ["api-app"],
+  "kind": "reliability",
+  "symptom": "A background media job fails before its provider call because a newly generated object-key shape is rejected by the shared storage guard.",
+  "rootCause": "The feature added a server-generated storage namespace without extending or contract-testing the central private-key allowlist, while its unit tests replaced the storage service with a permissive mock.",
+  "reusableRules": [
+    "Amends `references/service-implementation.md` under File uploads & ingest: whenever a feature adds a server-generated object-key namespace or shape, use a canonical domain key builder and add a contract test that passes that builder's real output through the central storage-key validator. Keep adjacent wrong-extension, wrong-suffix, traversal, and malformed-identifier cases rejected so extending the allowlist does not widen it accidentally."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/modules/ai-clips/ai-clip-storage.ts",
+      "note": "Defines the canonical server-generated temporary-frame and generated-video key shapes used by the worker."
+    },
+    {
+      "path": "apps/app-api/src/modules/s3/s3.service.ts",
+      "note": "Shows the central exact-shape allowlist shared by private-object reads, writes, copies, and deletes."
+    },
+    {
+      "path": "apps/app-api/src/modules/s3/s3.service.spec.ts",
+      "note": "Exercises the canonical builders against the real validator and proves neighboring malformed shapes remain rejected."
+    }
+  ],
+  "verification": [
+    "Focused storage, media-handler, and job-runner regression suite passed: 32 tests.",
+    "Full API suite passed: 40 suites and 258 tests.",
+    "API formatting, targeted lint, TypeScript typecheck, Nest build, and tenant-scope checks passed."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, provider name, model, bucket, exact feature namespace, and account/balance details.",
+    "The existing API skill already requires allowed namespaces, traversal rejection, MIME allowlists, and server-generated final keys; this proposal only refines that rule with builder-to-allowlist contract testing."
+  ]
+}

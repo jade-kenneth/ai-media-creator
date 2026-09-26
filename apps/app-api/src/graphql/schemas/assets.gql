@@ -1,0 +1,100 @@
+enum AssetKind {
+  PHOTO
+  CLIP
+  AUDIO
+}
+
+"""
+What an upload is for. MEDIA files are the project's photos and clips; a
+project keeps one current RECORDING (narration) and one current MUSIC track.
+"""
+enum AssetPurpose {
+  MEDIA
+  RECORDING
+  MUSIC
+}
+
+"Where a file came from: the creator's upload, or an AI scene clip made from one of their photos."
+enum AssetOrigin {
+  UPLOAD
+  AI_CLIP
+}
+
+enum AssetStatus {
+  UPLOADING
+  READY
+}
+
+"How an AI scene clip was made, and whether the creator has checked it."
+type AiClipInfo {
+  "The GENERATE_SCENE_CLIPS job that made it."
+  jobId: ID!
+  "The video edit scene it was made for."
+  sceneId: ID!
+  "The creator's photo it starts from; for REFERENCES, the first reference photo. Null when no photo was sent (DESCRIBE, or a story's one-click clip from the still alone)."
+  sourceAssetId: ID
+  "Missing on clips made before modes existed; read as FIRST_FRAME."
+  mode: SceneClipMode!
+  "FIRST_LAST_FRAME: the photo it ends on."
+  endAssetId: ID
+  "REFERENCES and CONSISTENT: every photo it was matched to, in order."
+  referenceAssetIds: [ID!]!
+  "CONSISTENT: the scene whose still was sent as the last reference; null for the first scene."
+  continuitySceneId: ID
+  "CONSISTENT: that scene's photo or clip."
+  continuityAssetId: ID
+  "A or B, in the order the job made them."
+  label: String!
+  prompt: String!
+  "Set once the creator confirms the product-accuracy check; required before use in a scene."
+  checkedAt: DateTime
+}
+
+type ProjectAsset implements Node {
+  id: ID!
+  projectId: ID!
+  kind: AssetKind!
+  purpose: AssetPurpose!
+  origin: AssetOrigin!
+  "Null for uploads."
+  aiClip: AiClipInfo
+  status: AssetStatus!
+  fileName: String!
+  sizeBytes: Int!
+  "Clip or audio length in seconds as read by the creator's browser."
+  durationSeconds: Float
+  "Signed, short-lived URL for the owner's preview."
+  previewUrl: String
+  createdAt: DateTime!
+}
+
+type AssetUploadTicket {
+  asset: ProjectAsset!
+  "A presigned PUT bound to this file's type and exact size, valid 5 minutes."
+  uploadUrl: String!
+}
+
+input CreateAssetUploadInput {
+  projectId: ID!
+  fileName: String!
+  contentType: String!
+  sizeBytes: Int!
+  durationSeconds: Float
+  rightsConfirmed: Boolean!
+  "Defaults to MEDIA."
+  purpose: AssetPurpose
+  "Set when this upload replaces an existing file."
+  replacesAssetId: ID
+}
+
+extend type Query {
+  "A project's stored photos and clips (purpose MEDIA), oldest first: up to 20 uploads plus the project's AI clips."
+  projectAssets(projectId: ID!): [ProjectAsset!]!
+}
+
+extend type Mutation {
+  createAssetUpload(input: CreateAssetUploadInput!): AssetUploadTicket!
+  completeAssetUpload(id: ID!): ProjectAsset!
+  "Removes a stored file, or cancels an upload in progress."
+  removeAsset(id: ID!): Boolean!
+}

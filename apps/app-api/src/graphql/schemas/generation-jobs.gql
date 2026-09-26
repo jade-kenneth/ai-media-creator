@@ -1,0 +1,89 @@
+enum GenerationJobType {
+  SUGGEST_ANGLES
+  SUGGEST_AUDIENCES
+  SUGGEST_PREMISES
+  WRITE_SCRIPT
+  REWRITE_HOOK
+  REWRITE_SCENE
+  GENERATE_VOICEOVER
+  ALIGN_RECORDING
+  RENDER_VIDEO
+  GENERATE_SCENE_CLIPS
+}
+
+enum GenerationJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum GenerationFailureCode {
+  PROVIDER_TIMEOUT
+  PROVIDER_REJECTED
+  PROVIDER_NOT_CONFIGURED
+  INVALID_OUTPUT
+  "A recording didn't match the script closely enough to time it."
+  RECORDING_MISMATCH
+  "An audio or video file couldn't be read."
+  UNREADABLE_MEDIA
+  "A file the render needs is no longer stored."
+  MEDIA_MISSING
+  "A render ran past its time limit and was stopped."
+  RENDER_TIMEOUT
+  "No worker picked the job up in time (the media worker isn't running)."
+  WORKER_UNAVAILABLE
+  INTERNAL
+}
+
+"""
+A paid background job. Credits are held when it is created, charged when it
+completes and released when it fails.
+"""
+type GenerationJob implements Node {
+  id: ID!
+  projectId: ID!
+  type: GenerationJobType!
+  status: GenerationJobStatus!
+  "Zero-based index of the step in progress; equals stepCount when finished."
+  step: Int!
+  stepCount: Int!
+  creditCost: Int!
+  versionId: ID
+  hookId: ID
+  sceneId: ID
+  "GENERATE_SCENE_CLIPS: the start photo (the first reference for REFERENCES)."
+  sourceAssetId: ID
+  "GENERATE_SCENE_CLIPS: the motion description."
+  prompt: String
+  "GENERATE_SCENE_CLIPS: how the photos are used."
+  clipMode: SceneClipMode
+  "GENERATE_SCENE_CLIPS: how many clips were asked for."
+  clipCount: Int
+  "GENERATE_SCENE_CLIPS: each clip's length in seconds, from its scene (5 to 15)."
+  clipSeconds: Int
+  "GENERATE_SCENE_CLIPS, FIRST_LAST_FRAME: the end photo."
+  endAssetId: ID
+  "GENERATE_SCENE_CLIPS, REFERENCES and CONSISTENT: the reference photos."
+  referenceAssetIds: [ID!]
+  "GENERATE_SCENE_CLIPS, CONSISTENT: the scene whose still is sent; null for the first scene."
+  continuitySceneId: ID
+  "GENERATE_SCENE_CLIPS, CONSISTENT: that scene's photo or clip."
+  continuityAssetId: ID
+  resultVersionId: ID
+  failureCode: GenerationFailureCode
+  createdAt: DateTime!
+  startedAt: DateTime
+  finishedAt: DateTime
+}
+
+extend type Query {
+  generationJob(id: ID!): GenerationJob!
+  "The project's 20 most recent jobs, newest first (capped); active only when asked."
+  projectJobs(projectId: ID!, active: Boolean): [GenerationJob!]!
+}
+
+extend type Mutation {
+  "Retries a failed job in place: the same job, a fresh credit hold."
+  retryGenerationJob(id: ID!): GenerationJob!
+}

@@ -6,19 +6,27 @@ import * as TogglePrimitive from '@radix-ui/react-toggle';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Chips and segments per design/system/components-states.md.
+ * - chip: 32px (40px below 1024px) pill; selected is the ink fill.
+ * - segment: a button inside the sunken segment track; selected is white + e1.
+ * Selection is announced by the radio/pressed state, and shown by shape as well
+ * as colour (chips add a check glyph in ChoiceGroup; segments rise).
+ */
 const toggleVariants = cva(
-  "group/toggle inline-flex items-center justify-center gap-1 rounded-lg text-sm font-medium whitespace-nowrap transition-all outline-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-pressed:bg-muted data-[state=on]:bg-muted dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/toggle inline-flex shrink-0 items-center justify-center gap-1.5 font-medium whitespace-nowrap transition-colors duration-120 outline-none select-none disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-3.5",
   {
     variants: {
       variant: {
-        default: 'bg-transparent',
-        outline: 'border border-input bg-transparent hover:bg-muted',
+        default:
+          'rounded-md bg-transparent text-small text-ink hover:bg-surface-hover data-[state=on]:bg-surface-sunken',
+        chip: 'rounded-full border border-border-strong bg-surface px-3.5 text-small text-ink hover:border-ink-3 data-[state=on]:border-ink data-[state=on]:bg-ink data-[state=on]:text-white',
+        segment:
+          'rounded-sm px-3 text-small text-ink-2 hover:text-ink data-[state=on]:bg-surface data-[state=on]:text-ink data-[state=on]:shadow-e1',
       },
       size: {
-        default:
-          'h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
-        sm: "h-7 min-w-7 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: 'h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2',
+        default: 'h-10 min-w-10 lg:h-8 lg:min-w-8',
+        sm: 'h-9 min-w-9 lg:h-7 lg:min-w-7',
       },
     },
     defaultVariants: {

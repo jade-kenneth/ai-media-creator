@@ -8,12 +8,18 @@ Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 | Collection | Module | Tenant scope | Indexes | Source |
 | --- | --- | --- | --- | --- |
 | `AccountDeletionRequests` | account-deletion-requests | **tenant-scoped** | `email, status, createdAt`<br>`organizationId, status, createdAt`<br>`status, createdAt`<br>`createdAt` | apps/app-api/src/modules/account-deletion-requests/repositories/account-deletion-requests.repository.ts:21 |
+| `Assets` | assets | **tenant-scoped** | `id (unique)`<br>`organizationId, projectId, createdAt` | apps/app-api/src/modules/assets/repositories/assets.repository.ts:65 |
 | `AuthSecurity` | auth | global | `email (unique)`<br>`blockedUntil` | apps/app-api/src/modules/auth/repositories/auth-security.repository.ts:320 |
-| `Notifications` | notifications | **tenant-scoped** | `userId, createdAt, id`<br>`userId, isRead`<br>`relatedEntityId`<br>`organizationId` | apps/app-api/src/modules/notifications/repositories/notifications.repository.ts:15 |
+| `CreditAccounts` | credits | **tenant-scoped** | `id (unique)`<br>`ownerId (unique)`<br>`organizationId, ownerId` | apps/app-api/src/modules/credits/repositories/credits.repository.ts:64 |
+| `CreditEntries` | credits | **tenant-scoped** | `id (unique)`<br>`organizationId, ownerId, createdAt`<br>`jobId, kind` | apps/app-api/src/modules/credits/repositories/credits-ledger.repository.ts:25 |
+| `Exports` | exports | **tenant-scoped** | `id (unique)`<br>`organizationId, projectId, number (unique)`<br>`jobId (unique)` | apps/app-api/src/modules/exports/repositories/exports.repository.ts:35 |
+| `GenerationJobs` | generation-jobs | **tenant-scoped** | `id (unique)`<br>`ownerId, idempotencyKey (unique)`<br>`organizationId, projectId, createdAt`<br>`status, createdAt`<br>`status, type, createdAt` | apps/app-api/src/modules/generation-jobs/repositories/generation-jobs.repository.ts:119 |
 | `Organizations` | organizations | global | `slug (unique)`<br>`isActive` | apps/app-api/src/modules/organizations/repositories/organizations.repository.ts:13 |
-| `Payments` | payments | **tenant-scoped** | `id (unique)`<br>`referenceId (unique)`<br>`gatewayReference`<br>`userId, createdAt`<br>`organizationId, createdAt`<br>`organizationId, userId, createdAt` | apps/app-api/src/modules/payments/repositories/payments.repository.ts:37 |
-| `PushTokens` | push-tokens | **tenant-scoped** | `token, platform (unique)`<br>`userId, updatedAt`<br>`userId, platform`<br>`organizationId` | apps/app-api/src/modules/push-tokens/repositories/push-tokens.repository.ts:42 |
+| `ProductFacts` | facts | **tenant-scoped** | `id (unique)`<br>`organizationId, projectId, createdAt` | apps/app-api/src/modules/facts/repositories/facts.repository.ts:40 |
+| `Projects` | projects | **tenant-scoped** | `_id, id, text`<br>`_id, id, text, source`<br>`id (unique)`<br>`organizationId, ownerId, updatedAt`<br>`organizationId, ownerId, titleSort`<br>`organizationId, ownerId, status` | apps/app-api/src/modules/projects/repositories/projects.repository.ts:230 |
 | `SchedulerLocks` | scheduler-locks | global | `name (unique)`<br>`expiresAt` | apps/app-api/src/modules/scheduler-locks/repositories/scheduler-locks.repository.ts:18 |
+| `ScriptVersions` | scripts | **tenant-scoped** | `id (unique)`<br>`organizationId, projectId, number`<br>`projectId, number (unique)` | apps/app-api/src/modules/scripts/repositories/scripts.repository.ts:116 |
 | `Sessions` | sessions | **tenant-scoped** | `jti (unique)`<br>`accountId, dateTimeCreated`<br>`accountId, dateTimeLastRefreshed`<br>`organizationId` | apps/app-api/src/modules/sessions/repositories/sessions.repository.ts:18 |
-| `StorePurchases` | store-purchases | **tenant-scoped** | `id (unique)`<br>`store, storeReference (unique)`<br>`webhookEventIds`<br>`organizationId, userId, createdAt` | apps/app-api/src/modules/store-purchases/repositories/store-purchases.repository.ts:31 |
 | `Users` | users | **tenant-scoped** | `email (unique)`<br>`organizationId, role, isActive` | apps/app-api/src/modules/users/repositories/users.repository.ts:24 |
+| `VideoEdits` | video-edits | **tenant-scoped** | `id (unique)`<br>`organizationId, projectId (unique)` | apps/app-api/src/modules/video-edits/repositories/video-edits.repository.ts:152 |
+| `VoiceTracks` | voice-tracks | **tenant-scoped** | `_id, sceneId, audioKey, offsetMs, durationMs, words, text, startMs, endMs`<br>`id (unique)`<br>`organizationId, projectId, createdAt` | apps/app-api/src/modules/voice-tracks/repositories/voice-tracks.repository.ts:51 |

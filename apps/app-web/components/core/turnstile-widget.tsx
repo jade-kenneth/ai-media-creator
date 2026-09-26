@@ -13,8 +13,12 @@ import {
 const TURNSTILE_SCRIPT_SRC =
   'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
+// Local development skips the challenge; the API does the same while its
+// NODE_ENV is development.
 export const turnstileSiteKey =
-  process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+  process.env.NODE_ENV === 'development'
+    ? undefined
+    : process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
 export type TurnstileWidgetHandle = {
   /** Clears the solved challenge so the next attempt gets a fresh token. */
@@ -31,8 +35,8 @@ type TurnstileWidgetProps = {
 /**
  * Renders the Cloudflare Turnstile challenge and reports its token.
  *
- * Renders nothing when no site key is configured, which keeps local
- * development working while `TURNSTILE_ENABLED` is off on the API.
+ * Renders nothing when no site key is configured or under `next dev`, which
+ * keeps local development working without a Cloudflare challenge.
  */
 export const TurnstileWidget = forwardRef<
   TurnstileWidgetHandle,

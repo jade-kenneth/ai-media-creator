@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-25-fit-dependent-media-to-derived-segment-length",
+  "title": "Fit dependent media to a derived segment length with one rate function shared by the render and the preview",
+  "targetSkills": ["api-app", "web-app"],
+  "kind": "bug-fix",
+  "symptom": "In a timeline of segments, a video input ran out before its segment ended. The picture froze on its last frame while the audio kept playing, in both the browser preview and the server-rendered export. To the viewer the video looked stopped, waiting for the audio to finish.",
+  "rootCause": "Segment lengths were later changed to come from a measured audio track at read time instead of the stored length. The video inputs were never fitted to the new length. The render padded short inputs with a clone-last-frame filter, and the preview paused the media element at its end, so both froze silently. The input's start offset had been validated against the stored length. That check passed, but once the derived length grew there was still too little footage.",
+  "reusableRules": [
+    "New, under `references/service-implementation.md` § Processing ingested media server-side (a short sub-block after the streaming bullets): when a segment's output length comes from something other than the input itself (another track's measured length, a transition overlap, a user setting), fit each time-based input to that length explicitly. Do not rely on a pad or hold filter that silently repeats the last frame. Take the length the input actually has from a probe of the local file, not from stored metadata. Compute the playback rate in one exported pure function: footage left after the start offset ÷ the length needed, clamped to [a named floor, 1]. Apply it as a timestamp stretch before scaling and frame-rate conversion (for example FFmpeg `setpts=<1/rate>*(PTS-STARTPTS)` ahead of `fps`). Keep the hold filter only as a safety net for rounding. Unit-test the function: enough footage → 1, a shortfall → the ratio, a tiny input → the floor, and unknown or zero length → 1.",
+    "New, same place: a validation that compares an input's offset or range with a stored length doesn't guarantee coverage once a derived length replaces that stored length. The fit step must handle any shortfall, whichever validation passed. Put the segment's lengthening and its fitting in the same code path, so a new source of length can't bring the freeze back.",
+    "New, same place: cover a freeze with a real-render regression test. In the fixture, give a segment an input shorter than the segment. Sample two frames inside the shortfall window as small grayscale raw frames, and assert that their mean absolute pixel difference is above a threshold. Confirm the assertion fails with the fit turned off: a held frame measures near zero.",
+    "New, under `references/browser-compatibility.md` § JavaScript and Browser API Watchouts (media elements), or a small new media-preview section that `SKILL.md` routes to: a live preview that approximates a server render uses the render's fit rule, by importing it or mirroring it in a small `lib/` module when there's no shared package. Drive `<video>` from the one clock: seek to `start + elapsed × rate`, set `playbackRate` to the same rate only when it changes, and pause only after the stretched footage has really run out. Clamp the rate to the browser's supported range: Chromium throws `NotSupportedError` for a `playbackRate` below 0.0625. Use the same floor in the render, so the preview and the export agree. Read `element.duration` only once metadata has loaded; until then, treat the length as unknown and play at rate 1."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/modules/render/render.service.ts",
+      "note": "The exported pure rate function with its named floor. The render probes each time-based input and stretches it with a timestamp filter ahead of scaling and frame-rate conversion. The clone-last-frame pad stays only as a rounding net."
+    },
+    {
+      "path": "apps/app-api/src/modules/render/render.service.spec.ts",
+      "note": "Unit table for the rate function. The real-render fixture segment (1.5 s of footage for a 3 s segment) asserts that the frame difference inside the shortfall window is above 2."
+    },
+    {
+      "path": "apps/app-web/lib/studio/clip-rate.ts",
+      "note": "The client mirror of the same rate function and floor."
+    },
+    {
+      "path": "apps/app-web/features/scene-editor/preview-player/preview-player.tsx",
+      "note": "The preview seeks to start + elapsed × rate, sets playbackRate from the shared function, and pauses only once the stretched footage has run out."
+    },
+    {
+      "path": "apps/app-api/src/modules/video-edits/video-edits.service.ts",
+      "note": "The segment length comes from measured audio at read time, while the input offset is validated against the stored length. That is the gap the fit step now covers."
+    }
+  ],
+  "verification": [
+    "The real-render regression check measured a mean frame difference of 0.0002 with the stretch turned off (a held frame, so the assertion failed) and more than 2 with it on (passed).",
+    "Render specs passed (11 tests), with the rate unit table and the fixture render run against an FFmpeg build that has libass and xfade. Neighbouring service specs passed (74 tests across 8 suites).",
+    "API and web typecheck passed; lint and Prettier passed on the changed files.",
+    "The browser preview has not yet been checked in a signed-in session; the client evidence is code review plus static checks."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the step and screen names, the media domain terms (script, narration, voiceover, scene, AI clip), the named transitions and their overlap values, the output preset, and the phase number.",
+    "Removed the creator-facing warning copy that states the playback speed. It is product copy, not an engineering rule.",
+    "Overlap check against the locked snapshot: `api-app/references/service-implementation.md` § Processing ingested media server-side covers streaming to temp files, cleanup and stream tests, not timing or fitting, so the three api-app rules are new. `web-app/references/browser-compatibility.md` mentions media elements only for autoplay restrictions, so the preview rule is new. No web-app reference covers playbackRate, media seeking or preview/render parity.",
+    "Not targeted at mobile-app: this repository has no native player, so the rule is unverified on native video APIs. Promotion can mirror it once a native preview proves it.",
+    "Related but distinct: 2026-09-25-derived-length-invariant-at-every-write-boundary is about enforcing a minimum when data is written. This proposal is about fitting media when the length is derived at read or render time."
+  ]
+}

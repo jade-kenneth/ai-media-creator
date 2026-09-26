@@ -5,4 +5,7 @@ Cron jobs, intervals, and timeouts. Every recurring job must acquire a scheduler
 
 Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 
-_None found._
+| Kind | Schedule | Handler | Lock acquired | Source |
+| --- | --- | --- | --- | --- |
+| Interval | `generation-jobs-worker` | `tick` | **no** | apps/app-api/src/modules/generation-jobs/generation-jobs.worker.ts:52 |
+| Interval | `media-jobs-worker` | `tick` | **no** | apps/app-api/src/modules/generation-jobs/generation-jobs.worker.ts:65 |

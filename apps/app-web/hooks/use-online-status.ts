@@ -1,0 +1,22 @@
+'use client';
+
+import { useSyncExternalStore } from 'react';
+
+function subscribe(onChange: () => void) {
+  window.addEventListener('online', onChange);
+  window.addEventListener('offline', onChange);
+
+  return () => {
+    window.removeEventListener('online', onChange);
+    window.removeEventListener('offline', onChange);
+  };
+}
+
+/** The browser's connection state; assumed online during server rendering. */
+export function useOnlineStatus() {
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true,
+  );
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-26-no-heading-inside-title-slot-components",
+  "title": "Pass heading content to a title component instead of nesting another heading inside it",
+  "targetSkills": ["web-app"],
+  "kind": "bug-fix",
+  "symptom": "A page logged `In HTML, <h2> cannot be a child of <h2>. This will cause a hydration error.` and `<h2> cannot contain a nested <h2>` on every load, next to an attribute-only hydration mismatch on `<body>`. The page looked correct, and typecheck and lint were clean.",
+  "rootCause": "The design-system card title component already renders a heading element (an `h2` by default, with an `as` prop for the level). Several cards wrapped their own `<h2>` inside it to carry an id and classes, which produced invalid heading-in-heading HTML. The separate `<body>` mismatch was an attribute a browser extension adds before React hydrates, not something the app rendered.",
+  "reusableRules": [
+    "Amends `references/accessibility.md` under Rules (Ensure accessible structure): a title component that already renders a heading (card, dialog, sheet or alert titles) takes the heading's content and props directly — put `id`, `className` and the level (`as`) on the title component itself. Never nest a heading or block element (`p`, `div`, lists) inside it; React reports it as invalid DOM nesting and it can break hydration. Inline elements such as `span` are fine.",
+    "Amends `references/nextjs-performance-seo.md` under Next.js and SSR/Hydration Rules: when a hydration mismatch involves only attributes on `<html>` or `<body>` that the app never sets (browser extensions add them before hydration), add `suppressHydrationWarning` to that element only, with a comment saying why. It suppresses that element's own attributes one level deep; never add it to app content to hide a real mismatch.",
+    "Amends `references/nextjs-performance-seo.md` under Next.js and SSR/Hydration Rules: to diagnose a console error on a Next.js 16+ dev server, read the dev server's MCP endpoint (`POST /_next/mcp`, tool `get_errors`), which lists each open page's browser runtime errors with source-mapped stacks and the component tree, before guessing from code. Recheck it after the fix, and reload the page for the final check, because hydration errors only appear on a full load."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-web/components/ui/card.tsx",
+      "note": "The card title component renders a heading element itself (`as` defaults to `h2`)."
+    },
+    {
+      "path": "apps/app-web/features/media-mapping/media-page.tsx",
+      "note": "A card that wrapped its own `<h2>` inside the title component; now passes the text directly."
+    },
+    {
+      "path": "apps/app-web/features/keep-consistent/keep-consistent-card.tsx",
+      "note": "A title that carried `id` and layout classes on an inner `<h2>`; they now sit on the title component, and `aria-labelledby` still resolves."
+    },
+    {
+      "path": "apps/app-web/app/layout.tsx",
+      "note": "`suppressHydrationWarning` on `<body>` only, for extension-injected attributes."
+    }
+  ],
+  "verification": [
+    "Before the fix, the dev server's `get_errors` listed the nested-heading errors (source-mapped to the page and the card) and the `<body>` attribute mismatch for the open page.",
+    "After the fix, `get_errors` for the same session returned no runtime errors; web typecheck and lint were clean.",
+    "A scan of every card, dialog, sheet and alert title/description in the app found no other heading or block element nested inside one."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the page and card names, the project id in the URL and the name of the browser extension.",
+    "Searched `web-app/SKILL.md` and `references/*.md` for suppressHydrationWarning, extension, CardTitle, nested heading, cannot be a child and `_next/mcp`: `accessibility.md` only says headings are used semantically, and the hydration rules cover unstable render values, not injected attributes or dev-server error tooling.",
+    "No mobile-app target: nested HTML headings and HTML hydration are web-only; native text components have no heading nesting rule.",
+    "The final full-page reload was left to the developer's own browser session, since the check ran against the tab they already had open."
+  ]
+}

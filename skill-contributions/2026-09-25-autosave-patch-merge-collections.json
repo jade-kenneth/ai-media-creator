@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-25-autosave-patch-merge-collections",
+  "title": "Route every autosave edit to one collection through a single full-collection patch, or key patches per item",
+  "targetSkills": ["web-app", "mobile-app"],
+  "kind": "bug-fix",
+  "symptom": "On an autosaved editor, changing one control shortly after typing in another field of the same list item silently discards the typed change. The save indicator still reports success, and the text is gone after a reload.",
+  "rootCause": "The debounced autosave merges pending patches shallowly (`{ ...pending, ...patch }`). One handler scheduled a patch whose collection key held only the edited item and field, while the other fields' handler scheduled the whole collection under the same key. The later, smaller patch replaced the pending full-collection patch before the debounce fired, so the earlier edits were never sent.",
+  "reusableRules": [
+    "Amends `references/forms.md` under Drafts and Save-for-Later: when a debounced autosave merges pending patches shallowly, every handler that edits items of the same collection must go through one save function that rebuilds the full collection patch from current state. Never schedule a partial array (`{ items: [{ id, field }] }`) under a key another handler also schedules. If handlers must send per-item patches, key them per item and field (for example `field:<itemId>`) and fold those keys into the request only when the save runs, so merges can't overwrite each other. Add a regression check: edit field A, change field B on the same item inside the debounce window, reload, and both values are kept.",
+    "Amends `references/forms.md` under Rules (mobile): the same autosave rule applies to React Native editors. Every edit to items of one collection goes through one save function that rebuilds the full collection patch, or patches are keyed per item and field so a shallow merge can't drop pending edits. Verify with the edit, change, reload check inside the debounce window."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-web/features/project-workflow/use-autosave.ts",
+      "note": "Debounced autosave that merges pending patches shallowly and reports success after sending whatever patch remains."
+    },
+    {
+      "path": "apps/app-web/features/script-studio/script-editor.tsx",
+      "note": "The faulty handler scheduled a one-item collection patch; the fix routes it through the shared full-collection save function used by the item's other fields."
+    },
+    {
+      "path": "apps/app-web/features/scene-editor/draft.ts",
+      "note": "A sibling editor keys patches per item and field and folds them into the request at save time, so the same interaction was already safe there."
+    }
+  ],
+  "verification": [
+    "Web typecheck, lint (zero warnings) and production build passed after the fix.",
+    "Workspace typecheck and the full API suite (40 suites, 270 tests) passed.",
+    "Code review confirmed both handlers now produce the same full-collection patch shape, so a shallow merge keeps the newest value of every field."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, screen names, the specific field involved (a per-item select next to text fields) and the feature phase.",
+    "No existing autosave or patch-merge rule was found in `web-app` or `mobile-app` (searched SKILL.md and references for autosave, debounce, patch and shallow). The closest home is each skill's `forms.md`; the web copy extends the Drafts and Save-for-Later section, and the mobile copy extends Rules because that file has no drafts section.",
+    "A browser reload check of the fix is still pending in the product's Spec QA; the evidence here is code review plus static checks."
+  ]
+}

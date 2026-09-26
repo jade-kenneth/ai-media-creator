@@ -1,0 +1,76 @@
+enum ExportPreset {
+  "TikTok: 9:16, 1080 × 1920, 30 fps, MP4 (H.264 + AAC)."
+  TIKTOK_9_16
+}
+
+type ExportSnapshotScene {
+  order: Int!
+  purpose: ScenePurpose!
+  "e.g. “blendgo-in-bag.jpg, slow zoom” or “Text card”."
+  media: String!
+  durationSeconds: Int!
+  onScreenText: String!
+  transitionIn: SceneTransition!
+  "Exports rendered before clip sound existed read off."
+  clipSound: ClipSound!
+}
+
+"The settings an export was rendered with; never changes."
+type ExportSnapshot {
+  scriptVersionNumber: Int!
+  scenes: [ExportSnapshotScene!]!
+  voice: String!
+  captions: String!
+  music: String!
+  endCard: Boolean!
+  postCaption: String!
+  adTag: Boolean!
+  "Exports rendered before studios existed read AFFILIATE."
+  studio: StudioType!
+}
+
+type Export implements Node {
+  id: ID!
+  number: Int!
+  preset: ExportPreset!
+  durationMs: Int!
+  width: Int!
+  height: Int!
+  sizeBytes: Int!
+  "Signed, short-lived URL of the poster frame."
+  posterUrl: String
+  "Signed, short-lived URL for playback on the page."
+  videoUrl: String
+  snapshot: ExportSnapshot!
+  createdAt: DateTime!
+  downloadedAt: DateTime
+}
+
+type ProjectExports {
+  "Newest first (capped at 50)."
+  exports: [Export!]!
+  "The video changed after the latest export."
+  changedSinceLatest: Boolean!
+}
+
+type ExportDownload {
+  "Signed for 5 minutes; saves under fileName."
+  url: String!
+  fileName: String!
+}
+
+input RenderVideoInput {
+  projectId: ID!
+  idempotencyKey: String!
+}
+
+extend type Query {
+  projectExports(projectId: ID!): ProjectExports!
+}
+
+extend type Mutation {
+  "Paid (2 credits): renders the video as an MP4 in the TikTok preset."
+  renderVideo(input: RenderVideoInput!): GenerationJob!
+  "A fresh download link; the first download marks the project Exported."
+  createExportDownload(id: ID!): ExportDownload!
+}

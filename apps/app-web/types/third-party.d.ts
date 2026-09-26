@@ -43,6 +43,7 @@ type GoogleIdentityApi = {
           size?: 'small' | 'medium' | 'large';
           text?: 'signin_with' | 'signup_with' | 'continue_with';
           shape?: 'rectangular' | 'pill';
+          logo_alignment?: 'left' | 'center';
           width?: number;
         },
       ) => void;

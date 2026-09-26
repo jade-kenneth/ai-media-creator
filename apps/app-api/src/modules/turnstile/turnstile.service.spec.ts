@@ -24,6 +24,16 @@ describe('TurnstileService', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('skips verification in local development even when enabled', async () => {
+    const fetchMock = mockSiteverify({ success: true, action: 'login' });
+    const service = createService({ nodeEnv: 'development' });
+
+    await expect(
+      service.assertVerified(request(), { action: 'login' }),
+    ).resolves.toBeUndefined();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('rejects a request with no token before calling Cloudflare', async () => {
     const fetchMock = mockSiteverify({ success: true, action: 'login' });
     const service = createService();
@@ -104,10 +114,14 @@ describe('TurnstileService', () => {
   });
 });
 
-function createService({ enabled = true }: { enabled?: boolean } = {}) {
+function createService({
+  enabled = true,
+  nodeEnv = 'production',
+}: { enabled?: boolean; nodeEnv?: string } = {}) {
   const configService = {
     get: (key: string) =>
       ({
+        NODE_ENV: nodeEnv,
         TURNSTILE_ENABLED: enabled,
         CLOUDFLARE_TURNSTILE_SECRET_KEY: 'secret-key',
       })[key],

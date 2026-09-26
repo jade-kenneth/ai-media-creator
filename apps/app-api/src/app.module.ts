@@ -31,19 +31,31 @@ import {
 import { createGraphqlErrorFormatter } from './graphql/format-error';
 import { AccountDeletionRequestsModule } from './modules/account-deletion-requests/account-deletion-requests.module';
 import { AdminManagementModule } from './modules/admin-management/admin-management.module';
+import { AssetsModule } from './modules/assets/assets.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CreditsModule } from './modules/credits/credits.module';
+import { GenerationJobsModule } from './modules/generation-jobs/generation-jobs.module';
+import {
+  GenerationJobsWorker,
+  UnservedJobsWatch,
+} from './modules/generation-jobs/generation-jobs.worker';
 import type { GraphqlContext } from './modules/auth/types/auth-context';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
+import { FactsModule } from './modules/facts/facts.module';
 import { MailModule } from './modules/mail/mail.module';
-import { NotificationsModule } from './modules/notifications/notifications.module';
-import { PaymentsModule } from './modules/payments/payments.module';
-import { PushNotificationsModule } from './modules/push-notifications/push-notifications.module';
-import { PushTokensModule } from './modules/push-tokens/push-tokens.module';
+import { ProjectDuplicatesModule } from './modules/project-duplicates/project-duplicates.module';
+import { ProjectsModule } from './modules/projects/projects.module';
 import { S3Module } from './modules/s3/s3.module';
 import { SchedulerLocksModule } from './modules/scheduler-locks/scheduler-locks.module';
+import { ScriptsModule } from './modules/scripts/scripts.module';
 import { SessionsModule } from './modules/sessions/sessions.module';
+import { TextGenerationModule } from './modules/text-generation/text-generation.module';
 import { TurnstileModule } from './modules/turnstile/turnstile.module';
 import { UsersModule } from './modules/users/users.module';
+import { AiClipsModule } from './modules/ai-clips/ai-clips.module';
+import { ExportsModule } from './modules/exports/exports.module';
+import { VideoEditsModule } from './modules/video-edits/video-edits.module';
+import { VoiceTracksModule } from './modules/voice-tracks/voice-tracks.module';
 import { HealthResolver } from './resolver/health.resolver';
 import { NodeResolver } from './resolver/node.resolver';
 
@@ -98,18 +110,26 @@ import { NodeResolver } from './resolver/node.resolver';
 
     AuthModule,
     AccountDeletionRequestsModule,
+    AssetsModule,
     AdminManagementModule,
+    CreditsModule,
+    GenerationJobsModule,
     OrganizationsModule,
+    FactsModule,
     MailModule,
-    NotificationsModule,
-    PaymentsModule,
-    PushNotificationsModule,
-    PushTokensModule,
+    ProjectDuplicatesModule,
+    ProjectsModule,
     S3Module,
     SchedulerLocksModule,
+    ScriptsModule,
     SessionsModule,
+    TextGenerationModule,
     TurnstileModule,
     UsersModule,
+    VideoEditsModule,
+    VoiceTracksModule,
+    ExportsModule,
+    AiClipsModule,
   ],
 
   controllers: [AppController],
@@ -119,6 +139,10 @@ import { NodeResolver } from './resolver/node.resolver';
     NodeResolver,
     AppLoggerService,
     AppThrottlerGuard,
+    // Text jobs run in this process; voice and render jobs run in src/worker.ts.
+    GenerationJobsWorker,
+    // Fails media jobs that wait while the media worker is down.
+    UnservedJobsWatch,
     {
       provide: APP_GUARD,
       useExisting: AppThrottlerGuard,

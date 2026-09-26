@@ -22,51 +22,90 @@ Regenerate with `pnpm catalogs`. CI fails when this file does not match source.
 
 Externally callable, unauthenticated by session, and authenticated instead by a provider signature or token. Each must be idempotent on redelivery.
 
-| Method | Path | Handler | Source |
-| --- | --- | --- | --- |
-| POST | `/payment-webhooks/xendit` | `xendit` | apps/app-api/src/modules/payments/payments.controller.ts:23 |
-| POST | `/store-webhooks/apple` | `apple` | apps/app-api/src/modules/store-purchases/store-purchases.controller.ts:17 |
-| POST | `/store-webhooks/google` | `google` | apps/app-api/src/modules/store-purchases/store-purchases.controller.ts:27 |
+_None found._
 
 ## GraphQL operations
 
 | Kind | Name | Guard | Roles | Tenant-aware | Source |
 | --- | --- | --- | --- | --- | --- |
+| Mutation | `addProductFact` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/facts/facts.resolver.ts:37 |
+| Mutation | `alignRecording` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:75 |
+| Mutation | `approveScriptVersion` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:96 |
+| Mutation | `autoFillSceneMedia` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:49 |
+| Mutation | `checkAiClip` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/ai-clips/ai-clips.resolver.ts:43 |
+| Mutation | `clearImportedProductValues` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:99 |
+| Mutation | `completeAssetUpload` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/assets/assets.resolver.ts:35 |
+| Mutation | `continueToFacts` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/facts/facts.resolver.ts:29 |
+| Mutation | `copyScriptVersion` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:104 |
 | Mutation | `createAdminAccount` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/admin-management/admin-management.resolver.ts:28 |
+| Mutation | `createAssetUpload` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/assets/assets.resolver.ts:27 |
+| Mutation | `createExportDownload` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/exports/exports.resolver.ts:42 |
 | Mutation | `createOrganization` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/organizations/organizations.resolver.ts:33 |
-| Mutation | `createPayment` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/payments/payments.resolver.ts:19 |
+| Mutation | `createProject` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:67 |
 | Mutation | `deactivateAdminAccount` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/admin-management/admin-management.resolver.ts:47 |
 | Mutation | `deactivateOrganization` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/organizations/organizations.resolver.ts:52 |
+| Mutation | `discardAiClips` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/ai-clips/ai-clips.resolver.ts:51 |
+| Mutation | `duplicateProject` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/project-duplicates/project-duplicates.resolver.ts:14 |
+| Mutation | `generateSceneClips` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/ai-clips/ai-clips.resolver.ts:33 |
+| Mutation | `generateVoiceover` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:65 |
+| Mutation | `importProduct` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:91 |
 | Mutation | `linkGoogleAccount` | `GraphqlAuthGuard` | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:61 |
 | Mutation | `login` | **@Public** | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:41 |
 | Mutation | `loginWithGoogle` | **@Public** | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:51 |
 | Mutation | `logout` | `GraphqlAuthGuard` | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:114 |
-| Mutation | `markAllNotificationsAsRead` | `GraphqlAuthGuard` | — | yes | apps/app-api/src/modules/notifications/notifications.resolver.ts:54 |
-| Mutation | `markNotificationAsRead` | `GraphqlAuthGuard` | — | yes | apps/app-api/src/modules/notifications/notifications.resolver.ts:40 |
 | Mutation | `reactivateAdminAccount` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/admin-management/admin-management.resolver.ts:54 |
 | Mutation | `reactivateOrganization` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/organizations/organizations.resolver.ts:59 |
-| Mutation | `registerPushToken` | `GraphqlAuthGuard` | — | yes | apps/app-api/src/modules/push-tokens/push-tokens.resolver.ts:18 |
 | Mutation | `registerUser` | **@Public** | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:31 |
+| Mutation | `removeAsset` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/assets/assets.resolver.ts:43 |
+| Mutation | `removeProductFact` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/facts/facts.resolver.ts:61 |
+| Mutation | `renameProject` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:75 |
+| Mutation | `renderVideo` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/exports/exports.resolver.ts:32 |
 | Mutation | `requestPasswordReset` | **@Public** | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:78 |
+| Mutation | `resetCaptions` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:85 |
 | Mutation | `resetPassword` | **@Public** | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:97 |
+| Mutation | `retryGenerationJob` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/generation-jobs/generation-jobs.resolver.ts:45 |
 | Mutation | `reviewAccountDeletionRequest` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | yes | apps/app-api/src/modules/account-deletion-requests/account-deletion-requests.resolver.ts:66 |
-| Mutation | `sendTestPushNotification` | `GraphqlAuthGuard, RolesGuard` | ADMIN | yes | apps/app-api/src/modules/push-notifications/push-notifications.resolver.ts:21 |
+| Mutation | `rewriteHook` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:60 |
+| Mutation | `rewriteScene` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:74 |
+| Mutation | `setProductFactStatus` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/facts/facts.resolver.ts:53 |
+| Mutation | `startVideoEdit` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:33 |
 | Mutation | `submitAccountDeletionRequest` | **none** | — | no | apps/app-api/src/modules/account-deletion-requests/account-deletion-requests.resolver.ts:30 |
+| Mutation | `suggestAngles` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:115 |
+| Mutation | `suggestAudiences` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:151 |
+| Mutation | `suggestPremises` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:137 |
+| Mutation | `switchVideoEditVersion` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:57 |
 | Mutation | `unlinkGoogleAccount` | `GraphqlAuthGuard` | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:70 |
-| Mutation | `unregisterPushToken` | `GraphqlAuthGuard` | — | yes | apps/app-api/src/modules/push-tokens/push-tokens.resolver.ts:28 |
 | Mutation | `updateAdminAccount` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/admin-management/admin-management.resolver.ts:37 |
 | Mutation | `updateMyProfile` | `GraphqlAuthGuard` | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:105 |
 | Mutation | `updateOrganization` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/organizations/organizations.resolver.ts:42 |
+| Mutation | `updateProduct` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:83 |
+| Mutation | `updateProductFactText` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/facts/facts.resolver.ts:45 |
+| Mutation | `updateScriptVersion` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:88 |
+| Mutation | `updateStory` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:129 |
+| Mutation | `updateStrategy` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:107 |
+| Mutation | `updateVideoEdit` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:41 |
 | Mutation | `verifyResetCode` | **@Public** | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:88 |
-| Mutation | `verifyStorePurchase` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/store-purchases/store-purchases.resolver.ts:18 |
+| Mutation | `writeScript` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:46 |
 | Query | `_health` | **none** | — | no | apps/app-api/src/resolver/health.resolver.ts:8 |
 | Query | `adminAccountDeletionRequest` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | yes | apps/app-api/src/modules/account-deletion-requests/account-deletion-requests.resolver.ts:56 |
 | Query | `adminAccountDeletionRequests` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | yes | apps/app-api/src/modules/account-deletion-requests/account-deletion-requests.resolver.ts:37 |
 | Query | `adminAccounts` | `GraphqlAuthGuard, RolesGuard` | SUPER_ADMIN | no | apps/app-api/src/modules/admin-management/admin-management.resolver.ts:21 |
+| Query | `clipPromptFlags` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/ai-clips/ai-clips.resolver.ts:24 |
+| Query | `creatorBrief` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:38 |
+| Query | `generationJob` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/generation-jobs/generation-jobs.resolver.ts:15 |
 | Query | `me` | `GraphqlAuthGuard` | — | no | apps/app-api/src/modules/auth/auth.resolver.ts:120 |
-| Query | `myNotifications` | `GraphqlAuthGuard` | — | yes | apps/app-api/src/modules/notifications/notifications.resolver.ts:20 |
-| Query | `myPayments` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/payments/payments.resolver.ts:37 |
+| Query | `myCredits` | `GraphqlAuthGuard` | — | yes | apps/app-api/src/modules/credits/credits.resolver.ts:14 |
 | Query | `organization` | **none** | — | no | apps/app-api/src/modules/organizations/organizations.resolver.ts:28 |
 | Query | `organizations` | **none** | — | no | apps/app-api/src/modules/organizations/organizations.resolver.ts:21 |
-| Query | `payment` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/payments/payments.resolver.ts:28 |
+| Query | `productFacts` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/facts/facts.resolver.ts:21 |
+| Query | `project` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:54 |
+| Query | `projectAssets` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/assets/assets.resolver.ts:19 |
+| Query | `projectCounts` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:49 |
+| Query | `projectExports` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/exports/exports.resolver.ts:24 |
+| Query | `projectJobs` | `GraphqlAuthGuard` _(class)_ | — | yes | apps/app-api/src/modules/generation-jobs/generation-jobs.resolver.ts:29 |
+| Query | `projects` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:39 |
+| Query | `scriptVersions` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/scripts/scripts.resolver.ts:30 |
+| Query | `studios` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/projects/projects.resolver.ts:62 |
 | Query | `validateSession` | `GraphqlAuthGuard` | — | no | apps/app-api/src/modules/sessions/sessions.resolver.ts:12 |
+| Query | `videoEdit` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/video-edits/video-edits.resolver.ts:25 |
+| Query | `voiceOptions` | `GraphqlAuthGuard` _(class)_ | — | no | apps/app-api/src/modules/voice-tracks/voice-tracks.resolver.ts:12 |

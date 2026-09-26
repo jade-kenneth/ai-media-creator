@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-25-derived-length-invariant-at-every-write-boundary",
+  "title": "Enforce a cross-field minimum with one pure rule at every write boundary, not only in the generation prompt",
+  "targetSkills": ["api-app", "web-app", "mobile-app"],
+  "kind": "bug-fix",
+  "symptom": "Two screens that show the same sequence of timed items reported different totals. The planning screen summed each item's stored length. A downstream screen used lengths measured from generated media and showed more than twice as much. The planning screen's own content estimate already disagreed with its total, and nothing flagged it.",
+  "rootCause": "Each item's length was meant to fit its content (a spoken-length estimate), but only the generation prompt said so. The model returned lengths without regard to content, coercion clamped them to the allowed range only, and user edits, copies and approval accepted any in-range value. Nothing enforced the rule on write, so records that broke it were approved and copied downstream, where real measurements exposed the gap.",
+  "reusableRules": [
+    "Amends `references/service-implementation.md` under Model output and outbound fetches (the bullet 'The prompt instruction is a hint, not the control'): the same applies to cross-field constraints the prompt asks for, such as a length or budget that must fit a text field. Put the constraint in one pure function (for example `fit(value, content)` that raises the value to the content's minimum within the allowed range) and apply it in the coercion step for every generated record and every regenerated item. The prompt may state the budget, but coercion is what guarantees it. Spec the correction: a too-short generated value is raised, a longer one is kept, and the cap still holds.",
+    "Amends `references/service-implementation.md` under Workflow gates and approvals: a write-model invariant holds on every path that writes the field, not only generation. That covers partial edit mutations (apply the rule to each edited item after merging its changes), copy and restore, and the step that freezes the record. When the invariant is added after records exist, normalize mutable drafts on read, and persist the normalized values in the approve or publish write so the frozen record matches what the reviewer saw. Leave already-frozen records as stored, so every downstream copy made from them still agrees with them. Don't backfill immutable records silently.",
+    "Amends `references/forms.md` (the rule that client schemas give immediate feedback while the API enforces persisted rules): when one field's minimum depends on another field's content, the client imports or mirrors the same pure function the API uses, not a second hand-written rule. While the source field grows, raise the dependent field to its minimum, but never shrink a value the user chose. A dependent value below the minimum gets an inline error that names the minimum and the reason, and it isn't saved until it's fixed. Read-only views of frozen records show no such error. Check both paths: typing past the minimum raises the value, and lowering the value below it blocks the save.",
+    "Amends `references/forms.md` under Rules (mobile): the same dependent-minimum rule applies to React Native editors. Share or mirror the API's pure function. Raise the dependent field as the source grows and never shrink the user's value. Show an inline error naming the minimum instead of saving a violating value, and show no error on read-only records."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/modules/scripts/script-writing.ts",
+      "note": "The pure fit rule and pace constant, shared with the existing estimate; coercion of generated items applies it; the prompts state the budget."
+    },
+    {
+      "path": "apps/app-api/src/modules/scripts/scripts.service.ts",
+      "note": "The partial edit mutation fits each edited item; drafts read fitted; the approve write persists the fitted items; frozen records read as stored."
+    },
+    {
+      "path": "apps/app-api/src/modules/scripts/scripts.service.spec.ts",
+      "note": "Regression specs: an edit raises a too-short value and keeps a longer one, a legacy draft reads fitted and is approved fitted, and a frozen legacy record reads unchanged."
+    },
+    {
+      "path": "apps/app-api/src/modules/scripts/script-writing.spec.ts",
+      "note": "Specs for coercion raising a too-short generated value, the cap, a longer value kept, and the budget present in both write and rewrite prompts."
+    },
+    {
+      "path": "apps/app-web/features/script-studio/spoken-length.ts",
+      "note": "The client mirror of the same rule, used by the editor for live adjustment and validation."
+    },
+    {
+      "path": "apps/app-web/features/script-studio/script-editor.tsx",
+      "note": "The dependent field grows as the source grows and never shrinks; a violating value is an inline error and is filtered out of the autosave; read-only views skip the error."
+    }
+  ],
+  "verification": [
+    "A read-only query of the development database reproduced the fault: items declared at 4 s held up to 22 words (about 9 s at the shared pace), and the downstream total was 50 s against a planned 21 s.",
+    "Full API suite passed (41 suites, 296 tests), including the new specs for coercion, the edit path, legacy draft read and approval, and frozen records read unchanged.",
+    "API and web typecheck passed; lint passed on the changed API and web folders.",
+    "A browser check of the editor behavior is still pending in the product's Spec QA; the client evidence is code review plus static checks."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the screen and step names, the media domain (scripts, scenes, voiceover, narration), the specific pace value, the languages involved and the phase number.",
+    "Removed the unrelated part of the same change (showing an upstream plan on a downstream screen and in a generation prefill); it is a feature, not a reusable rule.",
+    "Overlap check against the locked snapshot: `api-app/references/service-implementation.md` already says prompt instructions are hints for values copied from a source, so the first rule extends that bullet instead of repeating it. No existing api-app rule covers normalizing drafts on read and persisting at the freeze point, so the second rule is new under Workflow gates and approvals. `web-app/references/forms.md` line 51 and `mobile-app/references/forms.md` line 29 cover client-plus-server enforcement in general; the client rules refine those lines for a dependent minimum.",
+    "Not proposed: labelling a downstream total when a different source sets it. That is copy for this product, not an engineering rule."
+  ]
+}

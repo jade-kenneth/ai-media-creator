@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-25-restart-schema-first-api-after-sdl-change",
+  "title": "Confirm the running schema-first API serves an SDL change before testing its clients",
+  "targetSkills": ["api-app", "web-app", "mobile-app"],
+  "kind": "developer-experience",
+  "symptom": "After a change that added fields to the GraphQL schema, every client screen whose query selects one of the new fields showed its generic “couldn't load” error, although server and client typechecked, all specs passed and codegen was clean. The API answered the operation with `GRAPHQL_VALIDATION_FAILED` (“Cannot query field … on type …”).",
+  "rootCause": "Clients generate their operations from the SDL files, not from the running server, so a client that selects a new field compiles. A schema-first server reads its SDL at boot; the running dev process predated the change, and its watch process had recompiled some files without restarting the app. GraphQL validates the whole operation, so one unknown field fails the query entirely, not just that field.",
+  "reusableRules": [
+    "Amends `references/codegen-and-testing.md` under Contract changes affect clients: after any SDL change, restart the running API and confirm it serves the change before exercising a client — introspect the type (`__type(name: \"X\") { fields { name } }`) or send the client's operation unauthenticated and expect an auth error rather than `GRAPHQL_VALIDATION_FAILED`. A watch process that recompiled is not proof that it restarted: check the server process's start time against the change, and restart it explicitly when the new field is missing. Restart background workers that load the same build too, and check that no job is running before stopping one.",
+    "Amends `references/graphql-patterns.md` under Error Names (web): when a screen fails to load right after a schema change and the server's GraphQL error code is `GRAPHQL_VALIDATION_FAILED` for an operation that typechecks, the running API is older than the client's documents. Restart the API; do not change the client or remove the field.",
+    "Amends `references/graphql-patterns.md` under Error Names (mobile): the same diagnosis applies to the app — `GRAPHQL_VALIDATION_FAILED` on an operation that typechecks after a schema change means the API it talks to predates the change, so restart or redeploy that API instead of editing the operation."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/app.module.ts",
+      "note": "Schema-first GraphQL module loads `typePaths` from the SDL folder once at application start."
+    },
+    {
+      "path": "apps/app-web/react-query/video-edits/graphql/video-edits.ts",
+      "note": "A client fragment that selects the new field; it typechecked against the SDL while the running server rejected it."
+    }
+  ],
+  "verification": [
+    "Before the restart, introspection of the type listed no new field and the client operation returned `GRAPHQL_VALIDATION_FAILED`.",
+    "After rebuilding and restarting the API, introspection listed the field within 9 seconds of start and the same operation returned only the expected unauthenticated error.",
+    "The background media worker was restarted on the same build after confirming no job was queued or running."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the screen, the field names, ports, process ids and log excerpts.",
+    "Searched `api-app/references/codegen-and-testing.md`, `api-app/SKILL.md` and both clients' `graphql-patterns.md` for restart, introspect, running server, stale and watch; the existing rules require regenerating types on every side but say nothing about the running server serving the old schema.",
+    "The watcher failing to restart is environment-specific (a project on an external volume); the rule is written to verify the running server regardless of cause."
+  ]
+}

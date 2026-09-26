@@ -1,0 +1,46 @@
+"How a clip request uses the creator's photos (one mode per request)."
+enum SceneClipMode {
+  "One photo as the opening frame."
+  FIRST_FRAME
+  "A start photo and an end photo; the clip moves between them."
+  FIRST_LAST_FRAME
+  "Two to four photos the clip keeps the product looking like."
+  REFERENCES
+  "One-click: the scene's Keep consistent photos and, past the first scene, a still of the scene before, all as references. The server picks the photos."
+  CONSISTENT
+  "Stories only: made from the description alone, with no photo."
+  DESCRIBE
+}
+
+input GenerateSceneClipsInput {
+  projectId: ID!
+  "A scene of the project's video edit."
+  sceneId: ID!
+  "Defaults to FIRST_FRAME."
+  mode: SceneClipMode
+  "1 or 2; defaults to 1."
+  clipCount: Int
+  "FIRST_FRAME and FIRST_LAST_FRAME: the start photo, a ready photo the creator uploaded to this project."
+  sourceAssetId: ID
+  "FIRST_LAST_FRAME: the end photo, different from the start photo."
+  endAssetId: ID
+  "REFERENCES: 2 to 4 different photos. CONSISTENT sends no photo ids."
+  referenceAssetIds: [ID!]
+  "1–500 characters."
+  prompt: String!
+  idempotencyKey: String!
+}
+
+extend type Query {
+  "Claim check of a clip description against the project's approved facts (free)."
+  clipPromptFlags(projectId: ID!, prompt: String!): [ClaimFlag!]!
+}
+
+extend type Mutation {
+  "Makes one or two AI clips as long as the scene (5 to 15 seconds; paid, 4 credits per clip made)."
+  generateSceneClips(input: GenerateSceneClipsInput!): GenerationJob!
+  "Records the creator's product-accuracy check on an AI clip (once)."
+  checkAiClip(id: ID!): ProjectAsset!
+  "Deletes a clip job's AI clips that no scene uses."
+  discardAiClips(jobId: ID!): Boolean!
+}

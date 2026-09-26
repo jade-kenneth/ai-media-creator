@@ -41,8 +41,15 @@ export class TurnstileService {
 
   constructor(private readonly configService: ConfigService) {}
 
+  /**
+   * Local development always skips the challenge, matching the web client,
+   * which never renders the widget under `next dev`.
+   */
   get isEnabled(): boolean {
-    return this.configService.get<boolean>('TURNSTILE_ENABLED') === true;
+    return (
+      this.configService.get<boolean>('TURNSTILE_ENABLED') === true &&
+      this.configService.get<string>('NODE_ENV') !== 'development'
+    );
   }
 
   /**

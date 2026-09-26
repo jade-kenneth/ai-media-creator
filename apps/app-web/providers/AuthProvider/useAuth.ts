@@ -1,4 +1,4 @@
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
 import { useGlobalStore } from '@/hooks/use-global-store';
 import { getSession } from './service';
@@ -18,7 +18,7 @@ export const useAuth = (): UseAuthReturn => {
   const isMountedRef = useRef(true);
   const isRefreshingRef = useRef(false);
 
-  const fetchSession = async () => {
+  const fetchSession = useCallback(async () => {
     if (isRefreshingRef.current) return;
     isRefreshingRef.current = true;
 
@@ -37,7 +37,7 @@ export const useAuth = (): UseAuthReturn => {
     } finally {
       isRefreshingRef.current = false;
     }
-  };
+  }, [globalStore]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -47,15 +47,18 @@ export const useAuth = (): UseAuthReturn => {
       void fetchSession();
     };
 
-    void fetchSession();
+    const initialRefreshTimer = window.setTimeout(() => {
+      void fetchSession();
+    }, 0);
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       isMountedRef.current = false;
+      window.clearTimeout(initialRefreshTimer);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [fetchSession]);
 
   return { session };
 };

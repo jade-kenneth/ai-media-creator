@@ -1,0 +1,8 @@
+extend type Mutation {
+  """
+  Copies a project to test another hook: product, facts, media, strategy and
+  angle suggestions, with the approved script as a new draft. The original is
+  unchanged.
+  """
+  duplicateProject(id: ID!): Project!
+}

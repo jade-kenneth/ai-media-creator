@@ -1,7 +1,5 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale } from 'next-intl/server';
 
 import { AppProviders } from '@/providers/app-providers';
 
@@ -19,37 +17,40 @@ const geistMono = localFont({
   display: 'swap',
 });
 
-const applicationName = process.env.NEXT_PUBLIC_APP_NAME ?? 'Application';
+const applicationName =
+  process.env.NEXT_PUBLIC_APP_NAME ?? 'AI Creation Platform';
 
 export const metadata: Metadata = {
   title: {
-    default: `${applicationName} Admin`,
-    template: `%s | ${applicationName} Admin`,
+    default: applicationName,
+    template: `%s · ${applicationName}`,
   },
-  description: `Administrative control panel for ${applicationName}.`,
+  description:
+    'Turn a real product into an approved, fact-checked short-video script.',
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default async function RootLayout({
+export const viewport: Viewport = {
+  themeColor: '#f6f5f1',
+  viewportFit: 'cover',
+};
+
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-
   return (
     <html
-      lang={locale}
-      suppressHydrationWarning
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
-        <NextIntlClientProvider>
-          <AppProviders>{children}</AppProviders>
-        </NextIntlClientProvider>
+      {/* Browser extensions add attributes to <body> before hydration. */}
+      <body suppressHydrationWarning>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

@@ -9,12 +9,13 @@ import {
   resolveRequestId,
   resolveRequestLogLevel,
   shouldLogRequest,
+  type ObservabilityConfig,
 } from '../../config/observability-config';
 import { AppLoggerService } from '../logger/app-logger.service';
 
 @Injectable()
 export class RequestLoggingMiddleware implements NestMiddleware {
-  private readonly observabilityConfig;
+  private readonly observabilityConfig: ObservabilityConfig;
 
   constructor(
     private readonly configService: ConfigService,

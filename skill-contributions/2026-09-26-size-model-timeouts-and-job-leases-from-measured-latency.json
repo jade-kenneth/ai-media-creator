@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "2026-09-26-size-model-timeouts-and-job-leases-from-measured-latency",
+  "title": "Size a model call's timeout from measured latency, and renew the job lease when the call can outlast it",
+  "targetSkills": ["api-app"],
+  "kind": "reliability",
+  "symptom": "A queued generation job failed intermittently with the provider-timeout failure code, and a retry failed the same way. Other jobs of the same type had succeeded, and every spec passed.",
+  "rootCause": "The text model thinks by default at high effort, so one structured-output call spent more than half its time reasoning before the first output token. The whole call ran just under the fixed client timeout, which had been set before the prompt and output schema grew, so small variations pushed it over. The job queue's lease was sized just above that timeout and had no heartbeat, so raising the timeout alone would have let the queue reclaim a still-running job and run the call twice. Lowering the model's effort fit the old timeout, but in the measured runs it skipped reasoning and missed the requested length budget.",
+  "reusableRules": [
+    "Amends `references/service-implementation.md` under Model output and outbound fetches: size a language-model call's timeout from the latency you measured with the exact request (prompt, output schema and the model's default reasoning or effort settings), and leave several times that as headroom. Measure again whenever the prompt, the output schema or the model changes, since newer models may reason by default and output that grows adds latency. Do not lower the model's reasoning or effort just to fit an existing timeout without checking the output against the product's quality rules; treat it as a quality trade-off, not a fix for a timeout.",
+    "Amends `references/scheduled-work.md` (new rule under Rules): a job queue whose lease expiry reclaims a crashed job must renew the lease with a heartbeat shorter than the lease whenever one job step can run longer than the lease, such as a provider call whose timeout exceeds it. Otherwise a slow but healthy job is reclaimed and runs twice, with duplicate provider spend and competing writes. Cover the invariant with a spec that fails if the provider timeout exceeds the lease while the queue has no heartbeat.",
+    "Amends `references/service-implementation.md` under Model output and outbound fetches: when a failure message states a limit such as a timeout duration, change it in the same edit as the limit itself, in the server message and in any client copy keyed on that failure code."
+  ],
+  "evidence": [
+    {
+      "path": "apps/app-api/src/modules/text-generation/text-generation.types.ts",
+      "note": "Shared provider timeout constant and the timeout failure message that states its duration."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.types.ts",
+      "note": "Queue definitions: the text queue had a lease and no heartbeat; the media queue already renewed its lease for long jobs."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.runner.ts",
+      "note": "Runner starts a lease-renewing heartbeat only when the queue defines one."
+    },
+    {
+      "path": "apps/app-api/src/modules/generation-jobs/generation-jobs.service.spec.ts",
+      "note": "Spec asserting the text queue's heartbeat is shorter than its lease while the provider timeout exceeds the lease."
+    },
+    {
+      "path": "apps/app-web/lib/studio/labels.ts",
+      "note": "Client copy keyed on the timeout failure code, which restated the duration and had to change with the constant."
+    }
+  ],
+  "verification": [
+    "The stored job record showed two consecutive provider timeouts at the old cap, the second one after an in-place retry.",
+    "The exact failing request, streamed without a client cap, took about 56 s at the model's default effort, 35 s of it before the first output token; at lower effort levels it took about 29 s but produced scenes totalling about 150% of the requested length.",
+    "After raising the timeout, adding a 30 s heartbeat to the 90 s text-queue lease and updating the copy, the generation-jobs, text-generation and scripts suites passed (73 tests), and API and web typecheck and lint were clean."
+  ],
+  "excludedProjectDetails": [
+    "Removed the product name, the content style and language of the failing draft, project and job ids, the model id, token counts and database details.",
+    "Searched `api-app/SKILL.md` and every `api-app/references/*.md` for lease, heartbeat, timeout, effort, thinking and latency: the only timeout rule covers fetches of caller-supplied URLs, and nothing covers job lease renewal.",
+    "The exact timeout (3 minutes), lease (90 s) and heartbeat (30 s) values stay in app source; the rule states the relationship, not the numbers.",
+    "No web-app or mobile-app target: the client-side part (copy keyed on a failure code) is one sentence of the server rule and needs no separate client rule."
+  ]
+}

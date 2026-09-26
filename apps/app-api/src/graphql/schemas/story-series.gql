@@ -1,0 +1,9 @@
+extend type Mutation {
+  """
+  Makes the next episode of a story (Product Specification §3.25): a new story
+  project that copies the genre, format, cast and Keep consistent photos, and
+  picks up where this episode ended. Free. Only from the latest episode with an
+  approved script; a repeat returns the episode already made.
+  """
+  createNextEpisode(projectId: ID!): Project!
+}

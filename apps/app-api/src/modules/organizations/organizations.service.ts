@@ -122,6 +122,30 @@ export class OrganizationsService {
     return organization;
   }
 
+  /**
+   * Creates a creator's personal workspace on first sign-in. Unlike `create`,
+   * it has no password admin: its only member is the Google-provisioned
+   * creator, and its slug is generated so it never collides.
+   */
+  async createPersonalWorkspace(name: string): Promise<Organization> {
+    const now = new Date();
+    const id = new Types.ObjectId().toHexString();
+
+    return this.organizationsRepository.create({
+      id,
+      name: name.trim().slice(0, 80) || 'My workspace',
+      slug: `ws-${id}`,
+      logoUrl: null,
+      primaryColor: null,
+      contactNumber: null,
+      address: null,
+      features: [],
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
   async update(
     id: string,
     input: UpdateOrganizationInput,

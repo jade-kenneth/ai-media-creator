@@ -1,10 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'node:crypto';
 import {
   ConflictError,
   InvalidCredentialsError,
 } from 'src/common/errors/app.error';
-import type { AuthPayload, User } from '../../graphql/generated/graphql';
+import {
+  UserRole,
+  type AuthPayload,
+  type User,
+} from '../../graphql/generated/graphql';
+import { CreditsService } from '../credits/credits.service';
+import { OrganizationsService } from '../organizations/organizations.service';
 import { SessionsService } from '../sessions/sessions.service';
+import type { UserRecord } from '../users/repositories/users.repository';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import {
@@ -22,6 +32,9 @@ export class GoogleAuthService {
     private readonly usersService: UsersService,
     private readonly sessionsService: SessionsService,
     private readonly authService: AuthService,
+    private readonly organizationsService: OrganizationsService,
+    private readonly creditsService: CreditsService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -29,12 +42,15 @@ export class GoogleAuthService {
    *
    * An account is matched by its stored subject first. Failing that, a Google
    * address that Google itself reports as verified may adopt the matching
-   * account on first use. Sign-in never provisions an account: registration
-   * stays explicit so an account always lands in an organization.
+   * account on first use. A verified Google identity with no account is
+   * provisioned as a creator: the account, a personal workspace and the
+   * starter credits (Google is the only sign-in method; open decision 12).
    */
   async loginWithGoogle(idToken: string): Promise<AuthPayload> {
     const identity = await this.googleIdentityService.verifyIdToken(idToken);
-    const userRecord = await this.resolveAccount(identity);
+    const userRecord =
+      (await this.resolveAccount(identity)) ??
+      (await this.provisionCreator(identity));
 
     if (!userRecord) {
       throw new InvalidCredentialsError(
@@ -113,6 +129,70 @@ export class GoogleAuthService {
     await this.claimGoogleSub(byEmail.id, identity.sub);
 
     return byEmail;
+  }
+
+  /**
+   * Creates a creator for a verified Google identity that matches no account.
+   * The password hash is random and never disclosed, so the account can only
+   * sign in with Google. A concurrent first sign-in that wins the unique email
+   * index is resolved by looking the account up again.
+   */
+  private async provisionCreator(
+    identity: GoogleIdentity,
+  ): Promise<UserRecord | null> {
+    if (!identity.email || !identity.emailVerified) {
+      return null;
+    }
+
+    // An account already holds this email but is linked to another Google
+    // subject: never create a second account for it.
+    if (await this.usersService.findRecordByEmail(identity.email)) {
+      return null;
+    }
+
+    const firstName = identity.firstName?.trim() || null;
+    const workspace = await this.organizationsService.createPersonalWorkspace(
+      firstName ? `${firstName}'s workspace` : 'My workspace',
+    );
+    const unusablePasswordHash = await bcrypt.hash(
+      randomBytes(32).toString('hex'),
+      10,
+    );
+
+    try {
+      await this.usersService.createUser({
+        email: identity.email,
+        passwordHash: unusablePasswordHash,
+        role: UserRole.USER,
+        isActive: true,
+        organizationId: workspace.id,
+        firstName,
+        lastName: identity.lastName?.trim() || null,
+      });
+    } catch (error) {
+      await this.organizationsService
+        .deactivate(workspace.id)
+        .catch(() => undefined);
+
+      if (isDuplicateKeyError(error)) {
+        return this.resolveAccount(identity);
+      }
+
+      throw error;
+    }
+
+    const created = await this.usersService.findRecordByEmail(identity.email);
+
+    if (!created) return null;
+
+    await this.claimGoogleSub(created.id, identity.sub);
+    await this.creditsService.grant(
+      { ownerId: created.id, organizationId: workspace.id },
+      this.configService.get<number>('STARTER_CREDITS') ?? 0,
+      'Starter credits',
+    );
+
+    return this.usersService.findRecordByEmail(identity.email);
   }
 
   private async claimGoogleSub(

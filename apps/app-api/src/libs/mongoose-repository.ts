@@ -116,7 +116,7 @@ class MongooseRepositoryList<
     const items = hasNextPage ? documents.slice(0, first) : documents;
 
     const edges = items.map((document) => ({
-      cursor: encodeCursor(document.id),
+      cursor: encodeCursor(String(document.id)),
       node: deserializeDocument(document),
     }));
 

@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
 const projectRoot = resolve(__dirname, '..', '..');
@@ -6,6 +7,18 @@ const workspaceRoot = resolve(projectRoot, '..', '..');
 
 export function resolveEnvFilePaths(): string[] {
   return [resolve(projectRoot, '.env'), resolve(workspaceRoot, '.env')];
+}
+
+/**
+ * The absolute folder media jobs make their work folders in. A blank
+ * RENDER_TMP_DIR counts as unset: the schema drops it, and ConfigService then
+ * returns the raw '' from process.env. A relative folder would break FFmpeg,
+ * which runs with the work folder as its working directory.
+ */
+export function resolveRenderTmpDir(configService: ConfigService): string {
+  return resolve(
+    configService.get<string>('RENDER_TMP_DIR')?.trim() || tmpdir(),
+  );
 }
 
 export function createMongoConnectionOptions(configService: ConfigService) {

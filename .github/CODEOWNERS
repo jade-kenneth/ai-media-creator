@@ -36,8 +36,3 @@
 /apps/app-web/codegen.ts @jade-kenneth
 /apps/app-web/proxy.ts @jade-kenneth
 
-/apps/app-mobile/components/ @jade-kenneth
-/apps/app-mobile/providers/ @jade-kenneth
-/apps/app-mobile/react-query/ @jade-kenneth
-/apps/app-mobile/theme/ @jade-kenneth
-/apps/app-mobile/codegen.ts @jade-kenneth
